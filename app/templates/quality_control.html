@@ -1,0 +1,184 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+
+{% block app_content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="analyte" placeholder="Name of analyte">
+		</div>
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="unit" placeholder="Unit">
+		</div>
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="machine_name" placeholder="Machine used">
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="level" placeholder="Level">
+		</div>
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="lot_no" placeholder="Lot Number">
+		</div>
+		<div class="col-md-4">
+			<input type="text" class="form-control qc-info" id="expiry" placeholder="Expiry">
+		</div>
+	</div>
+</div>
+<br>
+<div class="container-fluid">
+	<div class="col-md-4 entryType" id="qcEnryContainer">
+		<input type="text" class="form-control qc-entry" id="qcEntry" placeholder="Enter QC results">
+		<button class="btn btn-default" id="submitQC" onclick="inputQC()" type="submit">Submit</button>	
+		<p><a onclick="dataInput('excelImportContainer');clearData()" href="#">Import from excel instead?</a></p>
+	</div>
+	<div class="entryType" id="excelImportContainer">
+		<div class="row">
+			<div class="col-md-4">
+				<span>Choose number of QC levels:</span>
+				<select>
+					<option id="lvl1" onclick="showQcLevel()">1 level</option>
+					<option id="lvl2" onclick="showQcLevel()">2 levels</option>
+					<option id="lvl3" onclick="showQcLevel()">3 levels</option>
+				</select>
+				<p><input type="checkbox" id="includeDate">Include date?
+				<input type="checkbox" id="includeTime">Include time?</p>
+			</div>
+			<div class="col-md-4">
+				<form id="fileInputForm">
+					<label for="inputFile">Choose excel file</label>
+					<input type="file" id="my_file_input">
+				</form>
+				<p><a onclick="dataInput('qcEnryContainer', 'givenResultContainer');clearData()" href="#">Input QC Data Manually?</a></p>
+			</div>
+		</div>
+		
+	</div>		
+</div>
+<br>
+<div class="container-fluid" id="my_file_output">
+</div>
+<div class="container-fluid">
+	<div class="row" id="qcDataContainer">	
+		
+	</div>
+	<br>
+	<button class="btn btn-default" onclick="calcStdev()" id="calculate">Calculate</button>
+	<input type="checkbox" id="gbtn" onclick="showGivenData()"></input>
+	<label for="gbtn" class="btn btn-default">Use Given Mean/SD's</label>
+	<button class="btn btn-default" onclick="drawChart()" id="createChart">Create Chart</button>
+	<button class="btn btn-default" onclick="drawChart2()" id="createImportChart">Create Chart</button>		
+	<button class="btn btn-default" onclick="clearData()">Clear</button>	
+</div>
+<br>
+<div class="container resultContainer" id="givenResultContainer" >
+	<div class="row">
+		<p><h5 style="padding-left: 15px">Calculated:</h5></p>
+		<div class="col-md-3">
+			<label for="cmean">Mean</label>
+			<input type="text" class="form-control qc-result" id="cmean" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="variance">Variance</label>
+			<input type="text" class="form-control qc-result" id="variance" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="cstndev">Standard Deviation</label>
+			<input type="text" class="form-control qc-result" id="cstndev" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="cv">% CV</label>
+			<input type="text" class="form-control qc-result" id="cv" readonly>
+		</div>
+	</div>
+</div>
+<div class="container resultContainer" id="importResultContainer">
+	<p><h5 style="padding-left: 15px">Calculated:</h5></p>
+	<div class="row levelContainer" id="level1Container">
+		<div class="col-md-3">
+			<label for="lvl1Mean">Level 1 Mean</label>
+			<input type="text" class="form-control qc-result" id="lvl1Mean" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl1Variance">Level 1 Variance</label>
+			<input type="text" class="form-control qc-result" id="lvl1Variance" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl1Stndev">Level 1 Standard Deviation</label>
+			<input type="text" class="form-control qc-result" id="lvl1Stndev" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl1Cv">Level 1 % CV</label>
+			<input type="text" class="form-control qc-result" id="lvl1Cv" readonly>
+		</div>
+	</div>
+	<div class="row levelContainer" id="level2Container">
+		<div class="col-md-3">
+			<label for="lvl2Mean">Level 2 Mean</label>
+			<input type="text" class="form-control qc-result" id="lvl2Mean" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl2Variance">Level 2 Variance</label>
+			<input type="text" class="form-control qc-result" id="lvl2Variance" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl2Stndev">Level 2 Standard Deviation</label>
+			<input type="text" class="form-control qc-result" id="lvl2Stndev" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl2Cv">Level 2 % CV</label>
+			<input type="text" class="form-control qc-result" id="lvl2Cv" readonly>
+		</div>
+	</div>
+	<div class="row levelContainer" id="level3Container">
+		<div class="col-md-3">
+			<label for="lvl3Mean">Level 3 Mean</label>
+			<input type="text" class="form-control qc-result" id="lvl3Mean" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl3Variance">Level 3 Variance</label>
+			<input type="text" class="form-control qc-result" id="lvl3Variance" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl3Stndev">Level 3 Standard Deviation</label>
+			<input type="text" class="form-control qc-result" id="lvl3Stndev" readonly>
+		</div>
+		<div class="col-md-3">
+			<label for="lvl3Cv">Level 3 % CV</label>
+			<input type="text" class="form-control qc-result" id="lvl3Cv" readonly>
+		</div>
+	</div>
+</div>
+
+<br>
+
+<div class="container-fluid" id="givenDataContainer" >
+	<div class="row">
+		<h5 style="padding-left: 15px">Given:</h5>
+		<div class="col-md-3">
+			<label for="gmean">Mean</label>
+			<input type="text" class="form-control qc-result" id="gmean">
+		</div>
+		<div class="col-md-3">
+			<label for="gstndev">Standard Deviation</label>
+			<input type="text" class="form-control qc-result" id="gstndev">
+		</div>
+	</div>
+</div>
+<div class="col-md-5" style="padding-top: 24px;">
+	
+</div>
+
+<br>
+<div class="container-fluid">
+	<div class="chart-container" id="chartContainer">
+		<canvas id="chartjs" width="770" height="385" style="display: block; width: 770px; height: 385px;"></canvas>
+	</div>
+</div>
+
+
+{% endblock %}

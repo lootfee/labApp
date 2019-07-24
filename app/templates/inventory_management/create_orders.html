@@ -1,0 +1,78 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Create Orders</h3>
+	<a class="create_orders" href="{{ url_for('orders', company_name=company.company_name)}}">Manage Orders</a>
+	<hr class="inventory_hr">
+    <div class="row sidenav" id="create_orders_sidenav">
+		<div class="col-md-12 registerContainer" id="create_orders_form_container">
+			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
+				<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+			</button>
+			{% if form %}
+			{{ wtf.quick_form(form) }}
+			<br>
+			{% endif %}
+			<br>
+			
+			<table class="table table-bordered table-hover" id="create_order_table">
+			<tr>
+				<th class="col-md-6" style="width:600px;">Name</th>
+				<th class="col-md-1" style="width:60px;">Quantity Remaining </th>
+			</tr>
+			{% if my_products %}
+				{% for my_p in my_products %}
+				<tr>
+					<td class="col-md-6" style="width:600px;">{{ my_p.name }}</td>
+					<td class="col-md-1" style="width:60px;"></td>
+					<td><a href="#">{{ ('Add') }}</a></td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+		</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+		<button type="button" class="btn btn-default" id="open_orders_sidenav" aria-label="Left Align">
+			<span>Add items</span>
+			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+		</button>
+		<span class="text-center"><h4>Order No: {{ order.order_no }}</h4></span>
+		<table class="table table-bordered table-hover">
+			<tr>
+				<th>Reference No</th>
+				<th>Name</th>
+				<th>Price Each</th>
+				<th>Quantity</th>
+				<th>Total Price</th>
+			</tr>
+			{% if order_list %}
+				{% for order in order_list %}
+				<tr>
+					<td>{{ order.ref_no }}</td>
+					<td>{{ order.name }}</td>
+					<td>{{ order.price }}</td>
+					<td><div contenteditable>{{ order.quantity }}</div></td>
+					<td id="total_price"></td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+		</table>
+		
+		</div>
+    </div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			
+			$('input#search_create_orders').quicksearch('table tbody tr');
+			
+		} );
+		
+	</script>
+{% endblock %}

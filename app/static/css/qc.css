@@ -1,0 +1,65 @@
+#gbtn {
+	position: absolute; 
+	visibility: hidden;
+}
+
+#gbtn:checked + label {
+	background: #bbddee;
+}
+
+#givenDataContainer{
+	border: 2px solid #ddd; 
+	border-radius: 8px;
+	padding-bottom: 12px;
+	display: none;
+}
+
+#calculate{
+	display: none;
+}
+
+#createChart{
+	display: none;
+}
+
+#createImportChart{
+	display: none;
+}
+
+#excelImportContainer {
+	display: none;
+}
+
+.levelContainer {
+	padding: 5px;
+	display: none;
+}
+
+#importResultContainer {
+	display: none;
+	border: 2px solid #ddd;
+	border-radius: 8px;
+	padding-bottom: 12px;
+}
+
+#givenResultContainer {
+	border: 2px solid #ddd;
+	border-radius: 8px;
+	padding-bottom: 12px;
+}
+
+.qcImportData1 {
+	color: blue;
+}
+
+.qcImportData2 {
+	color: red;
+}
+
+.qcImportData3 {
+	color: #cccc0e;
+}
+
+
+
+

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    {% if form %}
+    {{ wtf.quick_form(form) }}
+    <br>
+    {% endif %}
+	<nav class="navbar">
+		<ul class="nav nav-pills">
+			<li class="tablinks" onclick="openDept(event, 'Biochemistry')"><a>Biochemistry</a></li>
+			<li class="tablinks" onclick="openDept(event, 'Hematology')"><a>Hematology</a></li>
+		</ul>	
+	</nav>
+	
+	{% include 'biochemistry.html' %}
+	{% include 'hematology.html' %}
+			
+{% endblock %}
+
+

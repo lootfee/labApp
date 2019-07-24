@@ -1,0 +1,42 @@
+html, body {
+	font-family: 'Roboto', sans-serif;
+}
+
+#main-body {
+	width: 97%;
+}
+
+#main_logo {
+	float: left;
+	height: 35vh;
+    width: 19vw;
+}
+
+#main_header {
+	font-family: 'Roboto', sans-serif;
+	padding-top: 40px;
+    text-align: center;
+    font-size: xx-large;
+    font-weight: bolder;
+    color: #0066ff;
+}
+
+#branch {
+	font-size: x-large;
+}
+
+#address_header {
+	padding-top: 80px;
+    text-align: left;
+	font-size: small;
+    font-weight: bold;
+}
+
+#address_header p {
+	margin-bottom: 2px;
+}
+
+#main_page_nav button a {
+	text-decoration: none;
+	color: white;
+}

@@ -1,0 +1,139 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Manage Products</h3>
+	<hr class="inventory_hr">
+	<div class="row sidenav" id="product_sidenav">
+		<div class="col-md-12">
+			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
+				<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+			</button>
+			<h4>Register Product</h4>
+			<form action method="post" class="form" role="form">
+				{{ form.hidden_tag() }}
+				<div class="col-md-6">
+					<div class="form-group  required"><label class="control-label" for="reference_number">Reference Number</label>
+						<input class="form-control ui-autocomplete-input" id="reference_number" name="reference_number" required="" type="text" value="" autocomplete="off">
+					</div>
+					<div class="form-group  required"><label class="control-label" for="name">Item Name</label>
+						<input class="form-control" id="name" name="name" required="" type="text" value="">
+					</div>
+					<div class="form-group  required"><label class="control-label" for="description">Description</label>        
+						<input class="form-control" id="description" name="description" required="" type="text" value="">        
+					</div>
+					<div class="form-group  required"><label class="control-label" for="storage_req">Storage Requirement</label>       
+						<input class="form-control" id="storage_req" name="storage_req" required="" type="text" style="width: 40%;" value="">      
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="form-group"><label class="control-label" for="price">Price</label>			
+						<input class="form-control" id="price" name="price" type="text" value="">			
+					</div>
+					<div class="form-group "><label class="control-label" for="min_quantity">Minimum Quantity</label>       
+						<input class="form-control" id="min_quantity" name="min_quantity" type="text" value="">        
+					</div>
+					<div class="form-group "><label class="control-label" for="min_expiry">Minimum Expiry(Months)</label>        
+						<input class="form-control" id="min_expiry" name="min_expiry" type="text" value="">        
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="form-group  required"><label class="control-label" for="department">Department</label>  
+						<select class="form-control" id="department" name="department" required=""><option value="2">Hematology</option><option value="1">Biochemistry</option><option value="3">Parasitology</option></select>        
+					</div>
+					<div class="form-group  required"><label class="control-label" for="supplier">Supplier</label>        
+						<select class="form-control" id="supplier" name="supplier" required=""><option value="1">Pharmatrade</option><option value="2">al abbar</option></select>        
+					</div>
+					<div class="form-group  required"><label class="control-label" for="type">Type</label>       
+						<select class="form-control" id="type" name="type" required=""><option value="3">Reagent</option><option value="1">Control</option><option value="2">Calibrator</option></select>       
+					</div>
+				</div>
+				<input class="btn btn-default" id="submit" name="submit" type="submit" value="Register" style="float: right; margin-bottom: 10px;">
+			</form>
+				
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align">
+				<span>Register Product</span>
+				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+			</button>
+			<table class="table table-bordered table-hover">
+				<tr>
+					<th>Reference No</th>
+					<th>Product Name</th>
+					<th>Description</th>
+					<th>Storage</th>
+					<th>Price</th>
+					<th>Department</th>
+					<th>Type</th>
+					<th>Supplier</th>
+				</tr>
+				{% if products %}
+					{% for my_p in my_products %}
+					<tr>
+						<td>{{ my_p.ref_number }}</td>
+						<td>{{ my_p.name }}</td>
+						<td>{{ my_p.description }}</td>
+						<td>{{ my_p.storage_req }}</td>
+						<td>{{ my_p.price }}</td>
+						<td>{{ my_p.dept_name }}</td>
+						<td>{{ my_p.type_name }}</td>
+						<td>{{ my_p.supplier_name }}</td>
+						<td><a href="{{ url_for('delete_product', prod_id=my_p.product_id, comp_id=company.id) }}">
+						<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+						</a></td>
+					</tr>
+					{% endfor %}
+				{% endif %}
+			</table>
+		</div>
+	</div>
+		
+    </div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function(){
+			var product_tags = [
+				{% for prod in products %}
+					{
+					label: "{{ prod.ref_number}}",
+					name: "{{ prod.name }}",
+					description: "{{ prod.description }}",
+					storage_req: "{{ prod.storage_req }}",
+					},
+				{% endfor %}
+			  ]
+				$( "#reference_number" ).autocomplete({
+			  source: product_tags,
+			  focus: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  },
+			  select: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  $("#name").val(ui.item.name);
+			  $("#description").val(ui.item.description);
+			  $("#storage_req").val(ui.item.storage_req);
+			  }
+			});
+			
+			var temp_tags = [
+				{label: "2 - 8 °C"},
+				{label: "15 - 25 °C"},
+				{label: "20 - 25 °C"},
+				{label: "(-15) - (-25) °C"},
+				{label: "(-20) - (-25) °C"},
+			]
+			
+			$( "#storage_req" ).autocomplete({
+				  source: temp_tags,
+			});
+	   });
+	</script>
+{% endblock %}

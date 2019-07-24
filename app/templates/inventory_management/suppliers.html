@@ -1,0 +1,81 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}
+    <h3 class="inventory_headers">Manage Suppliers</h3>
+	<hr class="inventory_hr">
+	<div class="row sidenav" id="supplier_sidenav">
+		<div class="col-md-12 registerContainer">
+			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
+				<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+			</button>
+			<h4>Register Suppliers</h4>
+			<div class="col-md-12">
+				{% if form %}
+				{{ wtf.quick_form(form) }}
+				<br>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+    <div class="row">
+		<div class='col-md-12'>
+			<button type="button" class="btn btn-default" id="open_supplier_sidenav" aria-label="Left Align">
+				<span>Register Supplier</span>
+				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+			</button>
+		<table class="table table-bordered table-hover">
+			<tr>
+				<th>Supplier</th>
+				<th>Email</th>
+				<th>Contact</th>
+				<th>Address</th>
+			</tr>
+			{% if suppliers %}
+				{% for supplier in company.suppliers %}
+				<tr>
+					<td>{{ supplier.name }}</td>
+					<td>{{ supplier.email }}</td>
+					<td>{{ supplier.contact }}</td>
+					<td>{{ supplier.address }}</td>
+					<td class="del-edit-btn"><a href="{{ url_for('remove_supplier', supp_id=supplier.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true" ></span></a></td>
+				</tr>
+				{% endfor %}
+			{% endif %}
+		</table>
+		</div>
+    </div>
+	
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function(){
+			var supplier_tags = [
+				{% for supplier in suppliers %}
+					{
+					label: "{{ supplier.name }}",
+					address: "{{ supplier.address }}",
+					email: "{{ supplier.email }}",
+					contact: "{{ supplier.contact }}"
+					},
+				{% endfor %}
+			  ]
+				$( "#supplier_name" ).autocomplete({
+			  source: supplier_tags,
+			  focus: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  },
+			  select: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  $("#address").val(ui.item.address);
+			  $("#email").val(ui.item.email);
+			  $("#contact").val(ui.item.contact);
+			  }
+			});
+	   });
+	</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}		
+    <h3 class="inventory_headers">Manage Departments/ Item Types</h3>
+	<hr class="inventory_hr">
+    <div class="row">
+		<div class="col-md-4 registerContainer">
+			<div class="col-md-12">
+				{% if form1 %}
+				{{ wtf.quick_form(form1) }}
+				<br>
+				{% endif %}
+				{% if form2 %}
+				{{ wtf.quick_form(form2) }}
+				<br>
+				{% endif %}
+				
+			</div>
+		</div>
+		<div class="col-md-4">
+			<table class="table table-hover">
+				<tr>
+					<th>Departments</th>
+				</tr>
+				
+					{% for depts in company.departments %}
+					<tr>
+						<td>{{ depts.name }}</td>
+						<td class="del-edit-btn"><a href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+					</tr>
+					{% endfor %}
+			
+			</table>
+		</div>
+		<div class="col-md-4">
+			<table class="table table-hover">
+				<tr>
+					<th>Types</th>
+				</tr>
+				{% if types %}
+					{% for type in company.types %}
+					<tr>
+						<td>{{ type.name }}</td>
+						<td class="del-edit-btn"><a href="{{ url_for('remove_type', type_id=type.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+					</tr>
+					{% endfor %}
+				{% endif %}
+			</table>
+		</div>
+    </div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function(){
+			var dept_tags = [
+				{% for dept in departments %}
+					{label: "{{ dept.name}}"},
+				{% endfor %}
+			];
+			$( "#dept_name" ).autocomplete({
+			  source: dept_tags
+			});
+			
+			var type_tags = [
+				{% for type in types %}
+					{label: "{{ type.name }}"},
+				{% endfor %}
+			];
+			$( "#type_name" ).autocomplete({
+			  source: type_tags
+			});
+	   });
+	</script>
+{% endblock %}

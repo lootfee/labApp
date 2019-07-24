@@ -1,0 +1,18 @@
+<table class="table table-bordered table-hover">
+	<tr>
+		<th>Reference No</th>
+		<th>Product Code</th>
+		<th>Name</th>
+		<th>Description</th>
+	</tr>
+	{% if products %}
+		{% for p in products %}
+		<tr>
+			<td>{{ p.ref_number }}</td>
+			<td>{{ p.product_code }}</td>
+			<td>{{ p.name }}</td>
+			<td>{{ p.description }}</td>
+		</tr>
+		{% endfor %}
+	{% endif %}
+</table>

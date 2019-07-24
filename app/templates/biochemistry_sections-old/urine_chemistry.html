@@ -1,0 +1,82 @@
+<div class="sidecontent" id="urine_chemistry">
+	<form class="24hrUchemForm">
+	  <table id="24hrUchemTable" class="tableContainer">
+		<tr>
+		  <td class="inputLabel">24hr Urine Volume&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="uvol" id="uvol" placeholder="mL" onkeyup="calcuac()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data"  name="acr" id="acr" placeholder="alb/g creatinine" readonly></td>
+		  <td>A/C Ratio</td>
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Albumin (mg/L)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="ualb" id="ualb" onkeyup="calcuac()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ualb" id="24ualb" placeholder="mg/24hrs" readonly></td>
+		  
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Creatinine (mg/dL)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="ucrea" id="ucrea" onkeyup="calcuac()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ucrea" id="24ucrea" placeholder="mg/24hrs" readonly></td>
+		 
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Calcium (mg/dL)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="ucal" id="ucal" onkeyup="calcuca()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ucal" id="24ucal" placeholder="mg/24hrs" readonly></td>
+		  
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Phosphorus (mg/dL)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="uphos" id="uphos" onkeyup="calcuphos()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uphos" id="24uphos" placeholder="mg/24hrs" readonly></td>
+		 
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Magnesium (mg/dL)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="umag" id="umag" onkeyup="calcumag()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24umag" id="24umag" placeholder="mg/24hrs" readonly></td>
+		  
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Uric Acid (mg/dL)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="uuric" id="uuric" onkeyup="calcuuric()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uuric" id="24uuric" placeholder="mg/24hrs" readonly></td>
+		  
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Sodium (mmol/L)&nbsp;</td>
+		  <td><input class="inputData data" type="text" name="usod" id="usod" onkeyup="calcusod()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24usod" id="24usod" placeholder="mmol/24hrs" readonly></td>
+		 
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Potassium (mmol/L)&nbsp;</td>
+		  <td><input class="inputData  data" type="text" name="upot" id="upot" onkeyup="calcupot()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24upot" id="24upot" placeholder="mmol/24hrs" readonly></td>
+	
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Chloride (mmol/L)&nbsp;</td>
+		  <td><input class="inputData  data" type="text" name="uchlo" id="uchlo" onkeyup="calcuchlo()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uchlo" id="24uchlo" placeholder="mmol/24hrs" readonly></td>
+		
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Total Protein (mg/L)&nbsp;</td>
+		  <td><input class="inputData  data" type="text" name="utp" id="utp" onkeyup="calcutp()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24utp" id="24utp" placeholder="mg/24hrs" readonly></td>
+		
+		</tr>
+		<tr>
+		  <td class="inputLabel">Urine Urea (mg/dL)&nbsp;</td>
+		  <td><input class="inputData  data" type="text" name="uurea" id="uurea" onkeyup="calcuurea()"></td>
+		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uurea" id="24uurea" placeholder="mg/24hrs" readonly></td>
+		 
+		</tr>
+	  </table>
+	  <p></p>
+	  <input align="center" class="button" type="button" value="CLEAR" onclick="clearData()">
+		<p></p>
+		<p></p>
+	</form>
+</div>

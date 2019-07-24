@@ -1,0 +1,26 @@
+#reg_company_form {
+	display: none;
+}
+
+#edit_company_profile_form {
+	display: none;
+}
+
+.company_name_nav {
+	width: 22em;
+    text-align: center;
+}
+
+#edit_role {
+	width: 800;
+	height: 700;
+}
+
+#manage_affiliate_role_table {
+	    margin-bottom: 0;
+}
+
+#manage_afiliate_footer {
+	float: right;
+	margin: 8px;
+}

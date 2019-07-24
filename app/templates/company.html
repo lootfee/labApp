@@ -1,0 +1,38 @@
+{% if is_my_affiliate %}
+{% extends "company_base.html" %}
+{% else %}
+{% extends "base.html" %}
+{% endif %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<table class="table table-hover">
+	<tr>
+		{% if company.logo %}
+		<td width="256px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:256px;height:256px;"></td>
+		{% else %}
+		<td width="256px"><img src="{{ company.company_avatar(256) }}"></td>
+		{% endif %}
+		<td>
+			<div id="company_profile">
+				<h1>{{ company.company_name }}</h1>
+				{% if company.about_me %}<p>{{ company.about_me }}</p>{% endif %}
+				{% if company.address %}<p>Address: {{ company.address }}</p>{% endif %}
+				{% if company.contact_info %}<p>Contact: {{ company.contact_info }}</p>{% endif %}
+				<p><a href="#" id="edit_company_profile">Edit/Update company profile?</a></p>
+				<p><a href="{{ url_for('request_affiliate', company_name=company.company_name) }}" id="request_affiliate">Request to affiliate to company?</a></p>
+				
+				
+			</div>
+			<div id="edit_company_profile_form" class="col-md-8">
+				{% if form %}
+				{{ wtf.quick_form(form) }}
+				<br>
+				{% endif %}
+			</div>
+			
+		</td>
+	</tr>
+</table>
+
+{% endblock %}

@@ -1,0 +1,23 @@
+<div class="sidecontent" id="tibc">
+	<div>
+		<form>
+			  <table id="tibcTable" class="tableContainer">
+					<tr class="tableRow">
+						<td class="inputLabelShort">Iron &nbsp;</td>
+						<td><input type="text" class="inputData data" name="siron" id="siron" placeholder="µg/dL" onkeypress="displayUnits('sironUnit')" onkeyup="calcTibc()"><span class="units" id="sironUnit">mL</span></td>
+					</tr>
+					<tr class="tableRow">
+						<td class="inputLabelShort">UIBC &nbsp;</td>
+						<td><input type="text" class="inputData data" name="suibc" id="suibc" placeholder="µg/dL" onkeypress="displayUnits('suibcUnit')" onkeyup="calcTibc()"><span class="units" id="suibcUnit">mL</span></td>
+					</tr>
+					<tr>
+						<td class="inputLabelShort">TIBC &nbsp;</td>
+						<td><input type="text" class="outputData data" name="tibc" id="tibcResult" placeholder="µg/dL" readonly></td>
+					</tr>
+			  </table>
+			  <div class="buttonContainer">
+					<input type="button" class="button" value="CLEAR" onclick="clearData()"></input>
+			  </div>
+		</form>
+	</div>
+</div> 

@@ -1,0 +1,64 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Manage Orders</h3>
+	<button type="button" class="btn btn-primary btn-sm create_orders" data-toggle="modal" data-target="#create_order_modal">Create New Order</button>
+	<hr class="inventory_hr">
+	<div class="row">
+		<div class="col-md-12">
+			<table>
+				<tr>
+					<th class="col-md-2">Order ID</th>
+					<th class="col-md-2">Date Created</th>
+					<th class="col-md-2">Created by</th>
+					<th class="col-md-1">Date Reviewed</th>
+					<th class="col-md-2">Reviewed by</th>
+					<th class="col-md-1">Date Submitted</th>
+					<th class="col-md-2">Submitted by</th>
+				</tr>
+				{% if orders %}
+					{% for order in orders %}
+					<tr>
+						<td><a href="{{ url_for('create_orders', company_name=company.company_name, order_no=order.order_no) }}">{{ order.order_no }}</a></td>
+						<td>{{ order.date_created }}</td>
+						<td>{{ order.order_creator }}</td>
+						<td>{{ order.review_approved }}</td>
+						<td>{{ order.reviewer }}</td>
+						<td>{{ order.date_submitted }}</td>
+						<td>{{ order.submitted_by }}</td>
+					</tr>
+					{% endfor %}
+				{% endif %}
+				
+			</table>
+		</div>
+		<div class="modal fade" id="create_order_modal" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<form action method="post" class="form" role="form">
+					<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					</div>
+					<div class="modal-body">
+
+					{{ form.hidden_tag() }}
+					<div class="form-group required">
+						{{ form.order_no.label (class_="control-label") }}
+						{{ form.order_no (class_="form-control") }}
+					</div>
+
+					</div>
+					<div class="modal-footer">
+					{{ form.submit (class_="btn btn-default") }}
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</form>
+			</div>
+		  </div>
+		</div>
+	</div>
+    
+	
+{% endblock %}

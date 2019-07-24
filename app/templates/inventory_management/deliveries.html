@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Manage Deliveries</h3>
+	<hr>
+    <div class="row">
+		<div class="col-md-4 registerContainer">
+			<div class="col-md-12">
+				{% if form %}
+				{{ wtf.quick_form(form) }}
+				<br>
+				{% endif %}
+			</div>
+		</div>
+    </div>
+{% endblock %}

@@ -1,0 +1,95 @@
+.navbar {
+	margin-bottom: 10px;
+}
+
+.inventory_headers {
+	text-align: center;
+	margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#inventoryNav {
+	margin-bottom: 0;
+}
+
+.inventory_hr {
+	margin-top: 0; 
+	margin-bottom: 15px
+}
+
+.sidenav {
+	height: 70%;
+	width: 0;
+	position: fixed;
+    z-index: 1;
+    top: 150px;
+    left: 20px;
+    background-color: #fff;
+    overflow-x: hidden;
+    padding-top: 20px;
+    transition: 0.5s;
+    border-right: #ddd solid 1px;
+    border-top: #ddd solid 1px;
+	border-bottom: #ddd solid 1px;
+    border-radius: 6px;
+}
+
+.hide_sidenav {
+	position: absolute;
+	top: 0;
+	right: 25px;
+	margin-left: 50px;
+}
+
+/*.registerContainer {
+	border-right: #ddd solid 1px;
+}*/
+
+#submit_department {
+	margin-bottom: 15px;
+}
+
+.create_orders {
+	float: right;
+    margin-top: -30px;
+}
+
+.del-edit-btn {
+	width: 10px;
+}
+
+.admin-table {
+	text-align: center;
+}
+
+.hidden {
+	display: none;
+}
+
+.ui-menu {
+	border-radius: 4px;
+}
+
+.ui-menu .ui-menu-item {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+}
+
+.ui-menu .ui-menu-item .ui-menu-item-wrapper:hover {
+	border-color: #66afe9;
+	background: #e5e5e5;
+	border-radius: 4px;
+}
+
+#create_orders_form_container .form .form-group {
+	display: inline-block;
+}
+
+#create_orders_form_container .form-group .control-label {
+	display: block;
+}
+
+/*#search_create_orders:label {
+	display: block;
+}*/
+

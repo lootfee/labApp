@@ -1,0 +1,47 @@
+<div class="sidecontent" id="lipid_profile">
+	<div>
+		<form>
+			<table id="lipidProfileTable" class="tableContainer">
+				<tr>
+					<td class="inputLabel">Cholesterol (mg/dL)&nbsp;</td>
+					<td><input type="text" class="inputData data" name="cholesterol" id="cholesterol"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">HDL (mg/dL)&nbsp;</td>
+					<td><input type="text" class="inputData data" name="hdl" id="hdl"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">LDL (mg/dL)&nbsp;</td>
+					<td><input type="text" class="inputData data" name="ldl" id="ldl"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">VLDL (mg/dL)&nbsp;</td>
+					<td><input type="text" class="outputData data" name="vldl" id="vldl"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">Triglycerides (mg/dL)&nbsp;</td>
+					<td><input type="text" class="inputData data" name="triglycerides" id="trig"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">LDL Calculated (mg/dL)&nbsp;</td>
+					<td><input type="text" class="outputData data" name="ldlc" id="ldlc"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">Cholesterol/HDL ratio:&nbsp;</td>
+					<td><output type="text" class="outputData data" name="cholhdl" id="cholhdl"></td>
+				  </tr>
+				  <tr> 
+					<td class="inputLabel">HDL/LDL ratio:&nbsp;</td>
+					<td><output type="text" class="outputData data" name="hdlldl" id="hdlldl"></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">LDL/HDL ratio:&nbsp;</td>
+					<td><output type="text" class="outputData data" name="ldlhdl" id="ldlhdl" ></output></td>
+				  </tr>
+			</table>
+			<input type="button" class="button" value="CALCULATE" onclick="calclp()"></input>
+			<input type="button" class="button" value="CLEAR" onclick="clearData()"></input>
+		  <p><strong>Note:</strong> If there is a value on the direct LDL, this will be used for calculating the ratios; the calculated LDL is just for comparison.
+		</form>
+	</div>
+</div>

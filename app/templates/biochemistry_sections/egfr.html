@@ -1,0 +1,83 @@
+<div class="sidecontent" id="egfr">
+	<div>
+		<form>
+			<div id="egfrAdult" class="egfrType">
+				  <table id="egfrAdultTable" class="tableContainer">
+						<tr>
+							<td><h4>ADULT</h4></td>
+						</tr>
+						<tr class="tableRow">
+						  <td class="inputLabel">Serum Creatinine:&nbsp;</td>
+						  <td align="center" colspan="2"><input type="text" class="inputData data" name="screa3" id="screa3" placeholder="mg/dL" onkeypress="displayUnits('screa3Unit')"><span class="units" id="screa3Unit">mg/dL</span></td>
+						</tr>
+						<tr class="tableRow">
+						  <td class="inputLabel">Age:&nbsp;</td>
+						  <td align="center" colspan="2"><input type="text" class="inputData data" name="age" id="egfrAge" placeholder="years" onkeypress="displayUnits('egfrAgeUnit')"><span class="units" id="egfrAgeUnit">years</span></td>
+						</tr>
+						<tr>
+						  <td class="inputLabel">Gender:&nbsp;</td>
+						  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradgen" id="genm"><label for="genm" class="tableLabel">Male</label></td>
+						  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradgen" id="genf"><label for="genf" class="tableLabel">Female</label></td>
+						</tr>
+						<tr>
+						  <td class="inputLabel">Race:&nbsp;</td>
+						  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradrace" id="raceb"><label for="raceb" class="tableLabel">Black</label></td>
+						  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradrace" id="raceo"><label for="raceo" class="tableLabel">Others</label></td>
+						</tr>
+						<tr>
+						  <td class="inputLabel">eGFR :&nbsp;</td>
+						  <td align="center" colspan="2"><input type="text" class="outputData  data" name="egfr" id="egfrAdultOutput" placeholder="mL/min/1.73 m²" readonly></td>
+						</tr>
+				  </table>
+					<div class="buttonContainer">
+					  <input type="button" class="button" value="CALCULATE" onclick="calcegfr()"></input>
+					  <input type="button" class="button" value="CLEAR" onclick="clearData()"></input>
+					</div>
+					<p><strong>Note:</strong> The formula used in this equation is based on the CKD-EPI Creatinine Equation (2009) which is recommended by the National Kidney Foundation.</p>
+					<p>To be used only for patients >18 years old.</p>
+					<p><a onclick="openEgfr('egfrPedia')" href="#">Click here for our egfr Pediatric Calculator</a></p>
+			</div>
+			
+			<div id="egfrPedia" class="egfrType">
+				<table id="egfrPediatricTable" class="tableContainer">
+					<tr>
+						<td><h4>PEDIATRIC</h4></td>
+					</tr>		
+					<tr class="tableRow">
+					  <td class="inputLabel">Serum Creatinine:&nbsp;</td>
+					  <td align="center" colspan="2"><input type="text" class="inputData  data" name="screa3p" id="screa3p" placeholder="mg/dL" onkeypress="displayUnits('screa3pUnit')"><span class="units" id="screa3pUnit">mg/dL</span></td>
+					</tr>
+					<tr class="tableRow">
+					  <td class="inputLabel">Age:&nbsp;</td>
+					  <td align="center" colspan="2"><input type="text" class="inputData  data" name="agep" id="agep" placeholder="years" onkeypress="displayUnits('agepUnit')"><span class="units" id="agepUnit">years</span></td>
+					</tr>
+					<!--tr>
+					  <td class="inputLabel">Gender:&nbsp;</td>
+					  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradgenp" id="genmp"><label for="genmp" class="tableLabel">Male</label></td>
+					  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradgenp" id="genfp"><label for="genfp" class="tableLabel">Female</label></td>
+					</tr-->
+					<tr class="tableRow">
+					  <td class="inputLabel" rowspan="2">Height:&nbsp;</td>
+					  <td align="center" colspan="2"><input type="text" class="inputData  data" name="height" id="heightPedia"></td>
+					</tr>
+					<tr>
+					  <td class="inputLabel"></td>	
+					  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradh" id="hcm"><label for="hcm" class="tableLabel">Centimeters</label></td>
+					  <td align="center" class="radioCell"><input class="inputRadio" type="radio" name="egfradh" id="hmet"><label for="hmet" class="tableLabel">Meters</label></td>
+					</tr>
+					<tr>
+					  <td class="inputLabel">eGFR :&nbsp;</td>
+					  <td align="center" colspan="2"><input type="text" class="outputData  data" name="egfr" id="egfrPediaOutput" placeholder="mL/min/1.73 m²" readonly></td>
+					</tr>
+				  </table>
+				  <div class="buttonContainer">
+					  <input type="button" class="button" value="CALCULATE" onclick="calcEgfrP()"></input>
+					  <input type="button" class="button" value="CLEAR" onclick="clearData()"></input>
+				  </div>
+					<p><strong>Note:</strong> The formula used in this equation is based on the Creatinine-based “Bedside Schwartz” equation (2009) which is considered the best eGFR method for children.</p>
+					<p><a onclick="openEgfr('egfrAdult')" href="#" >Click here for our egfr Adult Calculator</a></p>
+				</table>
+			</div>
+		</form>
+	</div>
+</div>

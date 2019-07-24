@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    {% if form %}
+    {{ wtf.quick_form(form) }}
+    <br>
+    {% endif %}
+	<ul class="nav nav-pills nav-stacked">
+		<li><a href="documentation_page/sop/quality_department_sops.html">Quality Department</a></li>
+		<li><a href="#">Biochemistry</a></li>
+	</ul>
+{% endblock %}

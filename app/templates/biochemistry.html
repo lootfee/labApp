@@ -1,0 +1,25 @@
+<div class="tabcontent" id="Biochemistry">
+	<div class="sidelinks">
+		<ul class="nav nav-pills nav-stacked">
+			<li class="sidelink" onclick="openSide(event, 'lipid_profile')"><a>Lipid Profile</a></li>
+			<li class="sidelink" onclick="openSide(event, 'hba1c')"><a>HbA1c</a></li>
+			<li class="sidelink" onclick="openSide(event, 'creatinine_clearance')"><a>Creatinine Clearance</a></li>
+			<li class="sidelink" onclick="openSide(event, 'egfr')"><a>eGFR</a></li>
+			<li class="sidelink" onclick="openSide(event, 'urine_chemistry')"><a>Urine Chemistry</a></li>
+			<li class="sidelink" onclick="openSide(event, 'urea_to_bun')"><a>Urea to BUN</a></li>
+			<li class="sidelink" onclick="openSide(event, 'tibc')"><a>TIBC</a></li>
+			<li class="sidelink" onclick="openSide(event, 'transferrin_saturation')"><a>Transferrin Saturation</a></li>
+		</ul>
+	</div>
+	{% include 'biochemistry_sections/lipid_profile.html' %}
+	{% include 'biochemistry_sections/creatinine_clearance.html' %}
+	{% include 'biochemistry_sections/egfr.html' %}
+	{% include 'biochemistry_sections/urine_chemistry.html' %}
+	{% include 'biochemistry_sections/urea_to_bun.html' %}
+	{% include 'biochemistry_sections/tibc.html' %}
+	{% include 'biochemistry_sections/transferrin_saturation.html' %}
+	{% include 'biochemistry_sections/hba1c.html' %}
+	
+</div>
+
+	
