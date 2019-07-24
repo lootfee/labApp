@@ -19,15 +19,17 @@
 			
 			<table class="table table-bordered table-hover" id="create_order_table">
 			<tr>
+				<th class="col-md-6" style="width:400px;">Ref No</th>
 				<th class="col-md-6" style="width:600px;">Name</th>
-				<th class="col-md-1" style="width:60px;">Quantity Remaining </th>
+				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
 			</tr>
 			{% if my_products %}
 				{% for my_p in my_products %}
-				<tr>
-					<td class="col-md-6" style="width:600px;">{{ my_p.name }}</td>
-					<td class="col-md-1" style="width:60px;"></td>
-					<td><a href="#">{{ ('Add') }}</a></td>
+				<tr class="my_products_row">
+					<td>{{ my_p.ref_number }}</td>
+					<td>{{ my_p.name }}</td>
+					<td></td>
+					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
 				</tr>
 				{% endfor %}
 			{% endif %}
@@ -41,7 +43,7 @@
 			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 		</button>
 		<span class="text-center"><h4>Order No: {{ order.order_no }}</h4></span>
-		<table class="table table-bordered table-hover">
+		<table class="table table-bordered table-hover" id="orders_list_table">
 			<tr>
 				<th>Reference No</th>
 				<th>Name</th>
@@ -69,8 +71,32 @@
 	{{ super() }}
 	<script>
 		$(document).ready(function() {
+			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			
-			$('input#search_create_orders').quicksearch('table tbody tr');
+			var items = [
+				{% for my_p in my_products %}
+					{
+						refnum: "{{ my_p.ref_number}}",
+						name: "{{ my_p.name }}",
+						price: "{{ my_p.price }}",
+		
+					},
+				{% endfor %}
+			]
+			{% for my_p in my_products %}
+				$("#add_{{ my_p.ref_number }}").click(function() {
+					$('#orders_list_table > tbody:last-child').append('<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td>{{ my_p.price }}</td><td id="quantity_request_{{ my_p.ref_number}}"><div contenteditable>1</div></td><td id="total_price_{{ my_p.ref_number}}">{{ my_p.price }}</td></tr>');
+				});
+				
+				
+				$("#quantity_request_{{ my_p.ref_number}}").keyup(function() {
+					var total_{{ my_p.ref_number}} = parseFloat({{ my_p.price }}) * $("#quantity_request_{{ my_p.ref_number}}");
+					$("#total_price_{{ my_p.ref_number}}").val(total_{{ my_p.ref_number}});
+				});
+				/*var total_{{ my_p.ref_number}} = parseFloat({{ my_p.price }});
+				$("#total_price_{{ my_p.ref_number}}").val({{ my_p.price }});*/
+			{% endfor %}
+			
 			
 		} );
 		

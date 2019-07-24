@@ -479,6 +479,8 @@ def create_orders(company_name, order_no):
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
+		
+		#my_p.price = MyProducts.query.filter_by(product_id=my_p.product_id).first().price
 	
 	#product_sorted = Product.query.filter_by(department_id=dept_id, type_id=type_id).order_by(Product.name.asc())
 	#if form.validate_on_submit():
