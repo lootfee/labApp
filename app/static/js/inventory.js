@@ -27,7 +27,7 @@ $(document).ready(function() {
 		$("#product_sidenav").css( "width", "80%");
 	});
 	$("#open_orders_sidenav").click(function() {
-		$("#create_orders_sidenav").css( "width", "40%");
+		$("#create_orders_sidenav").css( "width", "70%");
 	});
 	
 	

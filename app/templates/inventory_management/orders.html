@@ -23,7 +23,7 @@
 					<tr>
 						<td><a href="{{ url_for('create_orders', company_name=company.company_name, order_no=order.order_no) }}">{{ order.order_no }}</a></td>
 						<td>{{ order.date_created }}</td>
-						<td>{{ order.order_creator }}</td>
+						<td>{{ order.creator }}</td>
 						<td>{{ order.review_approved }}</td>
 						<td>{{ order.reviewer }}</td>
 						<td>{{ order.date_submitted }}</td>

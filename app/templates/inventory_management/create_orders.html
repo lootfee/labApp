@@ -8,27 +8,42 @@
 	<hr class="inventory_hr">
     <div class="row sidenav" id="create_orders_sidenav">
 		<div class="col-md-12 registerContainer" id="create_orders_form_container">
-			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
-				<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
-			</button>
-			{% if form %}
-			{{ wtf.quick_form(form) }}
-			<br>
-			{% endif %}
-			<br>
-			
+			<div>
+				<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
+					<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+				</button>
+				<div class="col-md-5" style="margin-bottom: 10px;">
+					<div class="col-md-6">
+						<label class="control-label" for="department">Search</label>
+						<input class="form-control" id="search_create_orders">
+					</div>
+					<div class="col-md-6">
+						<label class="control-label" for="department">Department</label>
+						<select class="form-control" id="department">
+							<option value=''>All</option>
+							{% for d in dept %}
+							<option value='{{ d.name }}'>{{ d.name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+			</div>
 			<table class="table table-bordered table-hover" id="create_order_table">
 			<tr>
-				<th class="col-md-6" style="width:400px;">Ref No</th>
+				<th class="col-md-3" style="width:150px;">Ref No</th>
 				<th class="col-md-6" style="width:600px;">Name</th>
+				<th class="col-md-3" style="width:150px;">Department</th>
 				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
+				<th class="col-md-1" style="width:40px;">Quantity Request </th>
 			</tr>
 			{% if my_products %}
 				{% for my_p in my_products %}
 				<tr class="my_products_row">
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
+					<td>{{ my_p.department }}</td>
 					<td></td>
+					<td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
 					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
 				</tr>
 				{% endfor %}
@@ -42,28 +57,39 @@
 			<span>Add items</span>
 			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 		</button>
-		<span class="text-center"><h4>Order No: {{ order.order_no }}</h4></span>
-		<table class="table table-bordered table-hover" id="orders_list_table">
-			<tr>
-				<th>Reference No</th>
-				<th>Name</th>
-				<th>Price Each</th>
-				<th>Quantity</th>
-				<th>Total Price</th>
-			</tr>
-			{% if order_list %}
-				{% for order in order_list %}
-				<tr>
-					<td>{{ order.ref_no }}</td>
-					<td>{{ order.name }}</td>
-					<td>{{ order.price }}</td>
-					<td><div contenteditable>{{ order.quantity }}</div></td>
-					<td id="total_price"></td>
-				</tr>
-				{% endfor %}
-			{% endif %}
-		</table>
+		<span class="text-center"><h4>Order No: <span style="color: blue;">{{ order.order_no }}</span></h4> </span>
 		
+			<table class="table table-bordered table-hover" id="orders_list_table">
+				<tr>
+					<th>Reference No</th>
+					<th>Name</th>
+					<th>Price Each</th>
+					<th>Quantity</th>
+					<th>Total Price</th>
+				</tr>
+				{% for list in order_list %}
+					<tr>
+						<td>{{ list.ref_number }}</td>
+						<td>{{ list.name }}</td>
+						<td>{{ list.price }}</td>
+						<td contenteditable>{{ list.quantity }}</td>
+						<td class='individual_total'>{{ list.total }}</td>
+						<td><a href="{{url_for('remove_item', company_name=company.company_name, order_no=order.order_no, id=list.id)}}">delete</a></td>
+					</tr>
+					
+				{% endfor %}
+			</table>
+		
+		<form action method="post" class="form" role="form" name="orders_list_form" id="orders_list_form">
+			{{ form.csrf_token() }}
+			<div style="width: 180px;float: right;">
+				<div id="subtotal_container">Total: <span id="subtotal_price" style="color: blue;"></span></div>
+				<div>
+					{{ form.save(class_="btn btn-default")}}
+					{{ form.submit(class_="btn btn-default")}}
+				</div>
+			</div>
+		</form>
 		</div>
     </div>
 {% endblock %}
@@ -72,33 +98,67 @@
 	<script>
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
+			$('select#department').quicksearch('table#create_order_table .my_products_row');
 			
-			var items = [
-				{% for my_p in my_products %}
-					{
-						refnum: "{{ my_p.ref_number}}",
-						name: "{{ my_p.name }}",
-						price: "{{ my_p.price }}",
-		
-					},
-				{% endfor %}
-			]
+			var sum = 0;
+			$(".individual_total").each(function() {
+				sum += parseFloat($(this).text());
+				$("#subtotal_price").html(sum);
+			});
+			if ($(".individual_total").length > 0) {
+			$("#subtotal_container").css("display", "block");
+			}
 			{% for my_p in my_products %}
+			
 				$("#add_{{ my_p.ref_number }}").click(function() {
-					$('#orders_list_table > tbody:last-child').append('<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td>{{ my_p.price }}</td><td id="quantity_request_{{ my_p.ref_number}}"><div contenteditable>1</div></td><td id="total_price_{{ my_p.ref_number}}">{{ my_p.price }}</td></tr>');
+					
+					var exists=$('#orders_list_table tr td:contains('+{{ my_p.ref_number }}+')').length;
+					  if (!exists ){
+						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
+						
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td></tr>");
+						
+						
+						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' value=''><input type='hidden' name='tot_price' value=''></div>");
+						
+						var total = {{ my_p.price }} * qty_req;
+						$("#qty_{{ my_p.ref_number}}").html(qty_req);
+						$("#total_price_{{ my_p.ref_number}}").html(total);
+						$('input[name=qty]').val(qty_req);
+						$('input[name=tot_price]').val(total);
+						
+						var sum = 0;
+						$(".individual_total").each(function() {
+							sum += parseFloat($(this).text());
+							$("#subtotal_price").html(sum);
+						});
+						if ($(".individual_total").length > 0) {
+						$("#subtotal_container").css("display", "block");
+						}
+					}
 				});
 				
-				
-				$("#quantity_request_{{ my_p.ref_number}}").keyup(function() {
-					var total_{{ my_p.ref_number}} = parseFloat({{ my_p.price }}) * $("#quantity_request_{{ my_p.ref_number}}");
-					$("#total_price_{{ my_p.ref_number}}").val(total_{{ my_p.ref_number}});
-				});
-				/*var total_{{ my_p.ref_number}} = parseFloat({{ my_p.price }});
-				$("#total_price_{{ my_p.ref_number}}").val({{ my_p.price }});*/
 			{% endfor %}
-			
-			
 		} );
+		
+		{% for my_p in my_products %}
+		$(document).on( 'keyup', '#qty_{{ my_p.ref_number}}', function() {
+			var edit_qty = $("#qty_{{ my_p.ref_number}}").html();
+			var edit_total = {{ my_p.price }} * edit_qty;
+			$("#total_price_{{ my_p.ref_number}}").html(edit_total);
+			$('input[name=qty]').val(edit_qty);
+			$('input[name=tot_price]').val(edit_total);
+			var sum = 0;
+			$(".individual_total").each(function() {
+				sum += parseFloat($(this).text());
+				$("#subtotal_price").html(sum);
+			});
+			if ($(".individual_total").length > 0) {
+			$("#subtotal_container").css("display", "block");
+			}
+		});
+		
+		{% endfor %}
 		
 	</script>
 {% endblock %}

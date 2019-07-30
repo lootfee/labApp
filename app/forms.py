@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from app import app, photos
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField, HiddenField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User, Product, Item, Department, Supplier, Type, Order
 
@@ -12,10 +12,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
+	firstname = StringField('First Name', validators=[DataRequired()])
+	lastname = StringField('Last Name', validators=[DataRequired()])
 	username = StringField('Username', validators=[DataRequired()])
 	email = StringField('Email', validators=[DataRequired(), Email()])
-	password = PasswordField('Password', validators=[DataRequired()])
-	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+	password = PasswordField('Password', validators=[DataRequired(), Regexp(regex=r'^(?=\S{8,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])', message="Password must be atleasst 8 characters long, must contain an uppercase letter, a number and a special character.") ])
+	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Passwords do not match')])
 	submit = SubmitField('Register')
 	
 	def validate_username(self, username):
@@ -28,7 +30,11 @@ class RegistrationForm(FlaskForm):
 		if user is not None:
 			raise ValidationError('Email is already registered!')
 
+		
+
 class EditProfileForm(FlaskForm):
+	firstname = StringField('First Name', validators=[DataRequired()])
+	lastname = StringField('Last Name', validators=[DataRequired()])
 	username = StringField('Username', validators=[DataRequired()])
 	about_me = TextAreaField('About Me', validators=[Length(min=0, max=200)])
 	submit = SubmitField('Submit')
@@ -54,7 +60,7 @@ class ResetPasswordRequestForm(FlaskForm):
 	submit = SubmitField('Request Password Reset')
 	
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired(), Regexp(regex=r'^(?=\S{8,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])', message="Password must be atleasst 8 characters long, must contain an uppercase letter, a number and a special character.")])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Request Password Reset')
@@ -165,10 +171,19 @@ class CreateOrderIDForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 	
-class CreateOrderForm(FlaskForm):
+class InventorySearchForm(FlaskForm):
 	search_create_orders = StringField('Search')
 	department = SelectField('Department', coerce=int, validators=[InputRequired()])
-	type = SelectField('Type', coerce=int, validators=[InputRequired()])
+	#type = SelectField('Type', coerce=int, validators=[InputRequired()])
+
+class OrderListForm(FlaskForm):
+	refnum = HiddenField('Reference Number')
+	name = HiddenField('Name')
+	qty = HiddenField('Quantity')
+	price = HiddenField('Price')
+	tot_price = HiddenField('Total Price')
+	save = SubmitField('Save')
+	submit = SubmitField('Submit Order')
 
 	
 class DocumentRequestForm(FlaskForm):

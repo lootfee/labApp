@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, CreateOrderForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList
 from datetime import datetime
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -68,7 +68,7 @@ def register():
 		return redirect(url_for('index'))
 	form =RegistrationForm()
 	if form.validate_on_submit():
-		user = User(username=form.username.data, email=form.email.data)
+		user = User(firstname=form.firstname.data, lastname=form.lastname.data, username=form.username.data, email=form.email.data)
 		user.set_password(form.password.data)
 		db.session.add(user)
 		db.session.commit()
@@ -115,12 +115,16 @@ def edit_profile():
 	form = EditProfileForm(current_user.username)
 	if form.submit.data:
 		if form.validate_on_submit():
+			current_user.firstname = form.firstname.data
+			current_user.lastname = form.lastname.data
 			current_user.username = form.username.data
 			current_user.about_me = form.about_me.data
 			db.session.commit()
 			flash('Your changes has been saved!')
 			return redirect(url_for('edit_profile'))
 	elif request.method == 'GET':
+		form.firstname.data = current_user.firstname
+		form.lastname.data = current_user.lastname
 		form.username.data = current_user.username
 		form.about_me.data = current_user.about_me
 	return render_template('edit_profile.html', title='Edit Profile', form=form)
@@ -427,11 +431,34 @@ def delete_product(prod_id, comp_id):
 def inventory(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	orders = Order.query.filter_by(company_id=company.id).first()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	return render_template('inventory_management/inventory.html', title='Inventory', company=company)
+	dept = company.departments.order_by(Department.name.asc())
+	#dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
+	#type = Type.query.all()
+	#type_list = [(0, 'All')] + [(t.id, t.name) for t in type]
+	#form1 = InventorySearchForm()
+	#form1.department.choices = dept_list
+	#form1.type.choices = type_list
+	#dept_id = form1.department.data
+	#type_id= form1.type.data
+	products = Product.query.order_by(Product.name.asc())
+	my_products = MyProducts.query.all()
+	for my_p in my_products:
+		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
+		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
+		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
+		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
+	form = OrderListForm()
+	if form.submit.data:
+		request = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=orders.id)
+		db.session.add(request)
+		db.session.commit()
+		#return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
+	return render_template('inventory_management/inventory.html', title='Inventory', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, my_products=my_products, form=form, orders=orders, dept=dept)
 
 
 @app.route('/<company_name>/inventory_management/orders', methods=['GET', 'POST'])
@@ -439,6 +466,8 @@ def inventory(company_name):
 def orders(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	orders = Order.query.filter_by(company_id=company.id).all()
+	for order in orders:
+		order.creator = User.query.filter_by(id=order.order_creator).first().username
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
@@ -450,7 +479,7 @@ def orders(company_name):
 		db.session.add(order)
 		db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
-	return render_template('inventory_management/orders.html', title='Orders', company=company, form=form, orders=orders)
+	return render_template('inventory_management/orders.html', title='Orders', company=company, form=form, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
 
 
 
@@ -459,37 +488,69 @@ def orders(company_name):
 def create_orders(company_name, order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	order = Order.query.filter_by(order_no=order_no).first_or_404()
+	order_list = OrdersList.query.filter_by(order_id=order.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	dept = Department.query.order_by(Department.name.asc()).all()
-	dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
-	type = Type.query.all()
-	type_list = [(0, 'All')] + [(t.id, t.name) for t in type]
-	form = CreateOrderForm()
-	form.department.choices = dept_list
-	form.type.choices = type_list
-	dept_id = form.department.data
-	type_id= form.type.data
+	dept = company.departments.order_by(Department.name.asc())
+	#dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
+	#type = Type.query.all()
+	#type_list = [(0, 'All')] + [(t.id, t.name) for t in type]
+	#form1 = InventorySearchForm()
+	#form1.department.choices = dept_list
+	#form1.type.choices = type_list
+	#dept_id = form1.department.data
+	#type_id= form1.type.data
 	products = Product.query.order_by(Product.name.asc())
 	my_products = MyProducts.query.all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		
-		#my_p.price = MyProducts.query.filter_by(product_id=my_p.product_id).first().price
-	
-	#product_sorted = Product.query.filter_by(department_id=dept_id, type_id=type_id).order_by(Product.name.asc())
-	#if form.validate_on_submit():
-	#	if dept_id == 0:
-	#		products = Product.query.order_by(Product.name.asc())
-	#	else:
-	#		products = MyProducts.query.filter_by(department_id=dept_id).order_by(Product.name.asc())
-	return render_template('inventory_management/create_orders.html', title='Create Orders', company=company, form=form,products=products, my_products=my_products, order=order)	
+		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+	form = OrderListForm()
+	if form.save.data:
+		refnum_list = request.form.getlist('refnum')
+		name_list = request.form.getlist('name')
+		price_list = request.form.getlist('price')
+		qty_list = request.form.getlist('qty')
+		tot_list = request.form.getlist('tot_price')
+		#for i in refnum_list, price_list in range(0, len(refnum_list) ):
+		for i in range(0, len(refnum_list) ):
+			#print(refnum_list[i], name_list[i])
+		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id)
+			db.session.add(list)
+			db.session.commit()
+		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
+	return render_template('inventory_management/create_orders.html', title='Create Orders', company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
 
+
+@app.route('/<company_name>/<order_no>/remove_item/<int:id>')
+@login_required	
+def remove_item(company_name, order_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	order = Order.query.filter_by(order_no=order_no).first_or_404()
+	order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	id = OrdersList.query.filter_by(id=id).first()
+	db.session.delete(id)
+	db.session.commit()
+	return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
+
+'''@app.route('/<company_name>/add_to_orders/<order_no>', methods=['GET', 'POST'])
+@login_required
+def add_to_orders(company_name, order_no):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	order = Order.query.filter_by(order_no=order_no).first_or_404()
+	order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	form = OrderListForm()
+	if form.submit.data:
+		list_num = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=order.id)
+		db.session.add(list_num)
+		db.session.commit()
+		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))'''
 
 	
 @app.route('/deliveries')
@@ -628,16 +689,9 @@ def edit_type(id, comp_id):
 	
 
 	
-#@app.route('/add_to_orders/<int:id>', methods=['GET', 'POST'])
-#@login_required
-#def add_to_orders(id):
-#	product_get = Product.query.get(id)
-#	product_post = OrdersList(prod_id=product_get)
-#	db.session.add(product_post)
-##	db.session.commit()
-#	return redirect(url_for('create_orders'))
 
-@app.route('/orders_list', methods=['GET', 'POST'])	
+
+'''@app.route('/orders_list', methods=['GET', 'POST'])	
 def orders_list():
 	order_list = OrdersList.query.all()
 	for order in order_list:
@@ -645,7 +699,7 @@ def orders_list():
 		order.product_code = Product.query.filter_by(id=order_list.prod_id).first().product_code
 		order.name = Product.query.filter_by(id=order_list.prod_id).first().name
 		order.price = Product.query.filter_by(id=order_list.prod_id).first().price
-	return render_template('inventory_management/create_orders.html', order_list=order_list)
+	return render_template('inventory_management/create_orders.html', order_list=order_list)'''
 
 @app.route('/document_control/<username>')
 @login_required

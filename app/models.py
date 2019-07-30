@@ -86,6 +86,8 @@ class Affiliates(db.Model):
 
 class User(UserMixin, db.Model):
 	id = db.Column(db.Integer, primary_key=True)
+	firstname = db.Column(db.String(64), index=True)
+	lastname = db.Column(db.String(64), index=True)
 	username = db.Column(db.String(64), index=True, unique=True)
 	email = db.Column(db.String(120), index=True, unique=True )
 	password_hash = db.Column(db.String(128))
@@ -302,8 +304,22 @@ class Order(db.Model):
 	submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
+	list = db.relationship('OrdersList', backref=db.backref('order_list', lazy=True))
+	
 	def __repr__(self):
 		return '<Order {}>'.format(self.order_no)
+		
+class OrdersList(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	ref_number = db.Column(db.String(100))
+	name = db.Column(db.String(200), index=True)
+	price = db.Column(db.Numeric(10,2), index=True)
+	quantity = db.Column(db.Integer)
+	total = db.Column(db.Numeric(10,2))
+	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
+	
+	def __repr__(self):
+		return '<OrdersList {}>'.format(self.id)
 
 class Purchase(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

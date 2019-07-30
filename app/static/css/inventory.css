@@ -89,6 +89,15 @@
 	display: block;
 }
 
+#subtotal_container {
+	float: right;
+	border: #ddd solid 2px;
+	width: 150px;
+    padding: 5px;
+    font-size: large;
+	display: none;
+	margin: 10px;
+}
 /*#search_create_orders:label {
 	display: block;
 }*/
