@@ -458,10 +458,10 @@ function drawChart() {
 				},			
 				vAxis: {
 					ticks: [{v: +cmn + +(csd*3), f: '+3sd'}, {v: +cmn + +(csd*2), f: '+2sd'}, {v: +cmn + +csd, f: '+1sd'}, {v: cmn, f: 'mean'}, {v: cmn-csd, f: '-1sd'}, {v: cmn - (csd*2), f: '-2sd'}, {v: cmn - (csd*3), f: '-3sd'} ],
-					/*gridlines: {
-						color: 'blue',
-						count: 7
-					}*/
+					viewWindow: {
+							max: +cmn + +(csd*3),
+							min: cmn - (csd*3),
+						},
 				},									
 				pointSize: 10,
 				legend: {

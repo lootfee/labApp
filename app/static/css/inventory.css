@@ -1,3 +1,10 @@
+@media print
+{    
+    .no-print, .no-print *
+    {
+        display: none !important;
+    }
+}
 .navbar {
 	margin-bottom: 10px;
 }
@@ -98,7 +105,12 @@
 	display: none;
 	margin: 10px;
 }
-/*#search_create_orders:label {
-	display: block;
-}*/
+.modal-form-number {
+	font-size: large;
+    color: blue;
+}
 
+
+.text-center th {
+	text-align: center;
+}

@@ -5,6 +5,7 @@
     border-top: none;
     height: 100%;
 	width: 200px;
+	float: left;
 }
 
 .tablinks {

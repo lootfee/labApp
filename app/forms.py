@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from app import app, photos
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField, HiddenField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField, HiddenField, DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User, Product, Item, Department, Supplier, Type, Order
@@ -169,6 +169,11 @@ class SupplierRegistrationForm(FlaskForm):
 class CreateOrderIDForm(FlaskForm):
 	order_no = StringField('Create Order ID', validators=[DataRequired()])
 	submit = SubmitField('Submit')
+	
+class CreatePurchaseOrderForm(FlaskForm):
+	order_no_purchase_form = StringField('For Order No:', validators=[DataRequired()])
+	purchase_order = StringField('Purchase Order No:', validators=[DataRequired()])
+	submit = SubmitField('Create')
 
 	
 class InventorySearchForm(FlaskForm):
@@ -183,8 +188,24 @@ class OrderListForm(FlaskForm):
 	price = HiddenField('Price')
 	tot_price = HiddenField('Total Price')
 	save = SubmitField('Save')
-	submit = SubmitField('Submit Order')
+	submit = SubmitField('Submit')
 
+class EditOrderListForm(FlaskForm):#not used
+	orderlist_id = HiddenField('orderlist id')
+	edit_qty = StringField('edit_qty')
+	total = StringField('total')
+	form_save_edit = SubmitField('Save')
+	
+class AcceptDeliveryForm(FlaskForm):
+	delivery_no = StringField('Delivery Order No:', validators=[DataRequired()])
+	purchase_no = StringField('Purchase Order No:', validators=[DataRequired()])
+	submit = SubmitField('Submit')
+	
+class ItemReceiveForm(FlaskForm):
+	lot_no = StringField('Lot No:', validators=[DataRequired()])
+	expiry = DateField('Expiry:', validators=[DataRequired()])
+	quantity = IntegerField('Quantity')
+	submit = SubmitField('Submit')
 	
 class DocumentRequestForm(FlaskForm):
 	url = StringField('Paste URL here', validators=[URL()])

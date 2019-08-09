@@ -8,26 +8,42 @@
 	<hr class="inventory_hr">
 	<div class="row">
 		<div class="col-md-12">
-			<table>
+			<table class="text-center">
 				<tr>
 					<th class="col-md-2">Order ID</th>
-					<th class="col-md-2">Date Created</th>
-					<th class="col-md-2">Created by</th>
-					<th class="col-md-1">Date Reviewed</th>
-					<th class="col-md-2">Reviewed by</th>
-					<th class="col-md-1">Date Submitted</th>
-					<th class="col-md-2">Submitted by</th>
+					<th class="col-md-1">Created by</th>
+					<th class="col-md-1">Date</th>
+					<!--th class="col-md-1">Completed by</th>
+					<th class="col-md-1">Date</th>
+					<th class="col-md-1">Reviewed by</th>
+					<th class="col-md-1">Date</th-->
+					<th class="col-md-1">Submitted by</th>
+					<th class="col-md-1">Date</th>
+					<th class="col-md-2">Status</th>
 				</tr>
 				{% if orders %}
 					{% for order in orders %}
 					<tr>
 						<td><a href="{{ url_for('create_orders', company_name=company.company_name, order_no=order.order_no) }}">{{ order.order_no }}</a></td>
-						<td>{{ order.date_created }}</td>
-						<td>{{ order.creator }}</td>
-						<td>{{ order.review_approved }}</td>
-						<td>{{ order.reviewer }}</td>
-						<td>{{ order.date_submitted }}</td>
-						<td>{{ order.submitted_by }}</td>
+						{% for c in order.order_creator %}
+						<td>{{ c.username }}</td>
+						{% endfor %}
+						{% if order.date_created %}
+						<td>{{ order.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+						{% endif %}
+						{% for s in order.order_submitted_by %}
+						<td>{{ s.username }}</td>
+						{% endfor %}
+						{% if order.date_submitted %}
+						<td>{{ order.date_submitted.strftime('%Y-%m-%d %H:%M') }}</td>
+						{% endif %}
+						{% if order.purchase_order %}
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ order.purchase_order.purchase_order_no }}</a></td>
+						{% elif  order.date_submitted %}
+						<td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_purchase_modal_{{ order.order_no }}">Create Purchase Order</button></td>
+						
+						{% endif %}
+						
 					</tr>
 					{% endfor %}
 				{% endif %}
@@ -58,7 +74,35 @@
 			</div>
 		  </div>
 		</div>
-	</div>
-    
+		{% if orders %}
+		{% for order in orders %}
+		<div class="modal fade" id="create_purchase_modal_{{ order.order_no }}" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<form action method="post" class="form" role="form">
+					{{ form1.hidden_tag() }}
+					<div class="modal-header">
+					<h4 style="display: inline;">For order no: </h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					{{ form1.order_no_purchase_form(class_="form-control modal-form-number", value=order.order_no, readonly=True) }}
+					</div>
+					<div class="modal-body">
+						<div class="form-group required">
+							{{ form1.purchase_order.label (class_="control-label") }}
+							{{ form1.purchase_order (class_="form-control modal-form-number") }}
+						</div>
+
+					</div>
+					<div class="modal-footer">
+					{{ form1.submit (class_="btn btn-default") }}
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</form>
+			</div>
+		  </div>
+		</div>
+		{% endfor %}
+		{% endif %}
+	</div>   
 	
 {% endblock %}

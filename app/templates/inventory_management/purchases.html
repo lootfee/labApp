@@ -1,0 +1,49 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+
+<h3 class="inventory_headers">Purchases</h3>
+	<hr class="inventory_hr">
+	<div class="row">
+		<div class="col-md-12">
+			<table class="text-center">
+				<tr>
+					<th class="col-md-2">Purchase Order</th>
+					<th class="col-md-1">Created by</th>
+					<th class="col-md-1">Date</th>
+					<!--th class="col-md-1">Completed by</th>
+					<th class="col-md-1">Date</th>
+					<th class="col-md-1">Reviewed by</th>
+					<th class="col-md-1">Date</th-->
+					<th class="col-md-1">Purchased by</th>
+					<th class="col-md-1">Date</th>
+					<th class="col-md-1">Status</th>
+				</tr>
+				{% if purchases %}
+					{% for purchase in purchases %}
+					<tr>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
+						{% for p in purchase.purchase_created_by %}
+						<td>{{ p.username }}</td>
+						{% endfor %}
+						<td>{{ purchase.date_created.strftime('%Y-%m-%d') }}</td>
+						
+						{% for p in purchase.purchased_by %}
+						<td>{{ p.username }}</td>
+						{% endfor %}
+						{% if purchase.date_purchased %}
+						<td>{{ purchase.date_purchased.strftime('%Y-%m-%d') }}</td>
+						{% endif %}
+						<td></td>
+					</tr>
+					{% endfor %}
+				{% endif %}
+				
+			</table>
+		</div>
+		
+	</div>
+
+{% endblock %}

@@ -14,7 +14,15 @@
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}
 				<div class="col-md-6">
-					<div class="form-group  required"><label class="control-label" for="reference_number">Reference Number</label>
+					{{ form.reference_number.label(class_="contol-label") }}
+					{{ form.reference_number(class_="form-control") }}
+					{{ form.name.label(class_="contol-label") }}
+					{{ form.name(class_="form-control") }}
+					{{ form.description.label(class_="contol-label") }}
+					{{ form.description(class_="form-control") }}
+					{{ form.storage_req.label(class_="contol-label") }}
+					{{ form.storage_req(class_="form-control") }}
+					<!--div class="form-group  required"><label class="control-label" for="reference_number">Reference Number</label>
 						<input class="form-control ui-autocomplete-input" id="reference_number" name="reference_number" required="" type="text" value="" autocomplete="off">
 					</div>
 					<div class="form-group  required"><label class="control-label" for="name">Item Name</label>
@@ -25,10 +33,16 @@
 					</div>
 					<div class="form-group  required"><label class="control-label" for="storage_req">Storage Requirement</label>       
 						<input class="form-control" id="storage_req" name="storage_req" required="" type="text" style="width: 40%;" value="">      
-					</div>
+					</div-->
 				</div>
 				<div class="col-md-3">
-					<div class="form-group"><label class="control-label" for="price">Price</label>			
+					{{ form.price.label(class_="contol-label") }}
+					{{ form.price(class_="form-control") }}
+					{{ form.min_quantity.label(class_="contol-label") }}
+					{{ form.min_quantity(class_="form-control") }}
+					{{ form.min_expiry.label(class_="contol-label") }}
+					{{ form.min_expiry(class_="form-control") }}
+					<!--div class="form-group"><label class="control-label" for="price">Price</label>			
 						<input class="form-control" id="price" name="price" type="text" value="">			
 					</div>
 					<div class="form-group "><label class="control-label" for="min_quantity">Minimum Quantity</label>       
@@ -36,18 +50,36 @@
 					</div>
 					<div class="form-group "><label class="control-label" for="min_expiry">Minimum Expiry(Months)</label>        
 						<input class="form-control" id="min_expiry" name="min_expiry" type="text" value="">        
-					</div>
+					</div-->
 				</div>
 				<div class="col-md-3">
-					<div class="form-group  required"><label class="control-label" for="department">Department</label>  
-						<select class="form-control" id="department" name="department" required=""><option value="2">Hematology</option><option value="1">Biochemistry</option><option value="3">Parasitology</option></select>        
+					{{ form.department.label(class_="contol-label") }}
+					{{ form.department(class_="form-control") }}
+					{{ form.supplier.label(class_="contol-label") }}
+					{{ form.supplier(class_="form-control") }}
+					{{ form.type.label(class_="contol-label") }}
+					{{ form.type(class_="form-control") }}
+					<!--div class="form-group  required"><label class="control-label" for="department">Department</label>  
+						<select class="form-control" id="department" name="department" required="">
+						{% for d in dept %}
+						<option value='{{ d.name }}'>{{ d.name }}</option>
+						{% endfor %}
+						<option value="2">Hematology</option><option value="1">Biochemistry</option><option value="3">Parasitology</option></select>        
 					</div>
 					<div class="form-group  required"><label class="control-label" for="supplier">Supplier</label>        
-						<select class="form-control" id="supplier" name="supplier" required=""><option value="1">Pharmatrade</option><option value="2">al abbar</option></select>        
+						<select class="form-control" id="supplier" name="supplier" required="">
+						{% for s in supplier %}
+						<option value='{{ s.name }}'>{{ s.name }}</option>
+						{% endfor %}
+						<option value="1">Pharmatrade</option><option value="2">al abbar</option></select>        
 					</div>
 					<div class="form-group  required"><label class="control-label" for="type">Type</label>       
-						<select class="form-control" id="type" name="type" required=""><option value="3">Reagent</option><option value="1">Control</option><option value="2">Calibrator</option></select>       
-					</div>
+						<select class="form-control" id="type" name="type" required="">
+						{% for t in type %}
+						<option value='{{ t.name }}'>{{ t.name }}</option>
+						{% endfor %}
+						<option value="3">Reagent</option><option value="1">Control</option><option value="2">Calibrator</option></select>       
+					</div-->
 				</div>
 				<input class="btn btn-default" id="submit" name="submit" type="submit" value="Register" style="float: right; margin-bottom: 10px;">
 			</form>
@@ -56,11 +88,11 @@
 	</div>
 	<div class="row">
 		<div class="col-md-12">
-			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align">
+			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align" style="float: left;">
 				<span>Register Product</span>
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 			</button>
-			<table class="table table-bordered table-hover">
+			<table class="table table-bordered table-hover text-center">
 				<tr>
 					<th>Reference No</th>
 					<th>Product Name</th>

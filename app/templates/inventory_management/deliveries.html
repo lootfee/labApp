@@ -1,18 +1,70 @@
-{% extends "base.html" %}
+{% extends "company_base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}	
-    <h3 class="inventory_headers">Manage Deliveries</h3>
-	<hr>
+    <h3 class="inventory_headers">Deliveries</h3>
+	<hr class="inventory_hr">
     <div class="row">
-		<div class="col-md-4 registerContainer">
-			<div class="col-md-12">
-				{% if form %}
-				{{ wtf.quick_form(form) }}
-				<br>
+		<div class="col-md-12">
+			<table class="text-center">
+				<tr>
+					<th class="col-md-2">Purchase Order</th>
+					{% if all_deliveries %}
+					<th class="col-md-1">View Delivery</th>
+					{% else %}
+					<th class="col-md-1">Status</th>
+					{% endif %}
+					<th class="col-md-1">Action</th>
+				</tr>
+				{% if purchases %}
+					{% for purchase in purchases %}
+					{% if purchase.date_purchased %}
+					<tr>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
+						
+						{% if all_deliveries %}
+						{% for del in all_deliveries %}
+						<td><a href="{{ url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=del.delivery_no)}}">{{ del.delivery_no }}</a></td>
+						{% endfor %}
+						{% else %}
+						<td>Ordered</td>
+						{% endif %}
+						<td><a href="#" data-toggle="modal" id="accept_delivery" data-target="#accept_delivery_modal_{{ purchase.purchase_order_no }}">Accept Delivery</a></td>
+						
+					</tr>
+					{% endif %}
+					{% endfor %}
 				{% endif %}
-			</div>
+				
+			</table>
 		</div>
+		{% for purchase in purchases %}
+		<div class="modal fade" id="accept_delivery_modal_{{ purchase.purchase_order_no }}" tabindex="-1" role="dialog">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<form action method="post" class="form" role="form">
+					{{ form.hidden_tag() }}
+					<div class="modal-header">
+					<h4 style="display: inline;">For order no: </h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					{{ form.purchase_no(class_="form-control modal-form-number", value=purchase.purchase_order_no, readonly=True) }}
+					</div>
+					<div class="modal-body">
+						<div class="form-group required">
+							{{ form.delivery_no.label (class_="control-label") }}
+							{{ form.delivery_no (class_="form-control modal-form-number") }}
+						</div>
+
+					</div>
+					<div class="modal-footer">
+					{{ form.submit (class_="btn btn-default") }}
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					</div>
+				</form>
+			</div>
+		  </div>
+		</div>
+		{% endfor %}
     </div>
 {% endblock %}

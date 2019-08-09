@@ -1,0 +1,32 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+<h3 class="inventory_headers">Accept Delivery</h3>
+	<hr class="inventory_hr">
+    <div class="row">
+		<div class="col-md-12">
+		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ purchase.purchase_order_no }}</span></h4> </span>
+		<span class="text-center"><h4>Delivery Order No: <span style="color: blue;">{{ delivery.delivery_no }}</span></h4> </span>
+			<table class="table table-bordered table-hover text-center" id="orders_list_table">
+				<tr>
+					<th>Reference No</th>
+					<th>Name</th>
+					<th>Qty Requested</th>
+					<th>Qty Received</th>
+				</tr>
+				{% for list in purchase_list %}
+					<tr>
+						<td>{{ list.ref_number }}</td>
+						<td>{{ list.name }}</td>
+						<td>{{ list.quantity }}</td>
+						<td></td>
+						<td><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></td>
+					</tr>
+				{% endfor %}
+			</table>
+		</div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+<h3 class="inventory_headers">Receive Item</h3>
+	<hr class="inventory_hr">
+    <div class="row">
+		<div class="col-md-12">
+		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ purchase.purchase_order_no }}</span></h4> </span>
+			<table class="table table-bordered table-hover text-center" id="orders_list_table">
+				<tr>
+					<th>Reference No</th>
+					<th>Name</th>
+					<th>Quantity Requested</th>
+					
+					
+				</tr>
+				
+					<tr>
+						<td>{{ purchased_item.ref_number }}</td>
+						<td>{{ purchased_item.name }}</td>
+						<td>{{ purchased_item.quantity }}</td>
+						
+					</tr>
+				
+			</table>
+			<div class="col-md-2">
+			</div>
+			<div class="col-md-9 text-center">
+				<form action method="post" class="form" role="form">
+					{{ form.hidden_tag() }}
+					<div class="col-md-3 form-group required">
+						{{ form.lot_no.label (class_="control-label") }}
+						{{ form.lot_no (class_="form-control") }}
+					</div>
+					<div class="col-md-3 form-group required">
+						{{ form.expiry.label (class_="control-label") }}
+						{{ form.expiry (class_="form-control", type="date") }}
+					</div>
+					<div class="col-md-2 form-group required">
+						{{ form.quantity.label (class_="control-label") }}
+						{{ form.quantity (class_="form-control") }}
+					</div>
+					<div class="col-md-2" style="margin-top: 24px;">
+						{{ form.submit(class_="btn btn-default") }}
+					</div>
+				</form>
+			</div>
+			<div class="col-md-1">
+			</div>
+			
+			
+		</div>
+    </div>
+
+{% endblock %}

@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot
 from datetime import datetime
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -452,11 +452,11 @@ def inventory(company_name):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
-	form = OrderListForm()
-	if form.submit.data:
-		request = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=orders.id)
-		db.session.add(request)
-		db.session.commit()
+	#form = OrderListForm()
+	#if form.submit.data:
+	#	request = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=orders.id)
+	#	db.session.add(request)
+	#	db.session.commit()
 		#return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
 	return render_template('inventory_management/inventory.html', title='Inventory', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, my_products=my_products, form=form, orders=orders, dept=dept)
 
@@ -467,19 +467,34 @@ def orders(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	orders = Order.query.filter_by(company_id=company.id).all()
 	for order in orders:
-		order.creator = User.query.filter_by(id=order.order_creator).first().username
+		order.purchase_order = Purchase.query.filter_by(order_no=order.id).first()
+	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	form = CreateOrderIDForm()
+	form1 = CreatePurchaseOrderForm()
 	if form.validate_on_submit():
-		order = Order(order_no=form.order_no.data, order_creator=current_user.id, company_id=company.id)
+		order = Order(order_no=form.order_no.data, company_id=company.id)
 		db.session.add(order)
+		order.order_creator.append(user)
 		db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
-	return render_template('inventory_management/orders.html', title='Orders', company=company, form=form, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
+	if form1.validate_on_submit():
+		order_id = Order.query.filter_by(order_no=form1.order_no_purchase_form.data).first().id
+		purchase = Purchase(purchase_order_no=form1.purchase_order.data, company_id=company.id, order_no=order_id)
+		db.session.add(purchase)
+		purchase.purchase_created_by.append(user)
+		db.session.commit()
+		purchase_list = OrdersList.query.filter_by(order_id=order_id).all()
+		for i in purchase_list:
+			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, total=i.total, purchase_id=purchase.id, user_id=i.user_id)
+			db.session.add(list)
+			db.session.commit()
+		return redirect (url_for('purchases', company_name=company.company_name))
+	return render_template('inventory_management/orders.html', title='Orders', company=company, form=form, form1=form1, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchases=purchases)
 
 
 
@@ -489,6 +504,8 @@ def create_orders(company_name, order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	order = Order.query.filter_by(order_no=order_no).first_or_404()
 	order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	for list in order_list:
+		list.user = User.query.filter_by(id=list.user_id).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
@@ -521,46 +538,191 @@ def create_orders(company_name, order_no):
 		for i in range(0, len(refnum_list) ):
 			#print(refnum_list[i], name_list[i])
 		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id, user_id=user.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
-	return render_template('inventory_management/create_orders.html', title='Create Orders', company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
+	if form.submit.data:
+		order.order_submitted_by.append(user)
+		order.date_submitted = datetime.utcnow()
+		db.session.commit()
+		return redirect (url_for('orders', company_name=company.company_name))
+	form1 = EditOrderListForm()
+	'''if form1.form_save_edit.data:
+		order_edit = OrdersList.query.get(form.orderlist_id.data)
+		order_edit.quantity = form1.edit_qty.data
+		db.session.commit()
+		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))'''
+	return render_template('inventory_management/create_orders.html', title='Create Orders', company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept, form1=form1)	
 
 
-@app.route('/<company_name>/<order_no>/remove_item/<int:id>')
+@app.route('/<company_name>/<order_no>/remove_order_item/<int:id>')
 @login_required	
-def remove_item(company_name, order_no, id):
+def remove_order_item(company_name, order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	order = Order.query.filter_by(order_no=order_no).first_or_404()
-	order_list = OrdersList.query.filter_by(order_id=order.id).all()
-	id = OrdersList.query.filter_by(id=id).first()
-	db.session.delete(id)
+	#order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	item = OrdersList.query.filter_by(id=id).first()
+	db.session.delete(item)
 	db.session.commit()
 	return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
 
-'''@app.route('/<company_name>/add_to_orders/<order_no>', methods=['GET', 'POST'])
-@login_required
-def add_to_orders(company_name, order_no):
+#edit item from modal
+#cannot get data from form
+@app.route('/<company_name>/<order_no>/edit_item_qty/<int:id>', methods=['GET', 'POST'])
+@login_required	
+def edit_item_qty(company_name, order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	order = Order.query.filter_by(order_no=order_no).first_or_404()
-	order_list = OrdersList.query.filter_by(order_id=order.id).all()
-	form = OrderListForm()
-	if form.submit.data:
-		list_num = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=order.id)
-		db.session.add(list_num)
-		db.session.commit()
-		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))'''
-
+	#order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	item = OrdersList.query.filter_by(id=id).first()
+	form1 = EditOrderListForm()
+	order_id = form1.orderlist_id.data
+	edit_qty = form1.edit_qty.data
+	print(form1.edit_qty.data)
+	return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
 	
-@app.route('/deliveries')
+		
+@app.route('/<company_name>/inventory_management/purchases', methods=['GET', 'POST'])
 @login_required
-def deliveries():
+def purchases(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
-	return render_template('inventory_management/deliveries.html', title='Deliveries')
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	#form = CreatePurchaseOrderForm()
+	#for purchase in purchases:
+	#	purchase.purchase_created_by = User.query.filter_by(id=purchase.created_by).first().username
+	return render_template('inventory_management/purchases.html', title='Purchases', company=company, purchases=purchases, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)		
+
+
+@app.route('/<company_name>/inventory_management/purchase_list/<purchase_order_no>', methods=['GET', 'POST'])
+@login_required
+def purchase_list(company_name, purchase_order_no):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	for list in purchase_list:
+		list.user = User.query.filter_by(id=list.user_id).first()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments.order_by(Department.name.asc())
+	my_products = MyProducts.query.all()
+	for my_p in my_products:
+		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
+		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
+		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
+		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+	form = OrderListForm()
+	if form.save.data:
+		refnum_list = request.form.getlist('refnum')
+		name_list = request.form.getlist('name')
+		price_list = request.form.getlist('price')
+		qty_list = request.form.getlist('qty')
+		tot_list = request.form.getlist('tot_price')
+		#for i in refnum_list, price_list in range(0, len(refnum_list) ):
+		for i in range(0, len(refnum_list) ):
+			#print(refnum_list[i], name_list[i])
+		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
+			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], purchase_id=purchase.id, user_id=user.id)
+			db.session.add(list)
+			db.session.commit()
+		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
+	if form.submit.data:
+		purchase.purchased_by.append(user)
+		purchase.date_purchased = datetime.utcnow()
+		db.session.commit()
+		return redirect (url_for('purchases', company_name=company.company_name))
+	return render_template('inventory_management/purchase_list.html', title='Purchase List', company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchase_list=purchase_list, form=form, dept=dept, my_products=my_products)		
+
+
+@app.route('/<company_name>/<purchase_order_no>/remove_purchase_item/<int:id>')
+@login_required	
+def remove_purchase_item(company_name, purchase_order_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
+	item = PurchaseList.query.filter_by(id=id).first()
+	db.session.delete(item)
+	db.session.commit()
+	return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
+	
+
+@app.route('/<company_name>/<purchase_order_no>/accept_delivery/<delivery_order_no>')
+@login_required	
+def accept_delivery(company_name, purchase_order_no, delivery_order_no):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchase_list=purchase_list, delivery=delivery)		
+
+
+@app.route('/<company_name>/<purchase_order_no>/receive_delivery_item/<delivery_order_no>/<int:id>')
+@login_required	
+def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	purchased_item = PurchaseList.query.filter_by(id=id).first()
+	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no).first_or_404()
+	product = Product.query.filter_by(ref_number=purchased_item.ref_number).first()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	form = ItemReceiveForm()
+	if form.validate_on_submit():
+		raw_lotno = form.lot_no.data
+		qty = form.quantity.data
+		#expiry = form.expiry.data.split('-')
+		alnum_lotno = ''.join(e for e in raw_lotno if e.isalnum())
+		lot_query = Lot.query.filter_by(lot_no=alnum_lotno).first_or_404()
+		if lot_query is None:
+			lot = Lot(lot_no=alnum_lotno, expiry=form.expiry.data, product_id=product.id)
+			db.session.add(lot)
+			db.session.commit()
+			for i in range(1, qty):
+				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
+			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
+		if lot_query is not None:
+			lot = Lot.query.filter_by(lot_no=alnum_lotno).first()
+			for i in range(1, qty):
+				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
+			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
+	return render_template('inventory_management/receive_delivery_item.html', title='Receive Item', company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchased_item=purchased_item, form=form, delivery=delivery)	
+
+	
+@app.route('/<company_name>/inventory_management/deliveries', methods=['GET', 'POST'])
+@login_required
+def deliveries(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	purchases = Purchase.query.filter_by(company_id=company.id).all()
+	all_deliveries = Delivery.query.filter_by(company_id=company.id).all()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	form = AcceptDeliveryForm()
+	if form.validate_on_submit():
+		purchase = Purchase.query.filter_by(purchase_order_no=form.purchase_no.data).first_or_404()
+		delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id)
+		db.session.add(delivery)
+		db.session.commit()
+		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
+	return render_template('inventory_management/deliveries.html', title='Deliveries', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form, all_deliveries=all_deliveries)
 	
 @app.route('/<company_name>/inventory_management/suppliers',  methods=['GET', 'POST'])
 @login_required

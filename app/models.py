@@ -29,6 +29,26 @@ suppliers = db.Table('suppliers',
 	db.Column('supplier_id', db.Integer, db.ForeignKey('supplier.id')),
 )
 
+order_creator = db.Table('order_creator',
+	db.Column('order_id', db.Integer, db.ForeignKey('order.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+order_submitted_by = db.Table('order_submitted_by',
+	db.Column('order_id', db.Integer, db.ForeignKey('order.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+purchase_created_by = db.Table('purchase_created_by',
+	db.Column('purchase_id', db.Integer, db.ForeignKey('purchase.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+purchased_by = db.Table('purchased_by',
+	db.Column('purchase_id', db.Integer, db.ForeignKey('purchase.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
 '''lot_number = db.Table('lot_number',
 	db.Column('product_id', db.Integer, db.ForeignKey('product.id')),
 	db.Column('lot_id', db.Integer, db.ForeignKey('lot.id')),
@@ -94,17 +114,32 @@ class User(UserMixin, db.Model):
 	posts = db.relationship('Post', backref='author', lazy='dynamic')
 	about_me = db.Column(db.String(200))
 	last_seen = db.Column(db.DateTime, default=datetime.utcnow)
-	#affiliate = db.Column(db.Integer, db.ForeignKey('company.id'))
+	purchase_added_by = db.relationship('PurchaseList', backref=db.backref('purchase_added_by', lazy=True))
 	followed = db.relationship(
 		'User', secondary=followers,
 		primaryjoin=(followers.c.follower_id == id),
 		secondaryjoin=(followers.c.followed_id == id),
 		backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
 	)
-	#companies = db.relationship(
-	#	'Company', secondary='affiliates'
-	#	backref=db.backref('affiliate', lazy='dynamic')#, lazy='dynamic'
-	#)
+	order_creator = db.relationship(
+		'Order', secondary='order_creator',
+		backref=db.backref('order_creator', lazy='dynamic'), lazy='dynamic'
+	)
+	order_submitted_by = db.relationship(
+		'Order', secondary='order_submitted_by',
+		backref=db.backref('order_submitted_by', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	purchase_created_by = db.relationship(
+		'Purchase', secondary='purchase_created_by',
+		backref=db.backref('purchase_created_by', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	purchased_by = db.relationship(
+		'Purchase', secondary='purchased_by',
+		backref=db.backref('purchased_by', lazy='dynamic'), lazy='dynamic'
+	)
+
 		
 	def __repr__(self):
 		return '<User {}>'.format(self.username)
@@ -268,43 +303,21 @@ class MyProducts(db.Model):
 	product = db.relationship('Product', backref=db.backref('product_of_company', lazy='dynamic'))
 
 
-class Lot(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	lot_no = db.Column(db.String(50), index=True)
-	expiry = db.Column(db.DateTime, index=True)
-	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-	
-	item = db.relationship('Item', backref=db.backref('lot_no', lazy=True))
-	
-	def __repr__(self):
-		return '<Lot {}>'.format(self.id)
-	
-	
-class Item(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	lot_id = db.Column(db.Integer, db.ForeignKey('lot.id'))
-	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-	delivery_id = db.Column(db.Integer, db.ForeignKey('delivery.id'))
-	sequence_no = db.Column(db.String(50))
-	date_used = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	
-	def __repr__(self):
-		return '<Item {}{}>'.format(self.id, self.date_used)
-	
-
 class Order(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	order_no = db.Column(db.String(50), index=True)
+	order_no = db.Column(db.String(50), index=True, unique=True)
+	#order_creator = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	order_creator = db.Column(db.Integer, db.ForeignKey('user.id'))
-	review_approved = db.Column(db.DateTime, index=True)
-	reviewer = db.Column(db.Integer, db.ForeignKey('user.id'))
+	#completed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	#date_completed = db.Column(db.DateTime, index=True)
+	#reviewer = db.Column(db.Integer, db.ForeignKey('user.id'))
+	#review_approved = db.Column(db.DateTime, index=True)
+	#submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_submitted = db.Column(db.DateTime, index=True)
-	submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
-	list = db.relationship('OrdersList', backref=db.backref('order_list', lazy=True))
+	order_list = db.relationship('OrdersList', backref=db.backref('order_list', lazy=True))
+	puchase_no = db.relationship('Purchase', backref=db.backref('purchase_no', lazy=True))
 	
 	def __repr__(self):
 		return '<Order {}>'.format(self.order_no)
@@ -317,33 +330,80 @@ class OrdersList(db.Model):
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	
+	def __repr__(self):
+		return '<OrdersList {}>'.format(self.id)
+		
+class Purchase(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	purchase_order_no = db.Column(db.String(50), index=True, unique=True)
+	#created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	#purchased_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_purchased = db.Column(db.DateTime, index=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	order_no = db.Column(db.Integer, db.ForeignKey('order.id'))
+	
+	purchase_to_purchase_list = db.relationship('PurchaseList', backref=db.backref('purchase_to_purchase_list', lazy=True))
+	purchase_to_delivery = db.relationship('Delivery', backref=db.backref('purchase_to_delivery', lazy=True))
+
+	def __repr__(self):
+		return '<Purchase {}>'.format(self.purchase_order_no, self.date_purchased)
+		
+class PurchaseList(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	ref_number = db.Column(db.String(100))
+	name = db.Column(db.String(200), index=True)
+	price = db.Column(db.Numeric(10,2), index=True)
+	quantity = db.Column(db.Integer)
+	total = db.Column(db.Numeric(10,2))
+	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	
+	purchase_list_to_item = db.relationship('Item', backref=db.backref('purchase_list_to_item', lazy=True))
 	
 	def __repr__(self):
 		return '<OrdersList {}>'.format(self.id)
 
-class Purchase(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	purchase_id = db.Column(db.String(50), index=True)
-	date_purchased = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
-
-	def __repr__(self):
-		return '<Purchase {}>'.format(self.purchase_id, slef.date_purchased)
 
 class Delivery(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	delivery_id = db.Column(db.String(50), index=True)
-	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	delivery_no = db.Column(db.String(50), index=True, unique=True)
 	receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	
-	item = db.relationship('Item', backref=db.backref('delivery_date', lazy=True))
+	delivery_to_item = db.relationship('Item', backref=db.backref('delivery_to_item', lazy=True))
+	
 	
 	def __repr__(self):
 		return '<Delivery {}>'.format(self.delivery_id, slef.date_delivered)
+		
+class Item(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	lot_id = db.Column(db.Integer, db.ForeignKey('lot.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+	purchase_list_id = db.Column(db.Integer, db.ForeignKey('purchase_list.id'))
+	delivery_id = db.Column(db.Integer, db.ForeignKey('delivery.id'))
+	#sequence_no = db.Column(db.Integer)-use id instead
+	date_used = db.Column(db.DateTime, index=True)
+	
+	def __repr__(self):
+		return '<Item {}{}>'.format(self.id, self.date_used)
+
+class Lot(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	lot_no = db.Column(db.String(50), index=True)
+	expiry = db.Column(db.DateTime, index=True)
+	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+	
+	item = db.relationship('Item', backref=db.backref('lot_no', lazy=True))
+	
+	def __repr__(self):
+		return '<Lot {}>'.format(self.id)
 
 '''class OrdersList(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
