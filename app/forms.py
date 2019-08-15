@@ -203,7 +203,7 @@ class AcceptDeliveryForm(FlaskForm):
 	
 class ItemReceiveForm(FlaskForm):
 	lot_no = StringField('Lot No:', validators=[DataRequired()])
-	expiry = DateField('Expiry:', validators=[DataRequired()])
+	expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d')
 	quantity = IntegerField('Quantity')
 	submit = SubmitField('Submit')
 	

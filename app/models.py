@@ -379,7 +379,7 @@ class Delivery(db.Model):
 	
 	
 	def __repr__(self):
-		return '<Delivery {}>'.format(self.delivery_id, slef.date_delivered)
+		return '<Delivery {}>'.format(self.delivery_no, self.date_delivered)
 		
 class Item(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -396,7 +396,7 @@ class Item(db.Model):
 
 class Lot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	lot_no = db.Column(db.String(50), index=True)
+	lot_no = db.Column(db.String(50), index=True, unique=True)
 	expiry = db.Column(db.DateTime, index=True)
 	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
 	

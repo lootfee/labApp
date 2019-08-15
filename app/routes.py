@@ -8,6 +8,7 @@ from app.models import User, Post, Product, Item, Department, Supplier, Type, Or
 from datetime import datetime
 from app.email import send_password_reset_email
 from link_preview import link_preview
+from collections import Counter
 import requests
 
 
@@ -437,14 +438,6 @@ def inventory(company_name):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
-	#dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
-	#type = Type.query.all()
-	#type_list = [(0, 'All')] + [(t.id, t.name) for t in type]
-	#form1 = InventorySearchForm()
-	#form1.department.choices = dept_list
-	#form1.type.choices = type_list
-	#dept_id = form1.department.data
-	#type_id= form1.type.data
 	products = Product.query.order_by(Product.name.asc())
 	my_products = MyProducts.query.all()
 	for my_p in my_products:
@@ -452,14 +445,31 @@ def inventory(company_name):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
-	#form = OrderListForm()
-	#if form.submit.data:
-	#	request = OrdersList(ref_number=form.refnum.data, name=form.name.data, price=form.price.data, quantity=form.qty.data, total=form.tot_price.data, order_id=orders.id)
-	#	db.session.add(request)
-	#	db.session.commit()
-		#return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
-	return render_template('inventory_management/inventory.html', title='Inventory', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, my_products=my_products, form=form, orders=orders, dept=dept)
+		#my_p.stocks = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
+		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id).all()
+		my_p.lot_list = []
+		for i in my_p.item_query:
+			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+			#i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+			my_p.lot_list.append(i.lot_num)
+		my_p.count_lot_no_list = dict((x,my_p.lot_list.count(x)) for x in set(my_p.lot_list))
+		for l in my_p.count_lot_no_list:
+			lot_expiry = Lot.query.filter_by(lot_no=l).first()
+		my_p.lot_expiry = lot_expiry.expiry
+	return render_template('inventory_management/inventory.html', title='Inventory', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, my_products=my_products, orders=orders, dept=dept)
 
+@app.route('/<company_name>/consume/<ref_number>', methods=['GET', 'POST'])
+@login_required	
+def consume(company_name, ref_number):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	product_id = Product.query.filter_by(ref_number=ref_number).first().id
+	use_item = Item.query.filter_by(product_id=product_id, date_used=None).first()
+	
 
 @app.route('/<company_name>/inventory_management/orders', methods=['GET', 'POST'])
 @login_required
@@ -659,6 +669,15 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
 	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	for list in purchase_list:
+		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+		list.complete_delivery = list.delivered_qty == list.quantity
+		list.purchase_list_id = Item.query.filter_by(purchase_list_id=list.id).all()
+		list.delivery_no_list = []
+		for l in list.purchase_list_id:
+			l.delivery_no = Delivery.query.filter_by(id=l.delivery_id).first().delivery_no
+			list.delivery_no_list.append(l.delivery_no)
+		list.count_delivery_no_list = dict((x,list.delivery_no_list.count(x)) for x in set(list.delivery_no_list))	
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -668,7 +687,7 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchase_list=purchase_list, delivery=delivery)		
 
 
-@app.route('/<company_name>/<purchase_order_no>/receive_delivery_item/<delivery_order_no>/<int:id>')
+@app.route('/<company_name>/<purchase_order_no>/receive_delivery_item/<delivery_order_no>/<int:id>', methods=['GET', 'POST'])
 @login_required	
 def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
@@ -686,21 +705,26 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 	if form.validate_on_submit():
 		raw_lotno = form.lot_no.data
 		qty = form.quantity.data
-		#expiry = form.expiry.data.split('-')
+		#form_expiry = form.expiry.data.split('-')
+		#raw_expiry = datetime.strptime('form_expiry', '%Y-%m-%d')
 		alnum_lotno = ''.join(e for e in raw_lotno if e.isalnum())
-		lot_query = Lot.query.filter_by(lot_no=alnum_lotno).first_or_404()
+		lot_query = Lot.query.filter_by(lot_no=alnum_lotno).first()
 		if lot_query is None:
-			lot = Lot(lot_no=alnum_lotno, expiry=form.expiry.data, product_id=product.id)
+			lot = Lot(lot_no=alnum_lotno, product_id=product.id, expiry=form.expiry.data)
 			db.session.add(lot)
 			db.session.commit()
-			for i in range(1, qty):
+			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
+				db.session.add(item)
+				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
 		if lot_query is not None:
 			lot = Lot.query.filter_by(lot_no=alnum_lotno).first()
-			for i in range(1, qty):
+			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
-			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
+				db.session.add(item)
+				db.session.commit()
+			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase_order_no, delivery_order_no=delivery_order_no))
 	return render_template('inventory_management/receive_delivery_item.html', title='Receive Item', company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchased_item=purchased_item, form=form, delivery=delivery)	
 
 	
@@ -710,7 +734,8 @@ def deliveries(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
-	all_deliveries = Delivery.query.filter_by(company_id=company.id).all()
+	for purchase in purchases:
+		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id).all()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -722,7 +747,7 @@ def deliveries(company_name):
 		db.session.add(delivery)
 		db.session.commit()
 		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
-	return render_template('inventory_management/deliveries.html', title='Deliveries', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form, all_deliveries=all_deliveries)
+	return render_template('inventory_management/deliveries.html', title='Deliveries', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form)
 	
 @app.route('/<company_name>/inventory_management/suppliers',  methods=['GET', 'POST'])
 @login_required

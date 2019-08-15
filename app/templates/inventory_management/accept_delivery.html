@@ -15,14 +15,19 @@
 					<th>Name</th>
 					<th>Qty Requested</th>
 					<th>Qty Received</th>
+					<th>Status</th>
 				</tr>
 				{% for list in purchase_list %}
 					<tr>
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.quantity }}</td>
-						<td></td>
+						<td><a href="#" id="delivery_popup_{{ list.ref_number }}">{{ list.delivered_qty }}</a></td>
+						{% if list.complete_delivery %}
+						<td>Complete</td>
+						{% else %}
 						<td><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></td>
+						{% endif %}
 					</tr>
 				{% endfor %}
 			</table>
@@ -30,3 +35,22 @@
     </div>
 
 {% endblock %}
+{% block scripts%}
+{{ super() }}
+<script>
+$(document).ready(function(){
+	{% for list in purchase_list %}
+	  $('#delivery_popup_{{ list.ref_number }}').popover({
+		content: "<ul>{% for l in list.count_delivery_no_list %}<li>{{l}}: {{list.count_delivery_no_list[l]}} item/s</li>{% endfor %}</ul>",
+		html: true,
+		trigger: "focus",
+		placement: "left"
+	  }); 
+	{% endfor %}
+});
+
+</script>
+
+{% endblock %}
+
+

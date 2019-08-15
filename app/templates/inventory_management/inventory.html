@@ -24,11 +24,12 @@
 			</div>
 			<table class="table table-bordered table-hover" id="create_order_table">
 				<tr>
-					<th style="width:150px;">Ref No</th>
+					<th style="width:120px;">Ref No</th>
 					<th style="width:400px;">Name</th>
 					<th style="width:300px;">Description</th>
-					<th style="width:150px;">Department</th>
-					<th style="width:40px;">Stocks</th>
+					<!--th style="width:150px;">Department</th-->
+					<th style="width:180px;">Lot No / Expiry : Stocks</th>
+					<th style="width:40px;">Action</th>
 				</tr>
 				{% if my_products %}
 					{% for my_p in my_products %}
@@ -36,8 +37,11 @@
 						<td>{{ my_p.ref_number }}</td>
 						<td>{{ my_p.name }}</td>
 						<td>{{ my_p.description }}</td>
-						<td class="dept_name">{{ my_p.dept }}</td>
-						<td></td>
+						<td class="dept_name" style="display:none">{{ my_p.dept }}</td>
+						<td>{% for l in my_p.count_lot_no_list %}
+						<div><span style="font-weight: bold;color: blue;">{{l}}</span> / <span style="font-style: italic;color: blue;">{{ my_p.lot_expiry.strftime('%d-%m-%Y') }}</span> : <span style="font-weight: bold;color: green;">{{my_p.count_lot_no_list[l]}}</span></div>
+						{% endfor %}</td>
+						<td>Consume</td>
 						<!--td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td-->
 						<!--td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" id="request_{{ my_p.ref_number }}" data-target="#request_reagent_modal_{{ my_p.ref_number }}">Request Reagent</button></td-->
 						<!--td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Request') }}</a></td-->
@@ -47,46 +51,7 @@
 				{% endif %}
 			</table>
 		</div>
-		{% for my_p in my_products %}
-		<!--div class="modal fade" id="request_reagent_modal_{{ my_p.ref_number }}" tabindex="-1" role="dialog">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<form action method="post" class="form" role="form">
-					<div class="modal-header">
-					<h4 class="modal-title">{{ orders.order_no }}</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					</div>
-					<div class="modal-body">
-						<div class="form-group required">
-							<table>
-								<tr>
-									<th style="width:150px;">Ref No</th>
-									<th style="width:400px;">Name</th>
-									<th style="width:40px;">Qty</th>
-								</tr>
-								<tr>
-									<td>{{ my_p.ref_number }}</td>
-									<td>{{ my_p.name }}</td>
-									<td id="quantity_request_{{ my_p.ref_number }}" contenteditable>1</td>
-								</tr>
-							</table>
-							{{ form.csrf_token() }}
-							{{ form.refnum(value=my_p.ref_number) }}
-							{{ form.name(value=my_p.name) }}
-							{{ form.price(value=my_p.price) }}
-							{{ form.qty }}
-							{{ form.tot_price }}
-						</div>
-					</div>
-					<div class="modal-footer">
-					{{ form.submit (class_="btn btn-default") }}
-					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					</div>
-				</form>
-			</div>
-		  </div>
-		</div-->
-		{% endfor %}
+		
 	</div>
 {% endblock %}
 

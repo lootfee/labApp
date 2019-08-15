@@ -7,7 +7,7 @@
 	<hr class="inventory_hr">
     <div class="row">
 		<div class="col-md-12">
-			<table class="text-center">
+			<table class="text-center table-bordered table-hover">
 				<tr>
 					<th class="col-md-2">Purchase Order</th>
 					{% if all_deliveries %}
@@ -16,25 +16,24 @@
 					<th class="col-md-1">Status</th>
 					{% endif %}
 					<th class="col-md-1">Action</th>
+					
 				</tr>
 				{% if purchases %}
 					{% for purchase in purchases %}
 					{% if purchase.date_purchased %}
 					<tr>
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
+						{% if purchase.delivered_purchases %}
 						
-						{% if all_deliveries %}
-						{% for del in all_deliveries %}
-						<td><a href="{{ url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=del.delivery_no)}}">{{ del.delivery_no }}</a></td>
-						{% endfor %}
+						<td>{% for p in purchase.delivered_purchases %}<div><a href="{{ url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=p.delivery_no)}}">{{ p.delivery_no }}</a></div>{% endfor %}</td>
 						{% else %}
 						<td>Ordered</td>
 						{% endif %}
 						<td><a href="#" data-toggle="modal" id="accept_delivery" data-target="#accept_delivery_modal_{{ purchase.purchase_order_no }}">Accept Delivery</a></td>
-						
 					</tr>
 					{% endif %}
 					{% endfor %}
+					
 				{% endif %}
 				
 			</table>
