@@ -3,12 +3,11 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.email import send_password_reset_email
 from link_preview import link_preview
-from collections import Counter
 import requests
 
 
@@ -365,7 +364,8 @@ def inventory_management(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin)
+	#return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin)
+	return redirect(url_for('inventory', company_name=company.company_name))
 	
 
 
@@ -411,6 +411,8 @@ def products(company_name):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.storage_req = Product.query.filter_by(id=my_p.product_id).first().storage_req
+		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
+		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
@@ -446,30 +448,76 @@ def inventory(company_name):
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
 		#my_p.stocks = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
-		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id).all()
-		my_p.lot_list = []
+		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
+		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
+		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, date_used=None).all()
+		#my_p.lot_list = []
 		for i in my_p.item_query:
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
-			#i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			my_p.lot_list.append(i.lot_num)
+			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, date_used=None).count()
+			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
+			i.greater_expiry =  (i.expiry < i.min_expiry)
+		'''	my_p.lot_list.append(i.lot_num)
 		my_p.count_lot_no_list = dict((x,my_p.lot_list.count(x)) for x in set(my_p.lot_list))
-		for l in my_p.count_lot_no_list:
-			lot_expiry = Lot.query.filter_by(lot_no=l).first()
-		my_p.lot_expiry = lot_expiry.expiry
+		for j in my_p.item_query:
+			for l in my_p.count_lot_no_list:
+				j.lot_query = Lot.query.filter_by(lot_no=l).first().lot_no
+				j.lot_qty = my_p.count_lot_no_list[l]
+				j.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
+				j.min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
+				j.greater_expiry =  (j.lot_expiry < j.min_expiry)'''
+		'''for l in my_p.count_lot_no_list:
+			lot_query = Lot.query.filter_by(lot_no=l).first()
+			lot_qty = my_p.count_lot_no_list[l]
+			my_p.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
+			min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
+			greater_expiry =  (my_p.lot_expiry < min_expiry)'''
+		'''for l in my_p.count_lot_no_list:
+			l : {
+				lot_expiry : Lot.query.filter_by(lot_no=l).first().expiry.strftime('%d-%m-%Y'),
+				'min_expiry' : datetime.utcnow() - timedelta(days=my_p.min_expiry),
+				'greater_expiry' : ('lot_expiry' < 'min_expiry')
+			}
+			print(l[lot_expiry])
+			lot_query = Lot.query.filter_by(lot_no=l).first()
+			lot_qty = my_p.count_lot_no_list[l]
+			my_p.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
+			lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
+			min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
+			greater_expiry =  (my_p.lot_expiry < min_expiry)'''
+		
 	return render_template('inventory_management/inventory.html', title='Inventory', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, my_products=my_products, orders=orders, dept=dept)
 
-@app.route('/<company_name>/consume/<ref_number>', methods=['GET', 'POST'])
+@app.route('/<company_name>/consume_item/<ref_number>', methods=['GET', 'POST'])
 @login_required	
-def consume(company_name, ref_number):
+def consume_item(company_name, ref_number):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	product_id = Product.query.filter_by(ref_number=ref_number).first().id
-	use_item = Item.query.filter_by(product_id=product_id, date_used=None).first()
-	
+	product = Product.query.filter_by(ref_number=ref_number).first()
+	min_expiry = MyProducts.query.filter_by(product_id=product.id).first().min_expiry
+	#product_id = Product.query.filter_by(ref_number=ref_number).first().id
+	item_query = Item.query.filter_by(product_id=product.id, date_used=None).all()
+	for i in item_query:
+		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+		i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=product.id, date_used=None).count()
+		i.min_expiry = datetime.utcnow() + timedelta(days=min_expiry)
+		i.greater_expiry =  (i.expiry < i.min_expiry)
+	form = ConsumeItemForm()
+	#lot_list = [(l.lot_id, l.lot_num) for l in item_query]
+	#form.lot_numbers.choices = lot_list
+	if form.validate_on_submit():
+		#lot_num_id = Lot.query.filter_by(id=form.lot_numbers.data).first()
+		use_item = Item.query.filter_by(product_id=product.id, lot_id=form.lot_numbers.data, date_used=None).first()
+		use_item.date_used = datetime.utcnow()
+		db.session.commit()
+		return redirect(url_for('inventory', company_name=company.company_name))
+	return render_template('inventory_management/consume.html', title='Consume supply', company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, product=product, item_query=item_query, form=form)
 
 @app.route('/<company_name>/inventory_management/orders', methods=['GET', 'POST'])
 @login_required

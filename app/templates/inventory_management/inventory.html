@@ -38,10 +38,10 @@
 						<td>{{ my_p.name }}</td>
 						<td>{{ my_p.description }}</td>
 						<td class="dept_name" style="display:none">{{ my_p.dept }}</td>
-						<td>{% for l in my_p.count_lot_no_list %}
-						<div><span style="font-weight: bold;color: blue;">{{l}}</span> / <span style="font-style: italic;color: blue;">{{ my_p.lot_expiry.strftime('%d-%m-%Y') }}</span> : <span style="font-weight: bold;color: green;">{{my_p.count_lot_no_list[l]}}</span></div>
+						<td>{% for i in my_p.item_query %}
+						<div id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}"><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></div>
 						{% endfor %}</td>
-						<td>Consume</td>
+						<td>{% if my_p.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_p.ref_number)}}">Consume</a>{% endif %}</td>
 						<!--td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td-->
 						<!--td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" id="request_{{ my_p.ref_number }}" data-target="#request_reagent_modal_{{ my_p.ref_number }}">Request Reagent</button></td-->
 						<!--td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Request') }}</a></td-->
@@ -61,6 +61,12 @@
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
+			
+			$('[id]').each(function () {
+				{% for my_p in my_products %}{% for i in my_p.item_query %}
+				$('[id="' + this.id + '"]:gt(0)').remove();
+				{% endfor %}{% endfor %}
+			});
 			});
 			/*{% for my_p in my_products %}
 				

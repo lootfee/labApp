@@ -94,7 +94,7 @@ class ProductRegistrationForm(FlaskForm):
 	description = StringField('Description', validators=[DataRequired()])
 	price = DecimalField('Price', places=2, rounding=None)
 	min_quantity = IntegerField('Minimum Quantity')
-	min_expiry = IntegerField('Minimum Expiry(Months)')
+	min_expiry = IntegerField('Minimum Expiry(Days)')
 	storage_req = StringField('Storage Requirement', validators=[DataRequired()])
 	department = SelectField('Department', coerce=int, validators=[InputRequired()])
 	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
@@ -205,6 +205,10 @@ class ItemReceiveForm(FlaskForm):
 	lot_no = StringField('Lot No:', validators=[DataRequired()])
 	expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d')
 	quantity = IntegerField('Quantity')
+	submit = SubmitField('Submit')
+	
+class ConsumeItemForm(FlaskForm):
+	lot_numbers = SelectField('Lot Number', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
 class DocumentRequestForm(FlaskForm):
