@@ -36,6 +36,7 @@ class EditProfileForm(FlaskForm):
 	firstname = StringField('First Name', validators=[DataRequired()])
 	lastname = StringField('Last Name', validators=[DataRequired()])
 	username = StringField('Username', validators=[DataRequired()])
+	profile_pic = FileField('Upload Profile Pic:', validators=[FileAllowed(photos)])
 	about_me = TextAreaField('About Me', validators=[Length(min=0, max=200)])
 	submit = SubmitField('Submit')
 	cancel = SubmitField('Cancel')
@@ -66,6 +67,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
 class UserRoleForm(FlaskForm):
+	title = StringField('Title', validators=[DataRequired()])
 	qc_access = BooleanField('QC Access')
 	inv_access = BooleanField('Inventory Access')
 	qc_admin = BooleanField('QC Admin')

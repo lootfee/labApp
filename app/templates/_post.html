@@ -4,7 +4,11 @@
 			<div class="media-left">
 				<td width="70px">
 					<a href="{{ url_for('user', username=post.author.username) }}">
+						{% if post.author.profile_pic %}
+						<img src="{{ post.author.profile_pic }}" alt="user profile pic" style="width: 70px;">
+						{% else %}
 						<img src="{{ post.author.avatar(70) }}" />
+						{% endif %}
 					</a>
 				</td>
 			</div>

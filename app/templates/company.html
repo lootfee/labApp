@@ -36,3 +36,15 @@
 </table>
 
 {% endblock %}
+
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			$("#cancel").click(function(){
+				$("#edit_company_profile_form").hide();
+				$("#company_profile").show();
+			});
+		});
+	</script>
+{% endblock %}
