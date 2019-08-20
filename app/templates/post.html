@@ -1,3 +1,7 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
 <div class="media">
 	<table class="table table-hover">
         <tr>
@@ -13,21 +17,21 @@
 					<a href="{{ url_for('user', username=post.author.username) }}">{{ post.author.username }}</a>
 					<div>
 						<button type="button" class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;">
-						  <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></button>
+						  <a href="{{ url_for('upvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></a></button>
+						
+						
 						<button type="button" class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;">
-						  <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></button>
+						  <a href="{{ url_for('downvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></a></span></button>
+						
+						<span style="font-size: 11px;font-style:italic;color:blue;">{% if upvotes %}{{ upvotes }}{% else %}0 {% endif %} </span><span style="font-size: 11px;font-style:italic;color:red;">{% if downvotes %}{{ downvotes }}{% else %}0{% endif %}</span>
 					</div>
-					<span style="font-size: 11px;font-style:italic;color:blue;">{% if post.upvoters %}{{ post.upvoters.count() }}{% else %}0 {% endif %} </span><span style="font-size: 11px;font-style:italic;color:red;">{% if post.downvoters %}{{ post.downvoters.count() }}{% else %}0{% endif %}</span>
 				</td>
 			</div>
 				<td>
 					<div class="media-body">
-					<a href="{{ url_for('post', id=post.id) }}" target="_blank" style="text-decoration: none;color:black;">
 						<p>{{ post.body }}</p>
-						<p>{{ post.title }}</p>
+						<p><a href="{{ post.url }}" target="_blank">{{ post.title }}</a></p>
 						<p>{{ post.description }}</p>	
-					</a>
-						
 					</div>
 					<div class="media-right">
 						<a href="{{ post.url }}" target="_blank"><img class="media-object" src="{{ post.image }}" alt="{{ post.title }}" style="width:100px;height:100px;"></a>
@@ -38,3 +42,4 @@
         </tr>
     </table>
 </div>
+{% endblock %}

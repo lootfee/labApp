@@ -177,7 +177,34 @@ def explore():
 	prev_url = url_for('explore', page=posts.prev_num) \
 		if posts.has_prev else None
 	return render_template('index.html', title='Global', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/post/<int:id>', methods=['GET', 'POST'])
+@login_required
+def post(id):
+	user = User.query.filter_by(username=current_user.username).first()
+	post = Post.query.filter_by(id=id).first_or_404()
+	upvotes = post.upvoters.count()
+	downvotes = post.downvoters.count()
+	return render_template('post.html', title='Post', post=post, upvotes=upvotes, downvotes=downvotes)
 	
+@app.route('/upvote/<int:id>', methods=['GET', 'POST'])
+@login_required
+def upvote(id):
+	user = User.query.filter_by(username=current_user.username).first()
+	post = Post.query.filter_by(id=id).first_or_404()
+	post.upvotes(user)
+	db.session.commit()
+	return redirect(url_for('post', id=post.id))
+	
+@app.route('/downvote/<int:id>', methods=['GET', 'POST'])
+@login_required
+def downvote(id):
+	user = User.query.filter_by(username=current_user.username).first()
+	post = Post.query.filter_by(id=id).first_or_404()
+	post.downvotes(user)
+	db.session.commit()
+	return redirect(url_for('post', id=post.id))
 	
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
@@ -241,7 +268,7 @@ def company(company_name):
 			form.logo.data = company.logo
 		if company.contact_info:
 			form.contact_info.data = company.contact_info
-	return render_template('company.html', title=company_name, form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
+	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
 
 @app.route('/accept_affiliate/<int:user_id>, <int:comp_id>')
 @login_required
@@ -373,8 +400,27 @@ def inventory_management(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	#return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin)
-	return redirect(url_for('inventory', company_name=company.company_name))
+	my_products = MyProducts.query.all()
+	for my_p in my_products:
+		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
+		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
+		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
+		my_p.storage_req = Product.query.filter_by(id=my_p.product_id).first().storage_req
+		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
+		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
+		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
+		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
+		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
+	item_query = Item.query.filter_by(date_used=None).all()
+	for i in item_query:
+		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+		i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, date_used=None).count()
+		i.less_quantity = my_p.min_quantity <= i.quantity
+		i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
+		i.greater_expiry =  (i.expiry < i.min_expiry)
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin)
+	#return redirect(url_for('inventory', company_name=company.company_name))
 	
 
 
@@ -532,7 +578,7 @@ def consume_item(company_name, ref_number):
 @login_required
 def orders(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	orders = Order.query.filter_by(company_id=company.id).all()
+	orders = Order.query.filter_by(company_id=company.id).order_by(Order.date_created.desc()).all()
 	for order in orders:
 		order.purchase_order = Purchase.query.filter_by(order_no=order.id).first()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
