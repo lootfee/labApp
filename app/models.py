@@ -49,6 +49,22 @@ purchased_by = db.Table('purchased_by',
 	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
 )
 
+votes = db.Table('votes',
+	db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+upvotes = db.Table('upvotes',
+	db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+downvotes = db.Table('downvotes',
+	db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+
 '''lot_number = db.Table('lot_number',
 	db.Column('product_id', db.Integer, db.ForeignKey('product.id')),
 	db.Column('lot_id', db.Integer, db.ForeignKey('lot.id')),
@@ -203,7 +219,67 @@ class Post(db.Model):
 	image = db.Column(db.String(1000))
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	#upvote = db.Column(db.Integer, default=0)
+	#downvote = db.Column(db.Integer, default=0)
+	
+	voters = db.relationship(
+		'User', secondary='votes',
+		backref=db.backref('votes', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	upvoters = db.relationship(
+		'User', secondary='upvotes',
+		backref=db.backref('upvotes', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	downvoters = db.relationship(
+		'User', secondary='downvotes',
+		backref=db.backref('downvotes', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	def voted(self, user):
+		return self.voters.filter(votes.c.user_id == user.id).count() > 0
 		
+	def upvoted(self, user):
+		return self.upvoters.filter(upvotes.c.user_id == user.id).count() > 0
+		
+	def downvoted(self, user):
+		return self.downvoters.filter(downvotes.c.user_id == user.id).count() > 0
+		
+	#def vote(self, user):
+	#	if not self.voted(user):
+	#		self.voters.append(user)
+	
+	#def unvote(self, user):
+	#	if self.voted(user):
+	#		self.voters.remove(user)
+	
+	def upvotes(self, user):
+			if not self.voted(user):
+				self.upvoters.append(user)
+				self.voters.append(user)
+			else:
+				if self.upvoted(user):
+					self.voters.remove(user)
+					self.upvoters.remove(user)
+				elif self.downvoted(user):
+					self.downvoters.remove(user)
+					self.upvoters.append(user)
+				
+				
+	def downvotes(self, user):
+			if not self.voted(user):
+				self.downvoters.append(user)
+				self.voters.append(user)
+			else:
+				if self.downvoted(user):
+					self.voters.remove(user)
+					self.downvoters.remove(user)
+				elif self.upvoted(user):
+					self.upvoters.remove(user)
+					self.downvoters.append(user)
+	
+	
 	def __repr__(self):
 		return '<Post {} {} {} {} {} >'.format(self.body, self.url, self.title, self.description, self.image)
 

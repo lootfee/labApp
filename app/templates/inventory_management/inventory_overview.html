@@ -6,11 +6,45 @@
     <h2 class="inventory_headers">Overview</h2>
 	<hr>
     <div class="row">
-        <div class="col-md-4">
-            {% if form %}
-			{{ wtf.quick_form(form) }}
-			<br>
-			{% endif %}
+		{% for i in item_query %}
+		{% if i.less_quantity == True %}
+        <div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<tr>
+				<th>Reagents less than min</th>
+			</tr>
+			<tr>
+				<td>{{ i.lot_num }} {{ i.expiry }} {{ i.quantity }}</td>
+			</tr>
+			</table>
+        </div>
+		{% endif %}
+		{% if i.greater_expiry == True %}
+		<div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<tr>
+				<th>Reagents near expiry</th>
+			</tr>
+			<tr>
+				<td>{{ i.lot_num }} {{ i.expiry }} {{ i.quantity }}</td>
+			</tr>
+			</table>
+        </div>
+		{% endif %}
+		{% endfor %}
+		<div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<tr>
+				<th>Pending orders</th>
+			</tr>
+			</table>
+        </div>
+		<div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<tr>
+				<th>Pending reagents</th>
+			</tr>
+			</table>
         </div>
     </div>
 {% endblock %}
