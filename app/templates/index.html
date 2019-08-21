@@ -2,8 +2,10 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
+	<span id="post_count" style="float:right; font-size:10px;"></span>
     {% if form %}
     {{ wtf.quick_form(form) }}
+	
     <br>
     {% endif %}
     {% for post in posts %}
@@ -23,4 +25,13 @@
             </li>
         </ul>
     </nav>
+{% endblock %}
+
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$('#post').on('keyup', function() {
+			$('#post_count').html(this.value.length + ' characters (max 1000)');
+		});
+	</script>
 {% endblock %}

@@ -51,9 +51,14 @@ class EditProfileForm(FlaskForm):
 			if user is not None:
 				raise ValidationError('Username already taken!')
 				
+
 class PostForm(FlaskForm):
-	post = TextAreaField('Say something', validators=[DataRequired(), Length(min=1, max=1000)])
+	post = TextAreaField('Say something', validators=[DataRequired(), Length(min=1, max=1000)], render_kw={'maxlength': 1000})
 	url = StringField('Paste URL here', validators=[URL()])
+	submit = SubmitField('Submit')
+	
+class CommentForm(FlaskForm):
+	comment = TextAreaField('Post a comment', validators=[DataRequired(), Length(min=1, max=500)], render_kw={'maxlength': 500})
 	submit = SubmitField('Submit')
 	
 class ResetPasswordRequestForm(FlaskForm):

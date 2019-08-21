@@ -21,14 +21,18 @@
 			</div>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
+					{% if is_qc_access %}
 					<li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li>
+					{% endif %}
 					<!--li><a href="{{ url_for('document_control', username=current_user.username) }}">Document Control</a></li-->
+					{% if is_inv_access %}
 					<li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li>
+					{% endif %}
 					{% if is_super_admin %}
 					<li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li>
 					{% endif %}
 				</ul>
-				<ul class="nav navbar-nav">
+				<ul class="nav navbar-nav text-center">
 					<li><a class="navbar-brand company_name_nav" href="{{ url_for('company', company_name=company.company_name)}}">{{ company.company_name}}</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">

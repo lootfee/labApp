@@ -104,6 +104,18 @@ class Company(db.Model):
 	def is_super_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first()
 		
+	def is_qc_access(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_access==True).first()
+		
+	def is_qc_admin(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_admin==True).first()
+		
+	def is_inv_access(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_access==True).first()
+		
+	def is_inv_admin(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_admin==True).first()
+		
 		
 
 class Affiliates(db.Model):
@@ -129,6 +141,8 @@ class User(UserMixin, db.Model):
 	email = db.Column(db.String(120), index=True, unique=True )
 	password_hash = db.Column(db.String(128))
 	posts = db.relationship('Post', backref='author', lazy='dynamic')
+	comment = db.relationship('Comment', backref='author', lazy='dynamic')
+	comment_reply = db.relationship('CommentReply', backref='author', lazy='dynamic')
 	profile_pic = db.Column(db.String(1000))
 	about_me = db.Column(db.String(200))
 	last_seen = db.Column(db.DateTime, default=datetime.utcnow)
@@ -219,8 +233,8 @@ class Post(db.Model):
 	image = db.Column(db.String(1000))
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-	#upvote = db.Column(db.Integer, default=0)
-	#downvote = db.Column(db.Integer, default=0)
+	
+	comments = db.relationship('Comment', backref=db.backref('post', lazy=True), lazy='dynamic')
 	
 	voters = db.relationship(
 		'User', secondary='votes',
@@ -237,6 +251,7 @@ class Post(db.Model):
 		backref=db.backref('downvotes', lazy='dynamic'), lazy='dynamic'
 	)
 	
+		
 	def voted(self, user):
 		return self.voters.filter(votes.c.user_id == user.id).count() > 0
 		
@@ -245,15 +260,7 @@ class Post(db.Model):
 		
 	def downvoted(self, user):
 		return self.downvoters.filter(downvotes.c.user_id == user.id).count() > 0
-		
-	#def vote(self, user):
-	#	if not self.voted(user):
-	#		self.voters.append(user)
-	
-	#def unvote(self, user):
-	#	if self.voted(user):
-	#		self.voters.remove(user)
-	
+			
 	def upvotes(self, user):
 			if not self.voted(user):
 				self.upvoters.append(user)
@@ -283,6 +290,28 @@ class Post(db.Model):
 	def __repr__(self):
 		return '<Post {} {} {} {} {} >'.format(self.body, self.url, self.title, self.description, self.image)
 
+
+class Comment(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	body = db.Column(db.String(500))
+	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+	reply = db.relationship('CommentReply', backref=db.backref('comment', lazy=True))
+	
+	def __repr__(self):
+		return '<Comment {}>'.format(self.id)
+		
+class CommentReply(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	body = db.Column(db.String(500))
+	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'))
+
+	def __repr__(self):
+		return '<Comment {}>'.format(self.id)
 
 class Department(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

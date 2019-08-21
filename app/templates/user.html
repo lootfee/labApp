@@ -13,15 +13,14 @@
                 <h1>User: {{ user.username }}</h1>
 				<h3>{{ user.firstname }} {{ user.lastname }}</h3>
 				{% if my_affiliates %}
-				Titles:
-				<ul>
+				
 				{% for affiliate in my_affiliates %}
 				{% if affiliate.title != None %}
-				<li><span>{{ affiliate.title }}</span> at <a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank">{{ affiliate.company.company_name}}</a></li>
+				<li style="list-style:none;"><span>{{ affiliate.title }}</span> at <a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank">{{ affiliate.company.company_name}}</a></li>
 				{% endif %}
 				{% endfor %}
 				{% endif %}
-				</ul>
+				<br>
                 {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
                 {% if user.last_seen %}<p>Last seen on: {{ moment(user.last_seen).format('LLLL') }}</p>{% endif %}
                 <p>{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>

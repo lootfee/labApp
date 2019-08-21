@@ -5,6 +5,7 @@
 {% include 'inventory_management/inventory_manager_nav.html' %}
     <h3 class="inventory_headers">Manage Suppliers</h3>
 	<hr class="inventory_hr">
+	{% if is_inv_admin %}
 	<div class="row sidenav" id="supplier_sidenav">
 		<div class="col-md-12 registerContainer">
 			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
@@ -19,12 +20,15 @@
 			</div>
 		</div>
 	</div>
+	{% endif %}
     <div class="row">
 		<div class='col-md-12'>
+		{% if is_inv_admin %}
 			<button type="button" class="btn btn-default" id="open_supplier_sidenav" aria-label="Left Align" style="float: left;">
 				<span>Register Supplier</span>
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 			</button>
+		{% endif  %}
 		<table class="table table-bordered table-hover text-center">
 			<tr>
 				<th>Supplier</th>
@@ -39,7 +43,9 @@
 					<td>{{ supplier.email }}</td>
 					<td>{{ supplier.contact }}</td>
 					<td>{{ supplier.address }}</td>
+					{% if is_inv_admin %}
 					<td class="del-edit-btn"><a href="{{ url_for('remove_supplier', supp_id=supplier.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true" ></span></a></td>
+					{% endif %}
 				</tr>
 				{% endfor %}
 			{% endif %}

@@ -1,5 +1,5 @@
 <div class="media">
-	<table class="table table-hover">
+	<table class="table table-hover table-bordered" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
         <tr>
 			<div class="media-left">
 				<td width="70px" style="text-align:center;">
@@ -12,10 +12,20 @@
 					</a>
 					<a href="{{ url_for('user', username=post.author.username) }}">{{ post.author.username }}</a>
 					<div>
-						<button type="button" class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;">
-						  <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></button>
-						<button type="button" class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;">
-						  <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></button>
+						{% if post.upvoted(user) %}
+						<div class="btn btn-primary" aria-label="Left Align" style="padding:2px 8px;pointer-events: none;">
+						  <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true" style="color:white;"></span></div>
+						{% else %}
+						<div class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;pointer-events: none;">
+						  <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span></div>
+						{% endif %}
+						{% if post.downvoted(user) %}
+						<div class="btn btn-danger" aria-label="Left Align" style="padding:2px 8px;pointer-events: none;">
+						  <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true" style="color:white;"></span></div>
+						{% else %}
+						<div class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;pointer-events: none;">
+						  <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></div>
+						{% endif %}
 					</div>
 					<span style="font-size: 11px;font-style:italic;color:blue;">{% if post.upvoters %}{{ post.upvoters.count() }}{% else %}0 {% endif %} </span><span style="font-size: 11px;font-style:italic;color:red;">{% if post.downvoters %}{{ post.downvoters.count() }}{% else %}0{% endif %}</span>
 				</td>
@@ -23,17 +33,24 @@
 				<td>
 					<div class="media-body">
 					<a href="{{ url_for('post', id=post.id) }}" target="_blank" style="text-decoration: none;color:black;">
-						<p>{{ post.body }}</p>
+						<p style="max-height: 75px;">{{ post.body }}</p>
+						{% if post.title %}
 						<p>{{ post.title }}</p>
+						{% endif %}
+						{% if post.description %}
 						<p>{{ post.description }}</p>	
+						{% endif %}
 					</a>
-						
+					
 					</div>
+					{% if post.image %}
 					<div class="media-right">
 						<a href="{{ post.url }}" target="_blank"><img class="media-object" src="{{ post.image }}" alt="{{ post.title }}" style="width:100px;height:100px;"></a>
 					</div>
+					{% endif %}
 						<br>
-						{{ moment(post.timestamp).calendar() }}		
+					<span style="float:left;">{{ post.comments.count() }} comments</span>
+					<span style="float:right; font-size:12px;">{{ moment(post.timestamp).calendar() }}	</span>		
 				</td>			
         </tr>
     </table>

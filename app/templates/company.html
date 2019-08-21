@@ -19,8 +19,12 @@
 				{% if company.about_me %}<p>{{ company.about_me }}</p>{% endif %}
 				{% if company.address %}<p>Address: {{ company.address }}</p>{% endif %}
 				{% if company.contact_info %}<p>Contact: {{ company.contact_info }}</p>{% endif %}
+				{% if is_super_admin %}
 				<p><a href="#" id="edit_company_profile">Edit/Update company profile?</a></p>
+				{% endif %}
+				{% if not is_my_affiliate %}
 				<p><a href="{{ url_for('request_affiliate', company_name=company.company_name) }}" id="request_affiliate">Request to affiliate to company?</a></p>
+				{% endif %}
 				
 				
 			</div>

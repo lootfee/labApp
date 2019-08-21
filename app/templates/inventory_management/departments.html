@@ -6,6 +6,7 @@
     <h3 class="inventory_headers">Manage Departments/ Item Types</h3>
 	<hr class="inventory_hr">
     <div class="row">
+		{% if is_inv_access %}
 		<div class="col-md-4 registerContainer">
 			<div class="col-md-12">
 				{% if form1 %}
@@ -19,6 +20,7 @@
 				
 			</div>
 		</div>
+		{% endif %}
 		<div class="col-md-4">
 			<table class="table table-hover">
 				<tr>
@@ -28,7 +30,9 @@
 					{% for depts in company.departments %}
 					<tr>
 						<td>{{ depts.name }}</td>
+						{% if is_inv_admin %}
 						<td class="del-edit-btn"><a href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+						{% endif %}
 					</tr>
 					{% endfor %}
 			
@@ -43,7 +47,9 @@
 					{% for type in company.types %}
 					<tr>
 						<td>{{ type.name }}</td>
+						{% if is_inv_admin %}
 						<td class="del-edit-btn"><a href="{{ url_for('remove_type', type_id=type.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+						{% endif %}
 					</tr>
 					{% endfor %}
 				{% endif %}
