@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -196,6 +196,31 @@ def post(id):
 		return redirect(url_for('post', id=post.id))
 	comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.timestamp.desc()).all()
 	return render_template('post.html', title='Post', user=user, post=post, upvotes=upvotes, downvotes=downvotes, upvoted=upvoted, downvoted=downvoted, form=form, comments=comments)
+	
+
+@app.route('/send_message/<recipient>', methods=['GET', 'POST'])
+@login_required
+def send_message(recipient):
+    user_recipient = User.query.filter_by(username=recipient).first_or_404()
+    form = MessageForm()
+    if form.validate_on_submit():
+        msg = Message(author=current_user, recipient=user_recipient, body=form.message.data)
+        db.session.add(msg)
+        db.session.commit()
+        flash(('Your message has been sent.'))
+        return redirect(url_for('user', username=recipient))
+    return render_template('send_message.html', title=('Send Message'), form=form, user_recipient=user_recipient)
+
+@app.route('/messages')
+@login_required
+def messages():
+	current_user.last_message_read_time = datetime.utcnow()
+	db.session.commit()
+	page = request.args.get('page', 1, type=int)
+	received_messages = current_user.messages_received.order_by( Message.timestamp.desc())
+	sent_messages = current_user.messages_sent.order_by( Message.timestamp.desc())
+	return render_template('messages.html', received_messages=received_messages, sent_messages=sent_messages)
+
 	
 @app.route('/upvote/<int:id>', methods=['GET', 'POST'])
 @login_required

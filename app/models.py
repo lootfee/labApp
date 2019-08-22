@@ -147,12 +147,23 @@ class User(UserMixin, db.Model):
 	about_me = db.Column(db.String(200))
 	last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 	purchase_added_by = db.relationship('PurchaseList', backref=db.backref('purchase_added_by', lazy=True))
+	last_message_read_time = db.Column(db.DateTime)
 	followed = db.relationship(
 		'User', secondary=followers,
 		primaryjoin=(followers.c.follower_id == id),
 		secondaryjoin=(followers.c.followed_id == id),
 		backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
 	)
+	
+	messages_sent = db.relationship(
+		'Message', foreign_keys='Message.sender_id',backref='author', lazy='dynamic'
+	)
+	
+	messages_received = db.relationship(
+		'Message',foreign_keys='Message.recipient_id',backref='recipient', lazy='dynamic'
+	)
+	
+	
 	order_creator = db.relationship(
 		'Order', secondary='order_creator',
 		backref=db.backref('order_creator', lazy='dynamic'), lazy='dynamic'
@@ -172,7 +183,6 @@ class User(UserMixin, db.Model):
 		backref=db.backref('purchased_by', lazy='dynamic'), lazy='dynamic'
 	)
 
-		
 	def __repr__(self):
 		return '<User {}>'.format(self.username)
 		
@@ -217,6 +227,10 @@ class User(UserMixin, db.Model):
 		except:
 			return
 		return User.query.get(id)
+		
+	def new_messages(self):
+		last_read_time = self.last_message_read_time or datetime(1900, 1, 1)
+		return Message.query.filter_by(recipient=self).filter(Message.timestamp > last_read_time).count()
 			
 
 @login.user_loader
@@ -226,7 +240,7 @@ def load_user(id):
 
 class Post(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	body = db.Column(db.String(1000))
+	body = db.Column(db.String(10000))
 	url = db.Column(db.String(1000))
 	title = db.Column(db.String(1000))
 	description = db.Column(db.String(1000))
@@ -293,7 +307,7 @@ class Post(db.Model):
 
 class Comment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	body = db.Column(db.String(500))
+	body = db.Column(db.String(1000))
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
@@ -305,13 +319,25 @@ class Comment(db.Model):
 		
 class CommentReply(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	body = db.Column(db.String(500))
+	body = db.Column(db.String(1000))
 	timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'))
 
 	def __repr__(self):
 		return '<Comment {}>'.format(self.id)
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    body = db.Column(db.String(5000))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    def __repr__(self):
+        return '<Message {}>'.format(self.body)
+		
 
 class Department(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

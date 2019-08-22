@@ -96,7 +96,7 @@
 	{{ super() }}
 	<script>
 		$('#comment').on('keyup', function() {
-			$('#comment_count').html(this.value.length + ' characters (max 500)');
+			$('#comment_count').html(this.value.length + ' characters (max 10000)');
 		});
 	</script>
 {% endblock %}

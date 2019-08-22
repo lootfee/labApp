@@ -35,6 +35,13 @@
 					{% else %}
 					<li><a href="{{ url_for('index')}}">Home</a></li>
 					<li><a href="{{ url_for('user', username=current_user.username) }}">{% if current_user.profile_pic %}<span><img src="{{ current_user.profile_pic }}" alt="user profile pic" style="width: 22px; height: 22px;"></span>{% else %}<span><img src="{{ current_user.avatar(256) }}" alt="user avatar" style="width: 22px; height: 22px;"></span>{% endif %}<span> {{ current_user.username }}</span></a></li>
+					
+					{% if current_user.new_messages() %}
+					<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;color:blue;"></span><span class="badge">{{ current_user.new_messages() }}</span></a></li>
+					{% else %}
+					<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;"></span></a></li>
+					{% endif %}
+					
 					<li><a href="{{ url_for('logout') }}">Logout</a></li>
 					{% endif %}
 				</ul>
@@ -44,7 +51,7 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container">
+	<div class="container" style="margin-bottom:20px;">
 		{% with messages = get_flashed_messages() %}
 		{% if messages %}
 			{% for message in messages %}
@@ -57,6 +64,8 @@
 		{% block app_content %}
 		{% endblock %}
 	</div>
+	
+<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;">© 2019 labApp All Right Reserved</footer>
 {% endblock %}
 
 {% block styles %}

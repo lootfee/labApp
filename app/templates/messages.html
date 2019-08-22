@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    	
+    <div>
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#inbox" aria-controls="inbox" role="tab" data-toggle="tab">Inbox</a></li>
+			<li role="presentation"><a href="#sent_items" aria-controls="sent_items" role="tab" data-toggle="tab">Sent Items</a></li>
+		</ul>
+		
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="inbox">
+				<div class="col-md-2" style="border-right: 1px solid #ddd;position: relative;top: 0;bottom: 0;height:100%">
+					<ul class="nav nav-pills nav-stacked" role="tablist">
+					<br>
+						{% for message in received_messages %}
+						<li role="presentation"><a href="#inbox_message_{{ message.id }}" aria-controls="message_{{ message.id }}" role="tab" data-toggle="tab">{{ message.author.username }} <span style="float:right;font-size:8px;">{{ moment(message.timestamp).calendar() }}</span></a></li>
+						{% endfor %}
+					</ul>
+					
+				</div>
+				<div class="col-md-10">
+					<div class="tab-content">
+						{% for message in received_messages %}
+						<div role="tabpanel" class="tab-pane" id="inbox_message_{{ message.id }}">
+							<p style="margin-top: 20px"><a href="{{ url_for('user', username=current_user.username) }}">{{ message.author.firstname }} {{ message.author.lastname }} ({{ message.author.username }})</a> - <span style="font-size:10px;">{{ message.timestamp }}</span></p>
+							
+							<p style="margin: 20px">{{ message.body }}</p>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+			<div role="tabpanel" class="tab-pane" id="sent_items">
+				<div class="col-md-2" style="border-right: 1px solid #ddd;position: relative;top: 0;bottom: 0;height:100%">
+					<ul class="nav nav-pills nav-stacked" role="tablist">
+					<br>
+					  {% for message in sent_messages %}
+						<li role="presentation"><a href="#sent_message_{{ message.id }}" aria-controls="message_{{ message.id }}" role="tab" data-toggle="tab">{{ message.recipient.username }}<span style="float:right;font-size:8px;">{{ moment(message.timestamp).calendar() }}</span></a></li>
+					{% endfor %}
+					</ul>
+				</div>
+				<div class="col-md-10">
+					<div class="tab-content">
+						{% for message in sent_messages %}
+						<div role="tabpanel" class="tab-pane" id="sent_message_{{ message.id }}">
+							<p style="margin-top: 20px"><a href="{{ url_for('user', username=message.recipient.username) }}">{{ message.recipient.firstname }} {{ message.recipient.lastname }} ({{ message.recipient.username }})</a> - <span style="font-size:10px;">{{ message.timestamp }}</span></p>
+							
+							<p style="margin: 20px">{{ message.body }}</p>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	
+{% endblock %}

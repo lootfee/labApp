@@ -53,13 +53,17 @@ class EditProfileForm(FlaskForm):
 				
 
 class PostForm(FlaskForm):
-	post = TextAreaField('Say something', validators=[DataRequired(), Length(min=1, max=1000)], render_kw={'maxlength': 1000})
+	post = TextAreaField('Say something', validators=[DataRequired(), Length(min=1, max=10000)], render_kw={'maxlength': 10000})
 	url = StringField('Paste URL here', validators=[URL()])
 	submit = SubmitField('Submit')
 	
 class CommentForm(FlaskForm):
-	comment = TextAreaField('Post a comment', validators=[DataRequired(), Length(min=1, max=500)], render_kw={'maxlength': 500})
+	comment = TextAreaField('Post a comment', validators=[DataRequired(), Length(min=1, max=1000)], render_kw={'maxlength': 1000})
 	submit = SubmitField('Submit')
+	
+class MessageForm(FlaskForm):
+    message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=5000)], render_kw={'maxlength': 5000})
+    submit = SubmitField('Submit')
 	
 class ResetPasswordRequestForm(FlaskForm):
 	email = StringField('Email', validators=[DataRequired(), Email()])
