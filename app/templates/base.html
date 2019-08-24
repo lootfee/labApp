@@ -73,17 +73,22 @@
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/company.css')}}">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-	<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.quicksearch/2.4.0/jquery.quicksearch.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/qc.css')}}">
+	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script-->
 	<link rel="shortcut icon" href="/static/logo.jpg">
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
     {{ moment.include_moment() }}
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.quicksearch/2.4.0/jquery.quicksearch.min.js" integrity="sha256-hD1kpQcVntR40eMx9uED+E4HAjD2OJkLIFcP6ukVd+g=" crossorigin="anonymous"></script>
 	<script src="{{url_for('static', filename='js/calculator.js')}}"></script>
 	<script src="{{url_for('static', filename='js/biochem.js')}}"></script>
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
 	<script src="{{url_for('static', filename='js/calculators.js')}}"></script>
+	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
 {% endblock %}

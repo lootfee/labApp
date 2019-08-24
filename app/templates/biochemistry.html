@@ -1,25 +1,30 @@
-<div class="tabcontent" id="Biochemistry">
-	<div class="sidelinks">
-		<ul class="nav nav-pills nav-stacked">
-			<li class="sidelink" onclick="openSide(event, 'lipid_profile')"><a>Lipid Profile</a></li>
-			<li class="sidelink" onclick="openSide(event, 'hba1c')"><a>HbA1c</a></li>
-			<li class="sidelink" onclick="openSide(event, 'creatinine_clearance')"><a>Creatinine Clearance</a></li>
-			<li class="sidelink" onclick="openSide(event, 'egfr')"><a>eGFR</a></li>
-			<li class="sidelink" onclick="openSide(event, 'urine_chemistry')"><a>Urine Chemistry</a></li>
-			<li class="sidelink" onclick="openSide(event, 'urea_to_bun')"><a>Urea to BUN</a></li>
-			<li class="sidelink" onclick="openSide(event, 'tibc')"><a>TIBC</a></li>
-			<li class="sidelink" onclick="openSide(event, 'transferrin_saturation')"><a>Transferrin Saturation</a></li>
+
+	<div role="tabpanel navigation" class="tab-pane active col-md-12" id="biochemistry">
+		<ul class="nav nav-pills nav-stacked col-md-2" role="tablist">
+			<li role="presentation"><a href="#lipid_profile" aria-controls="lipid_profile" role="tab" data-toggle="pill">Lipid Profile</a></li>
+			<li role="presentation"><a href="#hba1c" aria-controls="hba1c" role="tab" data-toggle="tab">HbA1c</a></li>
+			<li role="presentation"><a href="#creatinine_clearance" aria-controls="creatinine_clearance" role="tab" data-toggle="pill">Creatinine Clearance</a></li>
+			<li role="presentation"><a href="#egfr" aria-controls="egfr" role="tab" data-toggle="pill">eGFR</a></li>
+			<li role="presentation"><a href="#urine_chemistry" aria-controls="urine_chemistry" role="tab" data-toggle="pill">Urine Chemistry</a></li>
+			<li role="presentation"><a href="#urea_to_bun" aria-controls="urea_to_bun" role="tab" data-toggle="pill">Urea to BUN</a></li>
+			<li role="presentation"><a href="#tibc" aria-controls="tibc" role="tab" data-toggle="pill">TIBC</a></li>
+			<li role="presentation"><a href="#transferring_saturation" aria-controls="transferrin_saturation" role="tab" data-toggle="pill">Transferrin Saturation</a></li>
 		</ul>
+		<div class="tab-content col-md-6">
+			{% include 'biochemistry_sections/lipid_profile.html' %}
+			{% include 'biochemistry_sections/creatinine_clearance.html' %}
+			{% include 'biochemistry_sections/egfr.html' %}
+			{% include 'biochemistry_sections/urine_chemistry.html' %}
+			{% include 'biochemistry_sections/urea_to_bun.html' %}
+			{% include 'biochemistry_sections/tibc.html' %}
+			{% include 'biochemistry_sections/transferrin_saturation.html' %}
+			{% include 'biochemistry_sections/hba1c.html' %}
+		</div>
+			
 	</div>
-	{% include 'biochemistry_sections/lipid_profile.html' %}
-	{% include 'biochemistry_sections/creatinine_clearance.html' %}
-	{% include 'biochemistry_sections/egfr.html' %}
-	{% include 'biochemistry_sections/urine_chemistry.html' %}
-	{% include 'biochemistry_sections/urea_to_bun.html' %}
-	{% include 'biochemistry_sections/tibc.html' %}
-	{% include 'biochemistry_sections/transferrin_saturation.html' %}
-	{% include 'biochemistry_sections/hba1c.html' %}
 	
-</div>
+	
+
+
 
 	

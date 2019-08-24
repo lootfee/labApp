@@ -1,9 +1,13 @@
-<div class="tabcontent" id="Hematology">
-	<div class="sidelink">
-		<ul>
-			<li>Indices</li>
-			<li>Platelet Count</li>
-		</ul>
-	</div>
-</div>
 
+	<div role="tabpanel navigation" class="tab-pane col-md-12" id="hematology">
+		<ul class="nav nav-pills nav-stacked col-md-2" role="tablist">
+			<li role="presentation"><a href="#indices" aria-controls="indices" role="tab" data-toggle="pill">Indices</a></li>
+			<li role="presentation"><a href="#platelet_count" aria-controls="platelet_count" role="tab" data-toggle="pill">Platelet Count</a></li>
+		</ul>
+		<div class="tab-content col-md-6">
+			{% include 'hematology_sections/indices.html' %}
+		</div>
+	</div>
+	
+
+	

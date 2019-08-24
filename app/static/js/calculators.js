@@ -40,5 +40,24 @@ $(document).ready(function() {
 		}
 	});
 	
+	$("#hemoglobin").keyup(function() {
+		$("#hgb_unit").css("display", "inline-flex");
+	});
+	$("#hematocrit").keyup(function() {
+		$("#hct_unit").css("display", "inline-flex");
+	});
+	$("#rbc").keyup(function() {
+		$("#rbc_unit").css("display", "inline-flex");
+	});
 	
+	$("#calc_indices").click(function() {
+		var hgb = $("#hemoglobin").val();
+		var hct = $("#hematocrit").val();
+		var rbc = $("#rbc").val();
+		
+		$("#mcv").val(N((hct*10) / rbc, 1) + " fL");
+		$("#mch").val(N((hgb*10) / rbc, 1) + " pg");
+		$("#mchc").val(N((hgb*100) / hct, 1) + " g/dL");
+		
+	});
 });

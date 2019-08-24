@@ -134,3 +134,8 @@ output {
 	height: min-content;
     /*display: inline-flex;*/
 }
+
+sup {
+    padding-top: 10px;
+    font-size: 10px;
+}

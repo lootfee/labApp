@@ -87,17 +87,25 @@ def logout():
 @login_required
 def user(username):
 	user = User.query.filter_by(username=username).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
 	page = request.args.get('page', 1, type=int)
 	form = CompanyRegistrationForm()
 	if form.validate_on_submit():
+		#company_query = Company.query.filter_by(company_name=form.company_name.data).first()
+		#if company_query is not None:
+		#	return redirect(url_for('company', company_name=company_query.company_name))
+		#else:
 		company = Company(company_name=form.company_name.data)
-		db.session.add(company)
-		db.session.commit()
-		accept = Affiliates(accepted=True, super_admin=True)
-		accept.user_id = current_user.id
-		company.affiliate.append(accept)
-		db.session.commit()
-		return redirect(url_for('user', username=user.username))
+		if company is not None:
+			return redirect(url_for('company', company_name=company.company_name))
+		else:
+			db.session.add(company)
+			db.session.commit()
+			accept = Affiliates(accepted=True, super_admin=True)
+			accept.user_id = current_user.id
+			company.affiliate.append(accept)
+			db.session.commit()
+			return redirect(url_for('company', company_name=company.company_name))
 	my_affiliates = Affiliates.query.filter_by(user_id=user.id, accepted=True).all()
 	#for affiliate in my_affiliates:
 	#	affiliate.comp_id = affiliate.company_id
@@ -108,7 +116,7 @@ def user(username):
         if posts.has_next else None
 	prev_url = url_for('user', username=user.username, page=posts.prev_num) \
         if posts.has_prev else None
-	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates)
+	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates, companies=companies)
 		
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -166,6 +174,7 @@ def unfollow(username):
 	return redirect(url_for('user', username=username))
 	
 @app.route('/explore')
+@login_required
 @cross_origin()
 def explore():
 	user = User.query.filter_by(username=current_user.username).first()
@@ -423,11 +432,11 @@ def quality_control(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	return render_template('quality_control.html', title='Quality Control', user=user, company=company, is_super_admin=is_super_admin)
 
-@app.route('/quality_control_sample')
+@app.route('/quality_control_')
 def quality_control_sample():
 	return render_template('quality_control_sample.html', title='Quality Control')
 	
-@app.route('/inventory_management_sample')	
+@app.route('/inventory_management_')	
 def inventory_management_sample():
 	return render_template('inventory_management/inventory_overview_sample.html', title='Inventory Overview')
 	

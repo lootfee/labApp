@@ -34,17 +34,17 @@
 		{% if pending_affiliates %}
 			<h4>Pending affiliates</h4>
 			<table class="table table-striped table-hover">
-				<tr>
+				<tr class="text-center">
 					<th>Full name (username)</th>
 					<th>Action</th>
 					<th></th>
+					
 				</tr>
 				{% for pending_affiliate in pending_affiliates %}
 				<tr>
-					<td class="col-md-4 admin-table"><a href="{{ url_for('user', username=pending_affiliate.users.username) }}">{{ pending_affiliate.users.username}}</a></td>
 					<td class="col-md-4 admin-table"><a href="{{ url_for('user', username=pending_affiliate.users.username) }}">{{ pending_affiliate.users.firstname}} {{ pending_affiliate.users.lastname}} ({{ pending_affiliate.users.username}})</a></td>
 					<td class="col-md-1 admin-table"><a href="{{ url_for('accept_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}">Accept</a></td>
-					<td class="col-md-1 admin-table"><a href="{{ url_for('delete_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}">Delete</a></td>
+					<td class="col-md-1 admin-table"><a href="{{ url_for('delete_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}">Reject</a></td>
 				</tr>
 				{% endfor %}
 			</table>
