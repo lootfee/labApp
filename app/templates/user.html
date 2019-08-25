@@ -75,24 +75,3 @@
         </ul>
     </nav>
 {% endblock %}
-{% block scripts %}
-	{{ super() }}
-	<script>
-		$(document).ready(function(){
-			var comp_tags = [
-				{% for comp in companies %}
-					{
-						value: "{{ url_for( 'company', company_name=comp.company_name )}}",
-						label: "{{ comp.company_name }}"
-					},
-				{% endfor %}
-			];
-			
-			$( "#company_name" ).autocomplete({
-				source: comp_tags,
-			}).data("ui-autocomplete")._renderItem = function(ul, item) {
-				return $("<li></li>").data("item-autocomplete", item).append('<tr><td><a href="' + item.value + '">' + item.label + '</a></td></tr>').appendTo(ul);
-			};
-	   });
-	</script>
-{% endblock %}

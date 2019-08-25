@@ -26,8 +26,11 @@
 					<li><a href="{{ url_for('explore')}}">Explore</a></li>
 					<li><a href="{{ url_for('calculators')}}">Calculators</a></li>
 					<li><a href="{{ url_for('quality_control_sample')}}">Quality Control</a></li>
-					<!--li><a href="{{ url_for('document_control_sample') }}">Document Control</a></li-->
+					<li><a href="{{ url_for('document_control_sample') }}">Document Control</a></li>
 					<li><a href="{{ url_for('inventory_management_sample')}}">Inventory</a></li>
+					{% if current_user.is_authenticated %}
+					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
+					{% endif %}
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					{% if current_user.is_anonymous %}
@@ -91,4 +94,36 @@
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
 	<script src="{{url_for('static', filename='js/calculators.js')}}"></script>
 	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	<script>
+		$(document).ready(function(){
+			var search_tags = [
+				{% for comp in companies %}
+					{
+						url: "{{ url_for( 'company', company_name=comp.company_name )}}",
+						label: "{{ comp.company_name }}",
+						profile_pic: "{% if comp.logo %}{{ comp.logo }} {% else %} {{ comp.company_avatar(30) }}{% endif %}",
+					},
+				{% endfor %}
+				{% for user in users %}
+					{
+						url: "{{ url_for( 'user', username=user.username )}}",
+						label: "{{ user.username }}",
+						profile_pic: "{% if user.profile_pic %}{{ user.profile_pic }} {% else %} {{ user.avatar(30) }}{% endif %}",
+					},
+				{% endfor %}
+			];
+			
+			
+			$("#search_bar").autocomplete({
+				minLength: 4,
+				source: search_tags,
+			}).data("ui-autocomplete")._renderItem = function (ul, item) {
+				return $("<li></li>")
+					.data("ui-autocomplete-item", item)
+					.append('<div><a class="ac-item-a" href="' + item.url + '" target="_blank" style="display:block;"><span width="30px" style="margin:5px;"><img src="' + item.profile_pic + '" width="30px" height="30px"></span><span>' + item.label + '</span></a></div>')
+					.appendTo(ul);
+			};
+	   });
+	</script>
+
 {% endblock %}

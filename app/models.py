@@ -75,6 +75,7 @@ downvotes = db.Table('downvotes',
 class Company(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	company_name = db.Column(db.String(128), index=True)
+	email = db.Column(db.String(120), index=True, unique=True )
 	address = db.Column(db.String(254))
 	contact_info = db.Column(db.String(254))
 	logo = db.Column(db.String(1000))

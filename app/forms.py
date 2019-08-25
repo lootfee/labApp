@@ -14,7 +14,7 @@ class LoginForm(FlaskForm):
 class RegistrationForm(FlaskForm):
 	firstname = StringField('First Name', validators=[DataRequired()])
 	lastname = StringField('Last Name', validators=[DataRequired()])
-	username = StringField('Username', validators=[DataRequired()])
+	username = StringField('Username', validators=[DataRequired(), Length(min=4, max=15)])
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	password = PasswordField('Password', validators=[DataRequired(), Regexp(regex=r'^(?=\S{8,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])', message="Password must be atleasst 8 characters long, must contain an uppercase letter, a number and a special character.") ])
 	password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password', message='Passwords do not match')])
@@ -35,7 +35,8 @@ class RegistrationForm(FlaskForm):
 class EditProfileForm(FlaskForm):
 	firstname = StringField('First Name', validators=[DataRequired()])
 	lastname = StringField('Last Name', validators=[DataRequired()])
-	username = StringField('Username', validators=[DataRequired()])
+	username = StringField('Username', validators=[DataRequired(), Length(min=4, max=15)])
+	email = StringField('Email', validators=[DataRequired(), Email()])
 	profile_pic = FileField('Upload Profile Pic:', validators=[FileAllowed(photos)])
 	about_me = TextAreaField('About Me', validators=[Length(min=0, max=200)])
 	submit = SubmitField('Submit')
@@ -50,6 +51,11 @@ class EditProfileForm(FlaskForm):
 			user = User.query.filter_by(username=self.username.data).first()
 			if user is not None:
 				raise ValidationError('Username already taken!')
+				
+	def validate_email(self, email):
+		user = User.query.filter_by(email=email.data).first()
+		if user is not None:
+			raise ValidationError('Email is already registered!')
 				
 
 class PostForm(FlaskForm):
@@ -92,12 +98,18 @@ class CompanyRegistrationForm(FlaskForm):
 	
 class CompanyProfileForm(FlaskForm):
 	company_name = StringField('Company Name:', validators=[DataRequired()])
+	email = StringField('Email', validators=[DataRequired(), Email()])
 	address = TextAreaField('Address:', validators=[Length(min=1, max=1000)])
 	contact_info = StringField('Contact info:')
 	logo = FileField('Logo:', validators=[FileAllowed(photos)])
 	about_me = TextAreaField('About Company:', validators=[Length(min=1, max=3000)], render_kw={"rows": 5, "cols": 150})
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
+	
+	def validate_email(self, email):
+		user = Company.query.filter_by(email=email.data).first()
+		if user is not None:
+			raise ValidationError('Email is already registered!')
 	
 class ProductRegistrationForm(FlaskForm):
 	reference_number = StringField('Reference Number', validators=[DataRequired()])

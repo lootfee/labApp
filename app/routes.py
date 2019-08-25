@@ -25,6 +25,8 @@ def before_request():
 @cross_origin()
 def index():
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	form = PostForm()
 	if form.validate_on_submit():
 		link_preview = 'https://api.linkpreview.net?key=5c6acce458459f41f44caa960c51d28fa218af3f05e30&q={}'.format(form.url.data)
@@ -44,7 +46,7 @@ def index():
 		if posts.has_next else None
 	prev_url = url_for('index', page=posts.prev_num) \
 		if posts.has_prev else None
-	return render_template('index.html', title='Home', form=form, posts=posts.items, next_url=next_url, prev_url=prev_url, user=user)
+	return render_template('index.html', title='Home', form=form, posts=posts.items, next_url=next_url, prev_url=prev_url, user=user, companies=companies, users=users)
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/login', methods=['GET', 'POST'])
@@ -88,24 +90,18 @@ def logout():
 def user(username):
 	user = User.query.filter_by(username=username).first_or_404()
 	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	page = request.args.get('page', 1, type=int)
 	form = CompanyRegistrationForm()
 	if form.validate_on_submit():
-		#company_query = Company.query.filter_by(company_name=form.company_name.data).first()
-		#if company_query is not None:
-		#	return redirect(url_for('company', company_name=company_query.company_name))
-		#else:
 		company = Company(company_name=form.company_name.data)
-		if company is not None:
-			return redirect(url_for('company', company_name=company.company_name))
-		else:
-			db.session.add(company)
-			db.session.commit()
-			accept = Affiliates(accepted=True, super_admin=True)
-			accept.user_id = current_user.id
-			company.affiliate.append(accept)
-			db.session.commit()
-			return redirect(url_for('company', company_name=company.company_name))
+		db.session.add(company)
+		db.session.commit()
+		accept = Affiliates(accepted=True, super_admin=True)
+		accept.user_id = current_user.id
+		company.affiliate.append(accept)
+		db.session.commit()
+		return redirect(url_for('company', company_name=company.company_name))
 	my_affiliates = Affiliates.query.filter_by(user_id=user.id, accepted=True).all()
 	#for affiliate in my_affiliates:
 	#	affiliate.comp_id = affiliate.company_id
@@ -116,13 +112,15 @@ def user(username):
         if posts.has_next else None
 	prev_url = url_for('user', username=user.username, page=posts.prev_num) \
         if posts.has_prev else None
-	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates, companies=companies)
+	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates, companies=companies, users=users)
 		
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	form = EditProfileForm(current_user.username)
 	if form.submit.data:
 		if form.validate_on_submit():
@@ -130,6 +128,7 @@ def edit_profile():
 			current_user.lastname = form.lastname.data
 			current_user.username = form.username.data
 			current_user.about_me = form.about_me.data
+			current_user.email = form.email.data
 			if form.profile_pic.data:
 				profile_pic_filename = photos.save(form.profile_pic.data)
 				current_user.profile_pic = photos.url(profile_pic_filename)
@@ -141,7 +140,8 @@ def edit_profile():
 		form.lastname.data = current_user.lastname
 		form.username.data = current_user.username
 		form.about_me.data = current_user.about_me
-	return render_template('edit_profile.html', title='Edit Profile', form=form, user=user)
+		form.email.data = current_user.email
+	return render_template('edit_profile.html', title='Edit Profile', form=form, user=user, companies=companies, users=users)
 	
 @app.route('/follow/<username>')
 @login_required
@@ -178,6 +178,8 @@ def unfollow(username):
 @cross_origin()
 def explore():
 	user = User.query.filter_by(username=current_user.username).first()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	page = request.args.get('page', 1, type=int)
 	posts = Post.query.order_by(Post.timestamp.desc()).paginate(
 		page, app.config['POSTS_PER_PAGE'], False)
@@ -185,13 +187,15 @@ def explore():
 		if posts.has_next else None
 	prev_url = url_for('explore', page=posts.prev_num) \
 		if posts.has_prev else None
-	return render_template('index.html', title='Global', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url)
+	return render_template('index.html', title='Global', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url, companies=companies, users=users)
 
 
 @app.route('/post/<int:id>', methods=['GET', 'POST'])
 @login_required
 def post(id):
 	user = User.query.filter_by(username=current_user.username).first()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	post = Post.query.filter_by(id=id).first_or_404()
 	upvotes = post.upvoters.count()
 	downvotes = post.downvoters.count()
@@ -204,31 +208,35 @@ def post(id):
 		db.session.commit()
 		return redirect(url_for('post', id=post.id))
 	comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.timestamp.desc()).all()
-	return render_template('post.html', title='Post', user=user, post=post, upvotes=upvotes, downvotes=downvotes, upvoted=upvoted, downvoted=downvoted, form=form, comments=comments)
+	return render_template('post.html', title='Post', user=user, post=post, upvotes=upvotes, downvotes=downvotes, upvoted=upvoted, downvoted=downvoted, form=form, comments=comments, companies=companies, users=users)
 	
 
 @app.route('/send_message/<recipient>', methods=['GET', 'POST'])
 @login_required
 def send_message(recipient):
-    user_recipient = User.query.filter_by(username=recipient).first_or_404()
-    form = MessageForm()
-    if form.validate_on_submit():
-        msg = Message(author=current_user, recipient=user_recipient, body=form.message.data)
-        db.session.add(msg)
-        db.session.commit()
-        flash(('Your message has been sent.'))
-        return redirect(url_for('user', username=recipient))
-    return render_template('send_message.html', title=('Send Message'), form=form, user_recipient=user_recipient)
+	user_recipient = User.query.filter_by(username=recipient).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
+	form = MessageForm()
+	if form.validate_on_submit():
+		msg = Message(author=current_user, recipient=user_recipient, body=form.message.data)
+		db.session.add(msg)
+		db.session.commit()
+		flash(('Your message has been sent.'))
+		return redirect(url_for('user', username=recipient))
+	return render_template('send_message.html', title=('Send Message'), form=form, user_recipient=user_recipient, companies=companies, users=users)
 
 @app.route('/messages')
 @login_required
 def messages():
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	current_user.last_message_read_time = datetime.utcnow()
 	db.session.commit()
 	page = request.args.get('page', 1, type=int)
 	received_messages = current_user.messages_received.order_by( Message.timestamp.desc())
 	sent_messages = current_user.messages_sent.order_by( Message.timestamp.desc())
-	return render_template('messages.html', received_messages=received_messages, sent_messages=sent_messages)
+	return render_template('messages.html', received_messages=received_messages, sent_messages=sent_messages, companies=companies, users=users)
 
 	
 @app.route('/upvote/<int:id>', methods=['GET', 'POST'])
@@ -282,17 +290,18 @@ def reset_password(token):
 def company(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
 	affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=True).all()
 	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=False).all()
 	is_my_affiliate = company.is_my_affiliate(user)
-	if not is_my_affiliate:
-		return redirect(url_for('company', company_name=company.company_name))
 	is_super_admin = company.is_super_admin(user)
 	form = CompanyProfileForm()
 	if form.submit.data:
 		if form.validate_on_submit():
 			company.company_name = form.company_name.data
 			company.about_me = form.about_me.data
+			company.email = form.email.data
 			company.address = form.address.data
 			company.contact_info = form.contact_info.data
 			if form.logo.data:
@@ -305,6 +314,8 @@ def company(company_name):
 			flash('Unable to update changes, please complete missing fields!')
 	elif request.method == 'GET':
 		form.company_name.data = company.company_name
+		if company.email:
+			form.email.data = company.email
 		if company.about_me:
 			form.about_me.data = company.about_me
 		if company.address:
@@ -313,7 +324,7 @@ def company(company_name):
 			form.logo.data = company.logo
 		if company.contact_info:
 			form.contact_info.data = company.contact_info
-	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
+	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, companies=companies, users=users)
 
 @app.route('/accept_affiliate/<int:user_id>, <int:comp_id>')
 @login_required
