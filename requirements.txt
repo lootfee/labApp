@@ -30,3 +30,7 @@ Werkzeug==0.14.1
 WTForms==2.2.1
 gunicorn
 psycopg2
+flask_cors
+flask_uploads
+requests
+link_preview
