@@ -54,6 +54,7 @@ td, th {
 
 input.data, output.data {
 	text-align: center;
+	color: blue;
 }
 
 output {
