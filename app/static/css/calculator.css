@@ -76,11 +76,12 @@ output {
 }
 
 .units {
-	left: -50px;
+	left: 286px;
     z-index: 2;
-    position: relative;
+    position: absolute;
 	display: none;
 	width: min-content;
+	padding-top: 3px;
 }
 
 .buttonContainer {

@@ -1,83 +1,83 @@
 <div role="tabpanel" class="tab-pane" id="urine_chemistry">
 	<form class="24hrUchemForm">
-	  <table id="24hrUchemTable" class="tableContainer">
+	  <table id="24hrUchemTable" class="tableContainer" style="table-layout:fixed;widht:300px;">
 		<tr>
 		  <td class="inputLabel">24hr Urine Volume &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="uvol" id="uvol" placeholder="mL" onkeypress="displayUnits('uvolUnit')" onkeyup="calcUchem()"><span class="units" id="uvolUnit">mL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data"  name="acr" id="acr" placeholder="alb/g creatinine" readonly></td>
-		  <td>A/C Ratio</td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="uvol" id="uvol" placeholder="mL" onkeypress="displayUnits('uvolUnit')" onkeyup="calcUchem()"><span class="units" id="uvolUnit">mL</span></td> 
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data"  name="acr" id="acr" placeholder="alb/g creatinine" readonly></td>
+		  <!--td>A/C Ratio</td-->
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Albumin &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="ualb" id="ualb" placeholder="mg/L" onkeypress="displayUnits('ualbUnit')" onkeyup="calcUchem()"><span class="units" id="ualbUnit">mg/L</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ualb" id="24ualb" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="ualb" id="ualb" placeholder="mg/L" onkeypress="displayUnits('ualbUnit')" onkeyup="calcUchem()"><span class="units" id="ualbUnit">mg/L</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24ualb" id="24ualb" placeholder="mg/24 hrs" readonly></td>
 		  
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Creatinine &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="ucrea" id="ucrea" placeholder="mg/dL" onkeypress="displayUnits('ucreaUnit')" onkeyup="calcUchem()"><span class="units" id="ucreaUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ucrea" id="24ucrea" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="ucrea" id="ucrea" placeholder="mg/dL" onkeypress="displayUnits('ucreaUnit')" onkeyup="calcUchem()"><span class="units" id="ucreaUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24ucrea" id="24ucrea" placeholder="mg/24 hrs" readonly></td>
 		 
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Calcium &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="ucal" id="ucal" placeholder="mg/dL" onkeypress="displayUnits('ucalUnit')" onkeyup="calcUchem()"><span class="units" id="ucalUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24ucal" id="24ucal" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="ucal" id="ucal" placeholder="mg/dL" onkeypress="displayUnits('ucalUnit')" onkeyup="calcUchem()"><span class="units" id="ucalUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24ucal" id="24ucal" placeholder="mg/24 hrs" readonly></td>
 		  
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Phosphorus &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="uphos" id="uphos" placeholder="mg/dL" onkeypress="displayUnits('uphosUnit')" onkeyup="calcUchem()"><span class="units" id="uphosUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uphos" id="24uphos" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="uphos" id="uphos" placeholder="mg/dL" onkeypress="displayUnits('uphosUnit')" onkeyup="calcUchem()"><span class="units" id="uphosUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24uphos" id="24uphos" placeholder="mg/24 hrs" readonly></td>
 		 
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Magnesium &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="umag" id="umag" placeholder="mg/dL" onkeypress="displayUnits('umagUnit')" onkeyup="calcUchem()"><span class="units" id="umagUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24umag" id="24umag" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="umag" id="umag" placeholder="mg/dL" onkeypress="displayUnits('umagUnit')" onkeyup="calcUchem()"><span class="units" id="umagUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24umag" id="24umag" placeholder="mg/24 hrs" readonly></td>
 		  
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Uric Acid &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="uuric" id="uuric" placeholder="mg/dL" onkeypress="displayUnits('uuricUnit')" onkeyup="calcUchem()"><span class="units" id="uuricUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uuric" id="24uuric" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="uuric" id="uuric" placeholder="mg/dL" onkeypress="displayUnits('uuricUnit')" onkeyup="calcUchem()"><span class="units" id="uuricUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24uuric" id="24uuric" placeholder="mg/24 hrs" readonly></td>
 		  
 		</tr>
 				<tr>
 		  <td class="inputLabel">Urine Urea &nbsp;</td>
-		  <td><input class="inputData  data" type="text" name="uurea" id="uurea" placeholder="mg/dL" onkeypress="displayUnits('uureaUnit')" onkeyup="calcUchem()"><span class="units" id="uureaUnit">mg/dL</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uurea" id="24uurea" placeholder="g/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData  data" type="text" name="uurea" id="uurea" placeholder="mg/dL" onkeypress="displayUnits('uureaUnit')" onkeyup="calcUchem()"><span class="units" id="uureaUnit">mg/dL</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24uurea" id="24uurea" placeholder="g/24 hrs" readonly></td>
 		 
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Total Protein &nbsp;</td>
-		  <td><input class="inputData  data" type="text" name="utp" id="utp" placeholder="mg/L" onkeypress="displayUnits('utpUnit')" onkeyup="calcUchem()"><span class="units" id="utpUnit">mg/L</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24utp" id="24utp" placeholder="mg/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData  data" type="text" name="utp" id="utp" placeholder="mg/L" onkeypress="displayUnits('utpUnit')" onkeyup="calcUchem()"><span class="units" id="utpUnit">mg/L</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24utp" id="24utp" placeholder="mg/24 hrs" readonly></td>
 		
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Sodium &nbsp;</td>
-		  <td><input class="inputData data" type="text" name="usod" id="usod" placeholder="mmol/L" onkeypress="displayUnits('usodUnit')" onkeyup="calcUchem()"><span class="units" id="usodUnit">mmol/L</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24usod" id="24usod" placeholder="mmol/24hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData data" type="text" name="usod" id="usod" placeholder="mmol/L" onkeypress="displayUnits('usodUnit')" onkeyup="calcUchem()"><span class="units" id="usodUnit">mmol/L</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24usod" id="24usod" placeholder="mmol/24hrs" readonly></td>
 		 
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Potassium &nbsp;</td>
-		  <td><input class="inputData  data" type="text" name="upot" id="upot" placeholder="mmol/L" onkeypress="displayUnits('upotUnit')" onkeyup="calcUchem()"><span class="units" id="upotUnit">mmol/L</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24upot" id="24upot" placeholder="mmol/24 hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData  data" type="text" name="upot" id="upot" placeholder="mmol/L" onkeypress="displayUnits('upotUnit')" onkeyup="calcUchem()"><span class="units" id="upotUnit">mmol/L</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24upot" id="24upot" placeholder="mmol/24 hrs" readonly></td>
 	
 		</tr>
 		<tr>
 		  <td class="inputLabel">Urine Chloride &nbsp;</td>
-		  <td><input class="inputData  data" type="text" name="uchlo" id="uchlo" placeholder="mmol/L" onkeypress="displayUnits('uchloUnit')" onkeyup="calcUchem()"><span class="units" id="uchloUnit">mmol/L</span></td>
-		  <td class="outputRow"><input type="text" class="uchemOutput data" name="24uchlo" id="24uchlo" placeholder="mmol/24hrs" readonly></td>
+		  <td style="width:140px;"><input style="width:140px;" class="inputData  data" type="text" name="uchlo" id="uchlo" placeholder="mmol/L" onkeypress="displayUnits('uchloUnit')" onkeyup="calcUchem()"><span class="units" id="uchloUnit">mmol/L</span></td>
+		  <td class="outputRow"><input style="width:140px;" type="text" class="uchemOutput data" name="24uchlo" id="24uchlo" placeholder="mmol/24hrs" readonly></td>
 		
 		</tr>
 		
 	  </table>
 	  <p></p>
 	  <div class="buttonContainer">
-		<input class="button" type="button" value="CLEAR" onclick="clearData()">
+		<input class="button clear_button" type="button" value="CLEAR">
 	  </div>
 	  
 		<p></p>
