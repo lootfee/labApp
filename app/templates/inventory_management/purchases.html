@@ -36,7 +36,11 @@
 						{% if purchase.date_purchased %}
 						<td>{{ purchase.date_purchased.strftime('%Y-%m-%d') }}</td>
 						{% endif %}
-						<td></td>
+						{% if purchase.purchase_order_complete == True %}
+						<td>Delivery completed</td>
+						{% else %}
+						<td>Items pending</td>
+						{% endif %}
 					</tr>
 					{% endfor %}
 				{% endif %}

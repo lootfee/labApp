@@ -3,7 +3,7 @@ from app import app, photos
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField, HiddenField, DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from app.models import User, Product, Item, Department, Supplier, Type, Order
+from app.models import User, Product, Item, Department, Supplier, Type, Order, Company
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -68,8 +68,9 @@ class CommentForm(FlaskForm):
 	submit = SubmitField('Submit')
 	
 class MessageForm(FlaskForm):
-    message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=5000)], render_kw={'maxlength': 5000})
-    submit = SubmitField('Submit')
+	user_search_bar = StringField('To:', validators=[DataRequired()])
+	message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=5000)], render_kw={'maxlength': 5000})
+	submit = SubmitField('Submit')
 	
 class ResetPasswordRequestForm(FlaskForm):
 	email = StringField('Email', validators=[DataRequired(), Email()])
@@ -234,6 +235,6 @@ class ConsumeItemForm(FlaskForm):
 	lot_numbers = SelectField('Lot Number', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
-class DocumentRequestForm(FlaskForm):
-	url = StringField('Paste URL here', validators=[URL()])
+class CreateDepartmentForm(FlaskForm):
+	department_name = StringField('Deparment name:', validators=[DataRequired()])
 	submit = SubmitField('Submit')

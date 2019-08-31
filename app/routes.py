@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, DocumentRequestForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
@@ -233,10 +233,18 @@ def messages():
 	users = User.query.order_by(User.username.desc()).all()
 	current_user.last_message_read_time = datetime.utcnow()
 	db.session.commit()
-	page = request.args.get('page', 1, type=int)
+	#page = request.args.get('page', 1, type=int)
 	received_messages = current_user.messages_received.order_by( Message.timestamp.desc())
 	sent_messages = current_user.messages_sent.order_by( Message.timestamp.desc())
-	return render_template('messages.html', received_messages=received_messages, sent_messages=sent_messages, companies=companies, users=users)
+	form = MessageForm()
+	if form.validate_on_submit():
+		user_recipient = User.query.filter_by(username=form.user_search_bar.data).first_or_404()
+		msg = Message(author=current_user, recipient=user_recipient, body=form.message.data)
+		db.session.add(msg)
+		db.session.commit()
+		flash(('Your message has been sent.'))
+		return redirect(url_for('messages'))
+	return render_template('messages.html', received_messages=received_messages, sent_messages=sent_messages, companies=companies, users=users, form=form)
 
 	
 @app.route('/upvote/<int:id>', methods=['GET', 'POST'])
@@ -467,19 +475,20 @@ def inventory_management(company_name):
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.storage_req = Product.query.filter_by(id=my_p.product_id).first().storage_req
 		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
+		my_p.current_quantity = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
+		my_p.less_quantity = my_p.min_quantity >= my_p.current_quantity
 		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	item_query = Item.query.filter_by(date_used=None).all()
-	for i in item_query:
-		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
-		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-		i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, date_used=None).count()
-		i.less_quantity = my_p.min_quantity <= i.quantity
-		i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
-		i.greater_expiry =  (i.expiry < i.min_expiry)
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin)
+		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, date_used=None).all()
+		for i in my_p.item_query:
+			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
+			i.greater_expiry =  (i.expiry < i.min_expiry)
+			
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, my_products=my_products)
 	#return redirect(url_for('inventory', company_name=company.company_name))
 	
 
@@ -762,12 +771,25 @@ def edit_item_qty(company_name, order_no, id):
 @login_required
 def purchases(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
+	purchases = Purchase.query.filter_by(company_id=company.id).all()
+	for purchase in purchases:
+		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+		purchase.purchase_order_complete = False
+		completed_item = 0
+		for list in purchase.purchase_list:
+			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+			list.complete_item_delivery = list.delivered_qty == list.quantity
+		for n in range(0, len(purchase.purchase_list)):
+			if list.complete_item_delivery:
+				completed_item += 1
+		if len(purchase.purchase_list) == completed_item:
+			purchase.purchase_order_complete = True
 	#form = CreatePurchaseOrderForm()
 	#for purchase in purchases:
 	#	purchase.purchase_created_by = User.query.filter_by(id=purchase.created_by).first().username
@@ -901,6 +923,18 @@ def deliveries(company_name):
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	for purchase in purchases:
 		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+		purchase.purchase_order_complete = False
+		completed_item = 0
+		for list in purchase.purchase_list:
+			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+			list.complete_item_delivery = list.delivered_qty == list.quantity
+		for n in range(0, len(purchase.purchase_list)):
+			if list.complete_item_delivery:
+				completed_item += 1
+		if len(purchase.purchase_list) == completed_item:
+			purchase.purchase_order_complete = True
+		#print(completed_item , len(purchase.purchase_list))
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -1046,25 +1080,17 @@ def edit_type(id, comp_id):
 	return render_template('inventory_management/departments.html', title='Departments', form1=form1, types=types, is_super_admin=is_super_admin, company=company)'''
 	
 
-	
-
-
-'''@app.route('/orders_list', methods=['GET', 'POST'])	
-def orders_list():
-	order_list = OrdersList.query.all()
-	for order in order_list:
-		order.ref_no = Product.query.filter_by(id=order_list.prod_id).first().ref_number
-		order.product_code = Product.query.filter_by(id=order_list.prod_id).first().product_code
-		order.name = Product.query.filter_by(id=order_list.prod_id).first().name
-		order.price = Product.query.filter_by(id=order_list.prod_id).first().price
-	return render_template('inventory_management/create_orders.html', order_list=order_list)'''
-
-@app.route('/document_control/<username>')
+@app.route('/<company_name>/document_control/', methods=['GET', 'POST'])
 @login_required
-def document_control(username):
-	form = DocumentRequestForm()
-	user = User.query.filter_by(username=username).first_or_404()
-	return render_template('document_control.html', title='Document Control', user=user, form=form)
+def document_control(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	form = CreateDepartmentForm()
+	return render_template('document_control.html', title='Document Control', user=user, company=company, form=form, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate)
 	
 @app.route('/document_control_sample')
 def document_control_sample():

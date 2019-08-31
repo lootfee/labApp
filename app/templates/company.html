@@ -18,6 +18,7 @@
 				<h1>{{ company.company_name }}</h1>
 				{% if company.about_me %}<p>{{ company.about_me }}</p>{% endif %}
 				{% if company.address %}<p>Address: {{ company.address }}</p>{% endif %}
+				{% if company.address %}<p>Email: {{ company.email }}</p>{% endif %}
 				{% if company.contact_info %}<p>Contact: {{ company.contact_info }}</p>{% endif %}
 				{% if is_super_admin %}
 				<p><a href="#" id="edit_company_profile">Edit/Update company profile?</a></p>

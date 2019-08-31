@@ -46,7 +46,7 @@
                 {% else %}
                 <p><a href="{{ url_for('unfollow', username=user.username) }}">Unfollow</a></p>
                 {% endif %}
-				{% if user != current_user %}
+				{% if user != current_user and user.is_following(current_user) %}
                 <p>
                     <a href="{{ url_for('send_message', recipient=user.username) }}">
                          <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> Message

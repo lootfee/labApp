@@ -539,61 +539,8 @@ class Lot(db.Model):
 	def __repr__(self):
 		return '<Lot {}>'.format(self.id)
 
-'''class OrdersList(db.Model):
+
+class DocumentationDepartment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
-	company_id = db.Column(db.Integer, db.ForeignKey('company.id'), primary_key=True)
-	quantity = db.Column(db.Integer)
-	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
-	date_requested = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-	
-	def __repr__(self):
-		return '<OrdersList {}>'.format(self.prod_id)
-
-
-class PurchaseOrdersList(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-	price = db.Column(db.Integer, db.ForeignKey('myProducts.price'))
-	quantity = db.Column(db.Integer)
-	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
-	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
-	date_requested = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-
-class PurchaseOrders(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	order_id = db.Column(db.String(50), index=True)
-	date_ordered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-	
-	def __repr__(self):
-		return '<Orders {}>'.format(self.quantity, slef.date_ordered)'''
-
-	
-#class Deliveries(db.Model):
-#	id = db.Column(db.Integer, primary_key=True)
-#	product_id = db.Column(db.Integer, db.ForeignKey('product.id', use_alter=True))
-#	order_id = db.Column(db.Integer, db.ForeignKey('orders.id', use_alter=True))
-#	quantity = db.Column(db.Integer)
-#	department_id = db.Column(db.Integer, db.ForeignKey('department.id', use_alter=True))
-#	date_received = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-#	user_id = db.Column(db.Integer, db.ForeignKey('user.id', use_alter=True))
-#	item_id = db.Column(db.Integer, db.ForeignKey('item.id', use_alter=True))
-#	product = db.relationship('Product', foreign_keys=[product_id], post_update=True, backref=db.backref('product', lazy='dynamic'))
-#	orders = db.relationship('Orders', foreign_keys=[order_id], post_update=True, backref=db.backref('orders', lazy='dynamic'))
-#	department = db.relationship('Department', foreign_keys=[department_id], post_update=True, backref=db.backref('department', lazy='dynamic'))
-#	item = db.relationship('Item', foreign_keys=[item_id], post_update=True, backref=db.backref('item', lazy='dynamic'))
-#	user = db.relationship('User', foreign_keys=[user_id], post_update=True, backref=db.backref('user', lazy='dynamic'))
-	
-#	def __repr__(self):
-#		return '<Deliveries {}>'.format(self.quantity, self.date_received)
-	
-	
-	
-	
-	
-	
-	
+	department_name = db.Column(db.String(50), index=True, unique=True)
+	company_dept_id = db.Column(db.Integer)

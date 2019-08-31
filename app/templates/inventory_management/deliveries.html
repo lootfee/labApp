@@ -29,7 +29,11 @@
 						{% else %}
 						<td>Ordered</td>
 						{% endif %}
+						{% if purchase.purchase_order_complete == True %}
+						<td>Delivery Complete</td>
+						{% else %}
 						<td><a href="#" data-toggle="modal" id="accept_delivery" data-target="#accept_delivery_modal_{{ purchase.purchase_order_no }}">Accept Delivery</a></td>
+						{% endif %}
 					</tr>
 					{% endif %}
 					{% endfor %}

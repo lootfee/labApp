@@ -23,7 +23,7 @@
 					</div>
 					<ul class="nav navbar-nav">
 						<li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li>
-						<li><a href="{{ url_for('document_control', username=current_user.username) }}">Document Control</a></li>
+						<li><a href="{{ url_for('document_control', company_name=company.company_name) }}">Document Control</a></li>
 						<li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li>
 						{% if is_super_admin %}
 						<li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li>
@@ -70,7 +70,7 @@
 		{% block app_content %}
 		{% endblock %}
 	</div>
-<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #80808021;  color: black;text-align: center;font-size: 12px;">© 2019 labApp All Right Reserved</footer>
+<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;">© 2019 labApp All Right Reserved</footer>
 {% endblock %}
 
 {% block styles %}

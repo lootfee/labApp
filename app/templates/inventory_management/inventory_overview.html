@@ -6,32 +6,51 @@
     <h2 class="inventory_headers">Overview</h2>
 	<hr>
     <div class="row">
-		{% for i in item_query %}
-		{% if i.less_quantity == True %}
+		
+		
         <div class="col-md-6">
             <table class="text-center table-bordered table-hover">
+			<h4>Reagents less than minimum qty</h4>
 			<tr>
-				<th>Reagents less than min</th>
+				<th>Ref Number</th>
+				<th>Name</th>
+				<th>Remaining quantity</th>
 			</tr>
+			{% for my_p in my_products %}
+			{% if my_p.less_quantity %}
 			<tr>
-				<td>{{ i.lot_num }} {{ i.expiry }} {{ i.quantity }}</td>
+				<td>{{ my_p.ref_number }}</td>
+				<td>{{ my_p.name }}</td> 
+				<td>{{ my_p.current_quantity }}</td>
 			</tr>
+			{% endif %}
+			{% endfor %}
 			</table>
         </div>
-		{% endif %}
-		{% if i.greater_expiry == True %}
+		
+		
 		<div class="col-md-6">
             <table class="text-center table-bordered table-hover">
+			<h4>Reagents near expiry</h4>
 			<tr>
-				<th>Reagents near expiry</th>
+				<th>Name</th>
+				<th>Lot no</th>
+				<th>Expiry</th>
 			</tr>
-			<tr>
-				<td>{{ i.lot_num }} {{ i.expiry }} {{ i.quantity }}</td>
+			{% for my_p in my_products %}
+			{% for i in my_p.item_query %}
+			{% if i.greater_expiry  %}
+			<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}">
+				<td>{{ my_p.name }}</td>
+				<td>{{ i.lot_num }}</td>
+				<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
 			</tr>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
 			</table>
         </div>
-		{% endif %}
-		{% endfor %}
+		
 		<div class="col-md-6">
             <table class="text-center table-bordered table-hover">
 			<tr>
@@ -47,4 +66,21 @@
 			</table>
         </div>
     </div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			//$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
+			//$('select#department').quicksearch('table#create_order_table .my_products_row');
+			
+			$('[id]').each(function () {
+				{% for my_p in my_products %}{% for i in my_p.item_query %}
+				$('[id="' + this.id + '"]:gt(0)').remove();
+				{% endfor %}{% endfor %}
+			});
+			});
+	
+	
+	</script>
 {% endblock %}

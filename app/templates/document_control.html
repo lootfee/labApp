@@ -1,10 +1,70 @@
-{% extends "base.html" %}
+{% extends "company_base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-    {% if form %}
-    {{ wtf.quick_form(form) }}
-    <br>
-    {% endif %}
+<p><a href="#" data-toggle="modal" data-target="#create_dept_modal" style="float:right;">Create Department</a></p>
+<div class="row">
+	<div class="col-md-12">
+		<div class="col-md-3">
+			{% if company.logo %}
+			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+			{% else %}
+			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+			{% endif %}
+		</div>
+		<div class="col-md-6 text-center" >
+			<h1>{{ company.company_name }}</h1>
+		</div>
+		<div class="col-md-3" style="width:180px; height:150px;">
+			<div style="position:absolute; bottom:0;">
+				<p>Adress: {{ company.address }}</p>
+				<p>Email: {{ company.email }}</p>
+				<p>Contact: {{ company.contact_info }}</p>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4">
+		<ul class="nav nav-tabs" role="tablist">
+			<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+			<li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+			<li role="presentation"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Messages</a></li>
+			<li role="presentation"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+		</ul>
+	</div>
+	<div class="col-md-4">
+		<div class="tab-content">
+			<li role="presentation" id="home" class="active"><a href="#homehome" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+			<li role="presentation" id="profile"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+			<li role="presentation" id="messages"><a href="#messages" aria-controls="messages" role="tab" data-toggle="tab">Messages</a></li>
+			<li role="presentation" id="settings"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a></li>
+		</div>
+	</div>
+	 <div class="col-md-4">
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="home">...</div>
+			<div role="tabpanel" class="tab-pane" id="profile">...</div>
+			<div role="tabpanel" class="tab-pane" id="messages">...</div>
+			<div role="tabpanel" class="tab-pane" id="settings">...</div>
+		</div>
+	</div>
+
 	
+</div>
+
+
+
+
+	
+<div class="modal fade" id="create_dept_modal" tabindex="-1" role="dialog" aria-labelledby="create_dept_modal_Label">
+  <div class="modal-dialog" role="document">
+	<div class="modal-content">
+	  <div class="modal-body">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		{{ wtf.quick_form(form) }}
+	  </div>
+	</div>
+  </div>
+</div>
 {% endblock %}
