@@ -232,9 +232,15 @@ class ItemReceiveForm(FlaskForm):
 	submit = SubmitField('Submit')
 	
 class ConsumeItemForm(FlaskForm):
-	lot_numbers = SelectField('Lot Number', coerce=int, validators=[InputRequired()])
+	lot_numbers = SelectField('Lot Number-Item id / Expiry', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
 class CreateDepartmentForm(FlaskForm):
 	department_name = StringField('Deparment name:', validators=[DataRequired()])
+	submit = SubmitField('Submit')
+
+
+class CreateDocumentForm(FlaskForm):
+	document_id = StringField('Document id:', validators=[DataRequired()], render_kw={"placeholder": "ex. SOP-001"})
+	document_name = StringField('Document name:', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUCOSE"})
 	submit = SubmitField('Submit')

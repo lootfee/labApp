@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm, CreateDocumentForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -468,7 +468,7 @@ def inventory_management(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	my_products = MyProducts.query.all()
+	my_products = MyProducts.query.filter_by(company_id=company.id).all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
@@ -487,8 +487,23 @@ def inventory_management(company_name):
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
-			
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, my_products=my_products)
+	pending_deliveries = Purchase.query.filter_by(company_id=company.id, purchase_to_delivery=None).all()
+	print(pending_deliveries)
+	purchase_q = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id).all()
+	for pq in purchase_q:
+		purchase_item_q = PurchaseList.query.filter_by(company_id=company.id, purchase_id=pq.id).all()
+		for item in purchase_item_q:
+			item.qty = PurchaseList.query.filter_by(id=item.id, company_id=company.id).first().quantity
+			item.item_count_q = Item.query.filter_by(purchase_list_id=item.id).count()
+			item.difference = item.qty - item.item_count_q
+			if item.qty > item.item_count_q:
+				print(item.ref_number, item.name, item.difference)
+	#orders = Order.query.filter_by(company_id=company.id).order_by(Order.date_created.desc()).all()
+	#for order in orders:
+	#	order.purchase_order = Purchase.query.filter_by(order_no=order.id).first()
+	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
+	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries)
 	#return redirect(url_for('inventory', company_name=company.company_name))
 	
 
@@ -499,6 +514,7 @@ def products(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -516,8 +532,11 @@ def products(company_name):
 		raw_refnum = form.reference_number.data
 		alnum_refnum = ''.join(e for e in raw_refnum if e.isalnum())
 		prod = Product.query.filter_by(ref_number=alnum_refnum).first()
-		if prod:
-			p = MyProducts(company_id=company.id, product_id=product.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data)
+		my_prod = MyProducts.query.filter_by(product_id=prod.id, company_id=company.id).first()
+		if my_prod:
+			flash('Product already registered, if you wish to edit, delete the product and register again.')
+		elif prod:
+			p = MyProducts(company_id=company.id, product_id=prod.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data)
 			db.session.add(p)
 			db.session.commit()
 		else:
@@ -529,7 +548,7 @@ def products(company_name):
 			db.session.commit()
 		return redirect(url_for('products', company_name=company.company_name))
 	products = Product.query.order_by(Product.name.asc()).all()
-	my_products = MyProducts.query.all()
+	my_products = MyProducts.query.filter_by(company_id=company.id).all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
@@ -540,7 +559,7 @@ def products(company_name):
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, my_products=my_products)
+	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, my_products=my_products)
 	
 
 @app.route('/delete_product/<int:prod_id>, <int:comp_id>')	
@@ -567,21 +586,21 @@ def inventory(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
 	products = Product.query.order_by(Product.name.asc())
-	my_products = MyProducts.query.all()
+	my_products = MyProducts.query.filter_by(company_id=company.id).all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
 		#my_p.stocks = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
-		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
-		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
-		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, date_used=None).all()
+		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id, company_id=company.id).first().min_quantity
+		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id, company_id=company.id).first().min_expiry
+		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).all()
 		#my_p.lot_list = []
 		for i in my_p.item_query:
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, date_used=None).count()
+			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
 		'''	my_p.lot_list.append(i.lot_num)
@@ -625,21 +644,23 @@ def consume_item(company_name, ref_number):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	product = Product.query.filter_by(ref_number=ref_number).first()
-	min_expiry = MyProducts.query.filter_by(product_id=product.id).first().min_expiry
+	min_expiry = MyProducts.query.filter_by(product_id=product.id, company_id=company.id).first().min_expiry
 	#product_id = Product.query.filter_by(ref_number=ref_number).first().id
-	item_query = Item.query.filter_by(product_id=product.id, date_used=None).all()
+	item_query = Item.query.filter_by(product_id=product.id, company_id=company.id, date_used=None).all()
 	for i in item_query:
 		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-		i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=product.id, date_used=None).count()
-		i.min_expiry = datetime.utcnow() + timedelta(days=min_expiry)
-		i.greater_expiry =  (i.expiry < i.min_expiry)
+		i.datas = str(i.lot_num) + " - " + str(i.id) +  " / " + str(i.expiry.strftime('%d-%m-%Y'))
+		#   -- not showing in selecfield option
+		#i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=product.id, company_id=company.id, date_used=None).count()
+		#i.min_expiry = datetime.utcnow() + timedelta(days=min_expiry)
+		#i.greater_expiry =  (i.expiry < i.min_expiry)
 	form = ConsumeItemForm()
-	#lot_list = [(l.lot_id, l.lot_num) for l in item_query]
-	#form.lot_numbers.choices = lot_list
+	lot_list = [(i.id, i.datas) for i in item_query]
+	form.lot_numbers.choices = lot_list
 	if form.validate_on_submit():
 		#lot_num_id = Lot.query.filter_by(id=form.lot_numbers.data).first()
-		use_item = Item.query.filter_by(product_id=product.id, lot_id=form.lot_numbers.data, date_used=None).first()
+		use_item = Item.query.filter_by(product_id=product.id, company_id=company.id, id=form.lot_numbers.data, date_used=None).first()
 		use_item.date_used = datetime.utcnow()
 		db.session.commit()
 		return redirect(url_for('inventory', company_name=company.company_name))
@@ -651,7 +672,7 @@ def orders(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	orders = Order.query.filter_by(company_id=company.id).order_by(Order.date_created.desc()).all()
 	for order in orders:
-		order.purchase_order = Purchase.query.filter_by(order_no=order.id).first()
+		order.purchase_order = Purchase.query.filter_by(order_no=order.id, company_id=company.id).first()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -667,14 +688,14 @@ def orders(company_name):
 		db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
 	if form1.validate_on_submit():
-		order_id = Order.query.filter_by(order_no=form1.order_no_purchase_form.data).first().id
+		order_id = Order.query.filter_by(order_no=form1.order_no_purchase_form.data, company_id=company.id).first().id
 		purchase = Purchase(purchase_order_no=form1.purchase_order.data, company_id=company.id, order_no=order_id)
 		db.session.add(purchase)
 		purchase.purchase_created_by.append(user)
 		db.session.commit()
-		purchase_list = OrdersList.query.filter_by(order_id=order_id).all()
+		purchase_list = OrdersList.query.filter_by(order_id=order_id, company_id=company.id).all()
 		for i in purchase_list:
-			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, total=i.total, purchase_id=purchase.id, user_id=i.user_id)
+			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
@@ -686,8 +707,8 @@ def orders(company_name):
 @login_required
 def create_orders(company_name, order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	order = Order.query.filter_by(order_no=order_no).first_or_404()
-	order_list = OrdersList.query.filter_by(order_id=order.id).all()
+	order = Order.query.filter_by(order_no=order_no, company_id=company.id).first_or_404()
+	order_list = OrdersList.query.filter_by(order_id=order.id, company_id=company.id).all()
 	for list in order_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
@@ -705,7 +726,7 @@ def create_orders(company_name, order_no):
 	#dept_id = form1.department.data
 	#type_id= form1.type.data
 	products = Product.query.order_by(Product.name.asc())
-	my_products = MyProducts.query.all()
+	my_products = MyProducts.query.filter_by(company_id=company.id).all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
@@ -722,7 +743,7 @@ def create_orders(company_name, order_no):
 		for i in range(0, len(refnum_list) ):
 			#print(refnum_list[i], name_list[i])
 		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id, user_id=user.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
@@ -744,9 +765,9 @@ def create_orders(company_name, order_no):
 @login_required	
 def remove_order_item(company_name, order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	order = Order.query.filter_by(order_no=order_no).first_or_404()
+	order = Order.query.filter_by(order_no=order_no, company_id=company.id).first_or_404()
 	#order_list = OrdersList.query.filter_by(order_id=order.id).all()
-	item = OrdersList.query.filter_by(id=id).first()
+	item = OrdersList.query.filter_by(id=id, company_id=company.id).first()
 	db.session.delete(item)
 	db.session.commit()
 	return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
@@ -757,7 +778,7 @@ def remove_order_item(company_name, order_no, id):
 @login_required	
 def edit_item_qty(company_name, order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	order = Order.query.filter_by(order_no=order_no).first_or_404()
+	order = Order.query.filter_by(order_no=order_no, company_id=company.id).first_or_404()
 	#order_list = OrdersList.query.filter_by(order_id=order.id).all()
 	item = OrdersList.query.filter_by(id=id).first()
 	form1 = EditOrderListForm()
@@ -778,12 +799,12 @@ def purchases(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	for purchase in purchases:
-		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id).all()
-		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 		purchase.purchase_order_complete = False
 		completed_item = 0
 		for list in purchase.purchase_list:
-			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
 			list.complete_item_delivery = list.delivered_qty == list.quantity
 		for n in range(0, len(purchase.purchase_list)):
 			if list.complete_item_delivery:
@@ -800,8 +821,8 @@ def purchases(company_name):
 @login_required
 def purchase_list(company_name, purchase_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	for list in purchase_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
@@ -810,7 +831,7 @@ def purchase_list(company_name, purchase_order_no):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
-	my_products = MyProducts.query.all()
+	my_products = MyProducts.query.filter_by(company_id=company.id).all()
 	for my_p in my_products:
 		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
@@ -827,7 +848,7 @@ def purchase_list(company_name, purchase_order_no):
 		for i in range(0, len(refnum_list) ):
 			#print(refnum_list[i], name_list[i])
 		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
-			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], purchase_id=purchase.id, user_id=user.id)
+			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], purchase_id=purchase.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
@@ -843,8 +864,8 @@ def purchase_list(company_name, purchase_order_no):
 @login_required	
 def remove_purchase_item(company_name, purchase_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
-	item = PurchaseList.query.filter_by(id=id).first()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
 	db.session.delete(item)
 	db.session.commit()
 	return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
@@ -854,18 +875,18 @@ def remove_purchase_item(company_name, purchase_order_no, id):
 @login_required	
 def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	for list in purchase_list:
-		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
 		list.complete_delivery = list.delivered_qty == list.quantity
-		list.purchase_list_id = Item.query.filter_by(purchase_list_id=list.id).all()
+		list.purchase_list_id = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).all()
 		list.delivery_no_list = []
 		for l in list.purchase_list_id:
-			l.delivery_no = Delivery.query.filter_by(id=l.delivery_id).first().delivery_no
+			l.delivery_no = Delivery.query.filter_by(id=l.delivery_id, company_id=company.id).first().delivery_no
 			list.delivery_no_list.append(l.delivery_no)
 		list.count_delivery_no_list = dict((x,list.delivery_no_list.count(x)) for x in set(list.delivery_no_list))	
-	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no).first_or_404()
+	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
@@ -878,10 +899,10 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 @login_required	
 def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
-	purchased_item = PurchaseList.query.filter_by(id=id).first()
-	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no).first_or_404()
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+	purchased_item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
+	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	product = Product.query.filter_by(ref_number=purchased_item.ref_number).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -922,12 +943,12 @@ def deliveries(company_name):
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	for purchase in purchases:
-		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id).all()
-		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 		purchase.purchase_order_complete = False
 		completed_item = 0
 		for list in purchase.purchase_list:
-			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
 			list.complete_item_delivery = list.delivered_qty == list.quantity
 		for n in range(0, len(purchase.purchase_list)):
 			if list.complete_item_delivery:
@@ -941,7 +962,7 @@ def deliveries(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	form = AcceptDeliveryForm()
 	if form.validate_on_submit():
-		purchase = Purchase.query.filter_by(purchase_order_no=form.purchase_no.data).first_or_404()
+		purchase = Purchase.query.filter_by(purchase_order_no=form.purchase_no.data, company_id=company.id).first_or_404()
 		delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id)
 		db.session.add(delivery)
 		db.session.commit()
@@ -1089,8 +1110,19 @@ def document_control(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	form = CreateDepartmentForm()
-	return render_template('document_control.html', title='Document Control', user=user, company=company, form=form, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate)
+	form1 = CreateDepartmentForm()
+	if form1.validate_on_submit():
+		dept = DocumentationDepartment(department_name=form1.department_name.data, company_id=company.id)
+		db.session.add(dept)
+		db.session.commit()
+		return redirect(url_for('document_control', company_name=company.company_name))
+	form2 = CreateDocumentForm()
+	if form2.validate_on_submit():
+		doc = DocumentName(document_id=form2.document_id.data, document_name=form2.document_name.data, company_id=company.id)
+		db.session.add(doc)
+		db.session.commit()
+		return redirect(url_for('document_control', company_name=company.company_name))
+	return render_template('document_control.html', title='Document Control', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2)
 	
 @app.route('/document_control_sample')
 def document_control_sample():

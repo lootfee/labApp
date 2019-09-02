@@ -12,35 +12,32 @@
 		</div>
 		<div class="col-md-3"></div>
 		<div class="col-md-6">
-		<form action method="post" class="form" role="form">
-		{{ form.hidden_tag() }}
-		<div class="col-md-8">
+			<form action method="post" class="form" role="form">
+			{{ form.hidden_tag() }}
+			<div class="col-md-3"></div>
+			<div class="col-md-6 form-group required">
+				{{ form.lot_numbers.label(class_="control-label") }}
+				{{ form.lot_numbers(class_="form-control") }}
+			</div>
+			<div class="col-md-3" style="margin-top: 24px;">
+			{{ form.submit(class_="btn btn-default") }}
+			</div>
 			
-		<label class="control-label" for="lot_numbers" >Lot Number / Expiry : Quantity</label>
-		<select class="form-control" id="lot_numbers" name="lot_numbers" required style="font-size: large;">
-			{% for i in item_query %}
-			<option value='{{ i.lot_id }}'><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></option>
-			{% endfor %}
-		</select>
+			</form>
 		</div>
-		<div class="col-md-3" style="margin-top: 24px;">
-		{{ form.submit(class_="btn btn-default") }}
-		</div>
+		<div class="col-md-3"></div>
 		
-		</form>
-		</div>
-		<div class="col-md-4"></div>
 	</div>
 
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
 	<script>
-		$(document).ready(function() {
+		/*$(document).ready(function() {
 			$("select option").val(function(idx, val) {
 				  $(this).siblings('[value="'+ val +'"]').remove();
 				});
-			});
+			});*/
 			
 	</script>
 {% endblock %}

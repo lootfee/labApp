@@ -13,10 +13,6 @@
 					<th class="col-md-2">Purchase Order</th>
 					<th class="col-md-1">Created by</th>
 					<th class="col-md-1">Date</th>
-					<!--th class="col-md-1">Completed by</th>
-					<th class="col-md-1">Date</th>
-					<th class="col-md-1">Reviewed by</th>
-					<th class="col-md-1">Date</th-->
 					<th class="col-md-1">Purchased by</th>
 					<th class="col-md-1">Date</th>
 					<th class="col-md-1">Status</th>
@@ -29,18 +25,22 @@
 						<td>{{ p.username }}</td>
 						{% endfor %}
 						<td>{{ purchase.date_created.strftime('%Y-%m-%d') }}</td>
-						
-						{% for p in purchase.purchased_by %}
-						<td>{{ p.username }}</td>
-						{% endfor %}
 						{% if purchase.date_purchased %}
-						<td>{{ purchase.date_purchased.strftime('%Y-%m-%d') }}</td>
-						{% endif %}
-						{% if purchase.purchase_order_complete == True %}
-						<td>Delivery completed</td>
+							{% for p in purchase.purchased_by %}
+								<td>{{ p.username }}</td>
+								<td>{{ purchase.date_purchased.strftime('%Y-%m-%d') }}</td>
+							{% endfor %}
+							{% if purchase.purchase_order_complete == True %}
+								<td>Delivery completed</td>
+								{% else %}
+								<td>Items pending</td>
+							{% endif %}
 						{% else %}
-						<td>Items pending</td>
+						<td></td>
+						<td></td>
+						<td></td>
 						{% endif %}
+						
 					</tr>
 					{% endfor %}
 				{% endif %}

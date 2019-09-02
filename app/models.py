@@ -465,6 +465,7 @@ class OrdersList(db.Model):
 	total = db.Column(db.Numeric(10,2))
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
 	def __repr__(self):
 		return '<OrdersList {}>'.format(self.id)
@@ -494,11 +495,12 @@ class PurchaseList(db.Model):
 	total = db.Column(db.Numeric(10,2))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
 	purchase_list_to_item = db.relationship('Item', backref=db.backref('purchase_list_to_item', lazy=True))
 	
 	def __repr__(self):
-		return '<OrdersList {}>'.format(self.id)
+		return '<PurchaseList {}>'.format(self.id)
 
 
 class Delivery(db.Model):
@@ -543,4 +545,17 @@ class Lot(db.Model):
 class DocumentationDepartment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	department_name = db.Column(db.String(50), index=True, unique=True)
-	company_dept_id = db.Column(db.Integer)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	
+	def __repr__(self):
+		return '<DocumentationDepartment {}>'.format(self.id)
+
+
+class DocumentName(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	document_id = db.Column(db.String(50), index=True, unique=True)
+	document_name = db.Column(db.String(50), index=True, unique=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	
+	def __repr__(self):
+		return '<DocumentName {}>'.format(self.id)

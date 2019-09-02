@@ -6,8 +6,6 @@
     <h2 class="inventory_headers">Overview</h2>
 	<hr>
     <div class="row">
-		
-		
         <div class="col-md-6">
             <table class="text-center table-bordered table-hover">
 			<h4>Reagents less than minimum qty</h4>
@@ -50,19 +48,70 @@
 			{% endfor %}
 			</table>
         </div>
-		
+	</div>
+	<div class="row">
+		{% if pending_deliveries %}
 		<div class="col-md-6">
             <table class="text-center table-bordered table-hover">
+			<h4>Pending Deliveries</h4>
 			<tr>
-				<th>Pending orders</th>
+				<th>Purchase Order</th>
+				<th>Date purchased</th>
 			</tr>
+			<tr>
+				{% for p in pending_deliveries %}
+				<td>{{ p.purchase_order_no }}</td>
+				<td>{{ p.date_purchased.strftime('%d-%m-%Y') }}</td>
+				{% endfor %}
+			</tr>
+			</table>
+        </div>
+		{% endif %}
+		<div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<h4>Undelivered reagents</h4>
+			<tr>
+				<th>Reference number</th>
+				<th>Reagent name</th>
+				<th>Date purchased</th>
+				<th>Purchase Order</th>
+			</tr>
+			</table>
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-md-6">
+            <table class="text-center table-bordered table-hover">
+			<h4>Submitted orders</h4>
+			<tr>
+				<th>Order Id</th>
+				<th>Date submitted</th>
+			</tr>
+			{% for ord in unsubmitted_orders %}
+			{% if ord.order_no %}
+			<tr>
+				<td>{{ ord.order_no }}</td>
+				<td>{{ ord.date_submitted.strftime('%d-%m-%Y') }}</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
 			</table>
         </div>
 		<div class="col-md-6">
             <table class="text-center table-bordered table-hover">
+			<h4>Pending purchases</h4>
 			<tr>
-				<th>Pending reagents</th>
+				<th>Purchase order no</th>
+				<th>Date created</th>
 			</tr>
+			{% for p in pending_purchases %}
+			{% if p.purchase_order_no %}
+			<tr>
+				<td>{{ p.purchase_order_no }}</td>
+				<td>{{ p.date_created.strftime('%d-%m-%Y') }}</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
 			</table>
         </div>
     </div>
