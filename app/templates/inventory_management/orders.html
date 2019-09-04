@@ -13,13 +13,11 @@
 					<th class="col-md-2">Order ID</th>
 					<th class="col-md-1">Created by</th>
 					<th class="col-md-1">Date</th>
-					<!--th class="col-md-1">Completed by</th>
-					<th class="col-md-1">Date</th>
-					<th class="col-md-1">Reviewed by</th>
-					<th class="col-md-1">Date</th-->
 					<th class="col-md-1">Submitted by</th>
 					<th class="col-md-1">Date</th>
+					{% if is_inv_admin %}
 					<th class="col-md-2">Status</th>
+					{% endif %}
 				</tr>
 				{% if orders %}
 					{% for order in orders %}
@@ -37,13 +35,13 @@
 						{% if order.date_submitted %}
 						<td>{{ order.date_submitted.strftime('%Y-%m-%d %H:%M') }}</td>
 						{% endif %}
+						{% if is_inv_admin %}
 						{% if order.purchase_order %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ order.purchase_order.purchase_order_no }}</a></td>
 						{% elif  order.date_submitted %}
 						<td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_purchase_modal_{{ order.order_no }}">Create Purchase Order</button></td>
-						
 						{% endif %}
-						
+						{% endif %}
 					</tr>
 					{% endfor %}
 				{% endif %}

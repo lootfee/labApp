@@ -464,6 +464,7 @@ def inventory_management_sample():
 def inventory_management(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_inv_admin = company.is_inv_admin(user)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -487,9 +488,25 @@ def inventory_management(company_name):
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
-	pending_deliveries = Purchase.query.filter_by(company_id=company.id, purchase_to_delivery=None).all()
-	print(pending_deliveries)
-	purchase_q = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id).all()
+	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
+	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
+	pending_item = []
+	for dp in delivered_purchases:
+		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id).all()
+		for pl in dp.purchase_list:
+			pl.name = PurchaseList.query.filter_by(id=pl.id).first().name
+			pl.ref_number = PurchaseList.query.filter_by(id=pl.id).first().ref_number
+			pl.purchase_order_no = Purchase.query.filter_by(company_id=company.id, id=pl.purchase_id).first().purchase_order_no
+			pl.date_purchased = Purchase.query.filter_by(company_id=company.id, id=pl.purchase_id).first().date_purchased
+			pl.qty = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, id=pl.id).first().quantity
+			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
+			#if pl.delivered_qty < pl.qty:
+				
+				#pl.pending_item = Product.query.filter_by(id=pl.id).first()
+				#print(pl.id , pl.qty , pl.delivered_qty)
+				#pending_item.append(pl.id)
+	
+	'''purchase_q = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id).all()
 	for pq in purchase_q:
 		purchase_item_q = PurchaseList.query.filter_by(company_id=company.id, purchase_id=pq.id).all()
 		for item in purchase_item_q:
@@ -497,13 +514,13 @@ def inventory_management(company_name):
 			item.item_count_q = Item.query.filter_by(purchase_list_id=item.id).count()
 			item.difference = item.qty - item.item_count_q
 			if item.qty > item.item_count_q:
-				print(item.ref_number, item.name, item.difference)
+				print(item.ref_number, item.name, item.difference)'''
 	#orders = Order.query.filter_by(company_id=company.id).order_by(Order.date_created.desc()).all()
 	#for order in orders:
 	#	order.purchase_order = Purchase.query.filter_by(order_no=order.id).first()
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries)
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases)
 	#return redirect(url_for('inventory', company_name=company.company_name))
 	
 
@@ -580,7 +597,6 @@ def inventory(company_name):
 	orders = Order.query.filter_by(company_id=company.id).first()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
-	is_qc_admin = company.is_qc_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -603,36 +619,7 @@ def inventory(company_name):
 			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
-		'''	my_p.lot_list.append(i.lot_num)
-		my_p.count_lot_no_list = dict((x,my_p.lot_list.count(x)) for x in set(my_p.lot_list))
-		for j in my_p.item_query:
-			for l in my_p.count_lot_no_list:
-				j.lot_query = Lot.query.filter_by(lot_no=l).first().lot_no
-				j.lot_qty = my_p.count_lot_no_list[l]
-				j.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
-				j.min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
-				j.greater_expiry =  (j.lot_expiry < j.min_expiry)'''
-		'''for l in my_p.count_lot_no_list:
-			lot_query = Lot.query.filter_by(lot_no=l).first()
-			lot_qty = my_p.count_lot_no_list[l]
-			my_p.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
-			min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
-			greater_expiry =  (my_p.lot_expiry < min_expiry)'''
-		'''for l in my_p.count_lot_no_list:
-			l : {
-				lot_expiry : Lot.query.filter_by(lot_no=l).first().expiry.strftime('%d-%m-%Y'),
-				'min_expiry' : datetime.utcnow() - timedelta(days=my_p.min_expiry),
-				'greater_expiry' : ('lot_expiry' < 'min_expiry')
-			}
-			print(l[lot_expiry])
-			lot_query = Lot.query.filter_by(lot_no=l).first()
-			lot_qty = my_p.count_lot_no_list[l]
-			my_p.lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
-			lot_expiry = Lot.query.filter_by(lot_no=l).first().expiry
-			min_expiry = datetime.utcnow() - timedelta(days=my_p.min_expiry)
-			greater_expiry =  (my_p.lot_expiry < min_expiry)'''
-		
-	return render_template('inventory_management/inventory.html', title='Inventory', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, is_qc_admin=is_qc_admin, my_products=my_products, orders=orders, dept=dept)
+	return render_template('inventory_management/inventory.html', title='Inventory', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, my_products=my_products, orders=orders, dept=dept)
 
 @app.route('/<company_name>/consume_item/<ref_number>', methods=['GET', 'POST'])
 @login_required	
@@ -651,10 +638,6 @@ def consume_item(company_name, ref_number):
 		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 		i.datas = str(i.lot_num) + " - " + str(i.id) +  " / " + str(i.expiry.strftime('%d-%m-%Y'))
-		#   -- not showing in selecfield option
-		#i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=product.id, company_id=company.id, date_used=None).count()
-		#i.min_expiry = datetime.utcnow() + timedelta(days=min_expiry)
-		#i.greater_expiry =  (i.expiry < i.min_expiry)
 	form = ConsumeItemForm()
 	lot_list = [(i.id, i.datas) for i in item_query]
 	form.lot_numbers.choices = lot_list
@@ -675,6 +658,7 @@ def orders(company_name):
 		order.purchase_order = Purchase.query.filter_by(order_no=order.id, company_id=company.id).first()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_inv_admin = company.is_inv_admin(user)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -699,7 +683,7 @@ def orders(company_name):
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
-	return render_template('inventory_management/orders.html', title='Orders', user=user, company=company, form=form, form1=form1, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchases=purchases)
+	return render_template('inventory_management/orders.html', title='Orders', user=user, company=company, form=form, form1=form1, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, purchases=purchases)
 
 
 
@@ -900,7 +884,7 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+	#purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	purchased_item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	product = Product.query.filter_by(ref_number=purchased_item.ref_number).first()
@@ -924,6 +908,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
 				db.session.add(item)
+				purchased_item.deliveries.append(delivery)
 				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
 		if lot_query is not None:
@@ -931,6 +916,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
 				db.session.add(item)
+				purchased_item.deliveries.append(delivery)
 				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase_order_no, delivery_order_no=delivery_order_no))
 	return render_template('inventory_management/receive_delivery_item.html', title='Receive Item', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchased_item=purchased_item, form=form, delivery=delivery)	

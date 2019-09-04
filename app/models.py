@@ -65,10 +65,10 @@ downvotes = db.Table('downvotes',
 )
 
 
-'''lot_number = db.Table('lot_number',
-	db.Column('product_id', db.Integer, db.ForeignKey('product.id')),
-	db.Column('lot_id', db.Integer, db.ForeignKey('lot.id')),
-)'''
+#deliveries = db.Table('deliveries',
+#	db.Column('purchase_list_id', db.Integer, db.ForeignKey('purchase_list.id')),
+#	db.Column('delivery_id', db.Integer, db.ForeignKey('delivery.id')),
+#)
 
 
 
@@ -420,7 +420,7 @@ class Product(db.Model):
 	lot_no = db.relationship('Lot', backref=db.backref('ref_no', lazy=True))
 		
 	def __repr__(self):
-		return '<Product {} {} {} {} {} {} {} {}>'.format(self.ref_number, self.product_code, self.name, self.storage_req, self.price, self.min_quantity, self.description, self.min_expiry)
+		return '<Product {} {} {} {} {} {} {} {}>'.format(self.ref_number, self.name, self.storage_req, self.price, self.min_quantity, self.description, self.min_expiry)
 
 
 class MyProducts(db.Model):
@@ -501,6 +501,9 @@ class PurchaseList(db.Model):
 	
 	def __repr__(self):
 		return '<PurchaseList {}>'.format(self.id)
+		
+	#def delivered_qty(self, delivery):
+	#	return self.deliveries.filter(deliveries.c.delivery_id == delivery.id).count()
 
 
 class Delivery(db.Model):
@@ -510,9 +513,12 @@ class Delivery(db.Model):
 	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
+	#purchase_list = db.relationship(
+	#	'PurchaseList', secondary='deliveries',
+	#	backref=db.backref('deliveries', lazy='dynamic'), lazy='dynamic'
+	#)
 	
 	delivery_to_item = db.relationship('Item', backref=db.backref('delivery_to_item', lazy=True))
-	
 	
 	def __repr__(self):
 		return '<Delivery {}>'.format(self.delivery_no, self.date_delivered)

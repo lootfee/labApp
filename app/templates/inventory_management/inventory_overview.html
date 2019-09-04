@@ -4,117 +4,142 @@
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}		
     <h2 class="inventory_headers">Overview</h2>
-	<hr>
-    <div class="row">
-        <div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Reagents less than minimum qty</h4>
-			<tr>
-				<th>Ref Number</th>
-				<th>Name</th>
-				<th>Remaining quantity</th>
-			</tr>
-			{% for my_p in my_products %}
-			{% if my_p.less_quantity %}
-			<tr>
-				<td>{{ my_p.ref_number }}</td>
-				<td>{{ my_p.name }}</td> 
-				<td>{{ my_p.current_quantity }}</td>
-			</tr>
-			{% endif %}
-			{% endfor %}
-			</table>
-        </div>
-		
-		
-		<div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Reagents near expiry</h4>
-			<tr>
-				<th>Name</th>
-				<th>Lot no</th>
-				<th>Expiry</th>
-			</tr>
-			{% for my_p in my_products %}
-			{% for i in my_p.item_query %}
-			{% if i.greater_expiry  %}
-			<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}">
-				<td>{{ my_p.name }}</td>
-				<td>{{ i.lot_num }}</td>
-				<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
-			</tr>
-			{% endif %}
-			{% endfor %}
-			{% endfor %}
-			</table>
-        </div>
-	</div>
-	<div class="row">
-		{% if pending_deliveries %}
-		<div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Pending Deliveries</h4>
-			<tr>
-				<th>Purchase Order</th>
-				<th>Date purchased</th>
-			</tr>
-			<tr>
-				{% for p in pending_deliveries %}
-				<td>{{ p.purchase_order_no }}</td>
-				<td>{{ p.date_purchased.strftime('%d-%m-%Y') }}</td>
+	<hr class="inventory_hr">
+    <div class="row text-center">
+		<div class="col-md-12">
+			<div class="col-md-5" style="border: 2px solid #dedede;border-radius: 8px;width:auto; margin: 10px;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4> Reagents less than minimum quantity</h4>
+				<tr>
+					<th>Ref Number</th>
+					<th>Name</th>
+					<th>Qty</th>
+				</tr>
+				{% for my_p in my_products %}
+				{% if my_p.less_quantity %}
+				<tr>
+					<td>{{ my_p.ref_number }}</td>
+					<td>{{ my_p.name }}</td> 
+					<td>{{ my_p.current_quantity }}</td>
+				</tr>
+				{% endif %}
 				{% endfor %}
-			</tr>
-			</table>
-        </div>
-		{% endif %}
-		<div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Undelivered reagents</h4>
-			<tr>
-				<th>Reference number</th>
-				<th>Reagent name</th>
-				<th>Date purchased</th>
-				<th>Purchase Order</th>
-			</tr>
-			</table>
-        </div>
+				</table>
+			</div>
+			<div class="col-md-7" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4>Reagents near expiry</h4>
+				<tr>
+					<th>Ref Number</th>
+					<th>Name</th>
+					<th>Lot no</th>
+					<th>Expiry</th>
+				</tr>
+				{% for my_p in my_products %}
+				{% for i in my_p.item_query %}
+				{% if i.greater_expiry  %}
+				<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}">
+					<td>{{ my_p.ref_number }}</td>
+					<td>{{ my_p.name }}</td>
+					<td>{{ i.lot_num }}</td>
+					<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
+				</tr>
+				{% endif %}
+				{% endfor %}
+				{% endfor %}
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="row text-center">
+		
+			<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px; margin-left: 5%;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4>Undelivered reagents</h4>
+				<tr>
+					<th>Reference number</th>
+					<th>Reagent name</th>
+					<th>Purchase Order</th>
+					<th>Date purchased</th>
+					<th>Qty requested</th>
+					<th>Qty delivered</th>
+				</tr>
+				{% for dp in delivered_purchases %}
+				{% for pl in dp.purchase_list %}
+				{% if pl.delivered_qty < pl.qty %}
+				<tr>
+					<td>{{ pl.ref_number }}</td>
+					<td>{{ pl.name }}</td>
+					<td>{{ pl.purchase_order_no }}</td>
+					<td>{{ pl.date_purchased }}</td>
+					<td>{{ pl.qty }}</td>
+					<td>{{ pl.delivered_qty }}</td>
+				</tr>
+				{% endif %}
+				{% endfor %}
+				{% endfor %}
+				</table>
+			</div>
+		
+		
     </div>
-	<div class="row">
-		<div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Submitted orders</h4>
-			<tr>
-				<th>Order Id</th>
-				<th>Date submitted</th>
-			</tr>
-			{% for ord in unsubmitted_orders %}
-			{% if ord.order_no %}
-			<tr>
-				<td>{{ ord.order_no }}</td>
-				<td>{{ ord.date_submitted.strftime('%d-%m-%Y') }}</td>
-			</tr>
+	{% if is_inv_admin %}
+	<div class="row text-center">
+		<div class="col-md-12">
+			{% if pending_deliveries %}
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4>Pending Deliveries</h4>
+				<tr>
+					<th>Purchase Order</th>
+					<th>Date purchased</th>
+				</tr>
+				{% for p in pending_deliveries %}
+				<tr>
+					<td>{{ p.purchase_order_no }}</td>
+					<td>{{ p.date_purchased.strftime('%d-%m-%Y') }}</td>
+				</tr>
+				{% endfor %}
+				</table>
+			</div>
 			{% endif %}
-			{% endfor %}
-			</table>
-        </div>
-		<div class="col-md-6">
-            <table class="text-center table-bordered table-hover">
-			<h4>Pending purchases</h4>
-			<tr>
-				<th>Purchase order no</th>
-				<th>Date created</th>
-			</tr>
-			{% for p in pending_purchases %}
-			{% if p.purchase_order_no %}
-			<tr>
-				<td>{{ p.purchase_order_no }}</td>
-				<td>{{ p.date_created.strftime('%d-%m-%Y') }}</td>
-			</tr>
-			{% endif %}
-			{% endfor %}
-			</table>
-        </div>
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4>Submitted orders</h4>
+				<tr>
+					<th>Order Id</th>
+					<th>Date submitted</th>
+				</tr>
+				{% for ord in unsubmitted_orders %}
+				{% if ord.order_no %}
+				<tr>
+					<td>{{ ord.order_no }}</td>
+					<td>{{ ord.date_submitted.strftime('%d-%m-%Y') }}</td>
+				</tr>
+				{% endif %}
+				{% endfor %}
+				</table>
+			</div>
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<h4>Pending purchases</h4>
+				<tr>
+					<th>Purchase order no</th>
+					<th>Date created</th>
+				</tr>
+				{% for p in pending_purchases %}
+				{% if p.purchase_order_no %}
+				<tr>
+					<td>{{ p.purchase_order_no }}</td>
+					<td>{{ p.date_created.strftime('%d-%m-%Y') }}</td>
+				</tr>
+				{% endif %}
+				{% endfor %}
+				</table>
+			</div>
+		</div>
     </div>
+	{% endif %}
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
