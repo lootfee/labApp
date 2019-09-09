@@ -75,11 +75,13 @@
 		$(document).ready(function(){
 			var search_user_tags = [
 				{% for user in users %}
+				{% if user.is_following(current_user) %}
 					{
 						url: "{{ url_for( 'user', username=user.username )}}",
 						label: "{{ user.username }}",
 						profile_pic: "{% if user.profile_pic %}{{ user.profile_pic }} {% else %} {{ user.avatar(30) }}{% endif %}",
 					},
+				{% endif %}
 				{% endfor %}
 			];
 			

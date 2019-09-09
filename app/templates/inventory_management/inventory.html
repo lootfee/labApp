@@ -41,26 +41,61 @@
 						<td>{% for i in my_p.item_query %}
 						<div id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}"><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></div>
 						{% endfor %}</td>
-						<td>{% if my_p.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_p.ref_number)}}">Consume</a>{% endif %}</td>
-						<!--td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td-->
-						<!--td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" id="request_{{ my_p.ref_number }}" data-target="#request_reagent_modal_{{ my_p.ref_number }}">Request Reagent</button></td-->
-						<!--td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Request') }}</a></td-->
+						<td>{% if my_p.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_p.ref_number)}}">Consume</a>
+						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_p.ref_number }}">Barcode</a>
+						{% endif %}</td>
+						
 					</tr>
 					
 					{% endfor %}
 				{% endif %}
 			</table>
 		</div>
-		
+		{% if my_products %}
+		{% for my_p in my_products %}
+		<div class="modal fade" id="barcode_modal_{{ my_p.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="barcode_modal_{{ my_p.ref_number }}_label">
+		  <div class="modal-dialog" role="document">
+			<div class="modal-content">
+			  <div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<span class="text-center"><h4>Ref No: <span style="color: blue;">{{ my_p.ref_number }}</span></h4> </span>
+				<span class="text-center"><h4>Name: <span style="color: blue;">{{ my_p.name }}</span></h4> </span>
+			  </div>
+			  <div class="modal-body">
+				
+				<select class="form-control" id="select_{{ my_p.ref_number }}">
+					{% for i in my_p.item_query %}
+					<option value="{{ i.lot_num }}{{ i.id }}">{{ i.lot_num }} - {{ i.id }} / {{ i.expiry.strftime('%d-%m-%Y') }}</option>
+					
+					{% endfor %}
+				</select>
+					<br>
+					{% for i in my_p.item_query %}
+					<div class="bcodes bcodes_{{ my_p.ref_number }} text-center" id="bc_container_{{ i.lot_num }}{{ i.id }}" style="text-align:center;margin:0 auto;">
+						<img  id="bc_{{ i.lot_num }}{{ i.id }}" style="margin: 0;">
+						<p>{{ i.lot_num }}-{{ i.id }}</p>
+						<p>{{ my_p.name }}</p>
+						<p>Lot: {{ i.lot_num }} &nbsp&nbsp&nbsp Expiry: {{ i.expiry.strftime('%d-%m-%Y') }}</p>
+						<p><input type="button" class="btn btn-default" id="print_{{ i.lot_num }}{{ i.id }}" value="Print"></p>
+					</div>
+					{% endfor %}
+			  </div>
+			</div>
+		  </div>
+		</div>
+		{% endfor %}
+		{% endif %}
 	</div>
 {% endblock %}
 
 {% block scripts %}
 	{{ super() }}
+	<style id="print_barcode_media"></style>
 	<script>
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
+			
 			
 			$('[id]').each(function () {
 				{% for my_p in my_products %}{% for i in my_p.item_query %}
@@ -68,6 +103,62 @@
 				{% endfor %}{% endfor %}
 			});
 			});
+			
+			{% if my_products %}
+			{% for my_p in my_products %}
+			{% for i in my_p.item_query %}
+			$("#bc_{{ i.lot_num }}{{ i.id }}").JsBarcode("{{ i.lot_num }}-{{ i.id }}", {
+				width: 5,
+				height: 100,
+				fontSize: 20,
+				margin: 5,
+				displayValue: false,
+			});
+			
+			$('#select_{{ my_p.ref_number }}').change(function(){
+				$('.bcodes_{{ my_p.ref_number }}').hide();
+				$('#bc_container_' + $(this).val()).show();
+			  });
+			  
+			$('#print_{{ i.lot_num }}{{ i.id }}').click(function(){
+				$('#print_barcode_media').text(
+					/*"@page {" +
+						"size: 3in 1in;" +
+						"margin: 0;" +
+						"padding: 0;" +
+					"}" +*/
+					"@media print {" + 
+						"html, body {" + 
+							"visibility: hidden;" +
+							"width: 100%;" +
+							"height: 100%;" +
+							"margin: 0;" +
+							"padding: 0;" +
+							"}" + 
+						"#bc_container_{{ i.lot_num }}{{ i.id }} {" +
+							"visibility: visible;" +
+							//"margin-top: 0;" +
+							"margin-bottom: 5px;" +
+							"width: 100%;" +
+							"height: 100%;" +
+							"max-width: 100%;" +
+							"max-height: 100%;" +
+						"}" + 
+						"#print_{{ i.lot_num }}{{ i.id }} {" +
+							"visibility: hidden;" +
+						"}" +
+					"}"
+				);
+				/*$(document.html).css('visibility', 'hidden');
+				$(document.body).css('visibility', 'hidden');
+				$('#bc_container_{{ i.lot_num }}{{ i.id }}').css('visibility', 'visible', "width", "100%", "height", "100%", "max-width", "100%", "max-height", "100%");
+				$('#print_{{ i.lot_num }}{{ i.id }}').css('visibility', 'hidden');*/
+				window.print();
+			});
+			{% endfor %}
+			{% endfor %}
+			{% endif %}
+			
 			/*{% for my_p in my_products %}
 				
 				$("#request_{{ my_p.ref_number }}").click(function() {

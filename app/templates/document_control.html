@@ -29,8 +29,9 @@
 		<p><a href="#" data-toggle="modal" data-target="#create_dept_modal" style="float:right;">Create Department</a></p>
 		<br>
 		<ul class="nav nav-tabs nav-stacked" role="tablist">
-			
-			<li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+			{% for dept in departments %}
+			<li role="presentation" class="active"><a href="#documentation_deptname_{{ dept.department_name }}" aria-controls="home" role="tab" data-toggle="tab">{{ dept.department_name }}</a></li>
+			{% endfor %}
 		</ul>
 	</div>
 	<div class="col-md-6">
@@ -38,7 +39,11 @@
 			<br>
 		<div class="tab-content">
 			<ul class="nav nav-tabs nav-stacked" role="tablist">
-				<li role="presentation" id="home" class="active"><a href="#" aria-controls="home" role="tab" data-toggle="tab">SOP 1</a></li>
+				{% for dept in departments %}
+				{% for doc in documents %}
+				<li role="presentation" id="documentation_deptname_{{ dept.department_name }}" class="active"><a href="#" aria-controls="home" role="tab" data-toggle="tab">{{ doc.document_id}}-{{ doc.document_name}}</a></li>
+				{% endfor %}
+				{% endfor %}
 		</ul>
 			</ul>
 		</div>

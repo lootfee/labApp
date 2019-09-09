@@ -24,7 +24,7 @@
 					<td class="col-md-3 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname}} {{ affiliate.users.lastname}} ({{ affiliate.users.username}})</a></td>
 					<td class="col-md-3 admin-table">{{ affiliate.title}}</a></td>
 					<td class="admin-table"><a href="{{ url_for('manage_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}" >Edit Role</a></td>
-					<td class="admin-table"><a href="{{ url_for('delete_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}">Remove</a></td>
+					<td class="admin-table"><a href="{{ url_for('retire_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}">Retire</a></td>
 				</tr>
 					{% endfor %}
 				{% endif %}

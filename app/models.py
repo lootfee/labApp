@@ -81,6 +81,7 @@ class Company(db.Model):
 	logo = db.Column(db.String(1000))
 	about_me = db.Column(db.String(400))
 	products = db.Column(db.Integer, db.ForeignKey('product.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	order = db.relationship('Order', backref=db.backref('company', lazy=True))
 	
@@ -123,6 +124,8 @@ class Affiliates(db.Model):
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'), primary_key=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
 	accepted = db.Column(db.Boolean, default=False)
+	start_date = db.Column(db.DateTime)
+	end_date = db.Column(db.DateTime)
 	title = db.Column(db.String(64), index=True)
 	qc_access = db.Column(db.Boolean, default=False)
 	inv_access = db.Column(db.Boolean, default=False)
@@ -343,6 +346,7 @@ class Message(db.Model):
 class Department(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(50), index=True, unique=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company = db.relationship(
 		'Company', secondary='departments',
 		backref=db.backref('departments', lazy='dynamic'), lazy='dynamic'
@@ -368,6 +372,7 @@ class Supplier(db.Model):
 	address = db.Column(db.String(200), index=True)
 	email = db.Column(db.String(120))
 	contact = db.Column(db.String(120))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company = db.relationship(
 		'Company', secondary='suppliers',
 		backref=db.backref('suppliers', lazy='dynamic'), lazy='dynamic'
@@ -390,6 +395,7 @@ class Supplier(db.Model):
 class Type(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(50), index=True, unique=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company = db.relationship(
 		'Company', secondary='types',
 		backref=db.backref('types', lazy='dynamic'), lazy='dynamic'
@@ -416,7 +422,7 @@ class Product(db.Model):
 	name = db.Column(db.String(200), index=True)
 	description = db.Column(db.String(100))
 	storage_req = db.Column(db.String(50), index=True)
-	
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	lot_no = db.relationship('Lot', backref=db.backref('ref_no', lazy=True))
 		
 	def __repr__(self):
@@ -432,6 +438,7 @@ class MyProducts(db.Model):
 	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
 	type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	company = db.relationship('Company', backref=db.backref('my_products', lazy='dynamic'))
 	product = db.relationship('Product', backref=db.backref('product_of_company', lazy='dynamic'))
@@ -440,13 +447,7 @@ class MyProducts(db.Model):
 class Order(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	order_no = db.Column(db.String(50), index=True, unique=True)
-	#order_creator = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-	#completed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
-	#date_completed = db.Column(db.DateTime, index=True)
-	#reviewer = db.Column(db.Integer, db.ForeignKey('user.id'))
-	#review_approved = db.Column(db.DateTime, index=True)
-	#submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_submitted = db.Column(db.DateTime, index=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
@@ -513,10 +514,6 @@ class Delivery(db.Model):
 	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
-	#purchase_list = db.relationship(
-	#	'PurchaseList', secondary='deliveries',
-	#	backref=db.backref('deliveries', lazy='dynamic'), lazy='dynamic'
-	#)
 	
 	delivery_to_item = db.relationship('Item', backref=db.backref('delivery_to_item', lazy=True))
 	
@@ -532,15 +529,17 @@ class Item(db.Model):
 	delivery_id = db.Column(db.Integer, db.ForeignKey('delivery.id'))
 	#sequence_no = db.Column(db.Integer)-use id instead
 	date_used = db.Column(db.DateTime, index=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	def __repr__(self):
-		return '<Item {}{}>'.format(self.id, self.date_used)
+		return '<Item {}{}>'.format(self.id)
 
 class Lot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_no = db.Column(db.String(50), index=True, unique=True)
 	expiry = db.Column(db.DateTime, index=True)
 	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	item = db.relationship('Item', backref=db.backref('lot_no', lazy=True))
 	
@@ -552,6 +551,7 @@ class DocumentationDepartment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	department_name = db.Column(db.String(50), index=True, unique=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	def __repr__(self):
 		return '<DocumentationDepartment {}>'.format(self.id)
@@ -562,6 +562,7 @@ class DocumentName(db.Model):
 	document_id = db.Column(db.String(50), index=True, unique=True)
 	document_name = db.Column(db.String(50), index=True, unique=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	def __repr__(self):
 		return '<DocumentName {}>'.format(self.id)

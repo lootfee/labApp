@@ -66,6 +66,10 @@ class PostForm(FlaskForm):
 class CommentForm(FlaskForm):
 	comment = TextAreaField('Post a comment', validators=[DataRequired(), Length(min=1, max=1000)], render_kw={'maxlength': 1000})
 	submit = SubmitField('Submit')
+
+class MessageFormDirect(FlaskForm):
+	message = TextAreaField('Message', validators=[DataRequired(), Length(min=0, max=5000)], render_kw={'maxlength': 5000})
+	submit = SubmitField('Submit')
 	
 class MessageForm(FlaskForm):
 	user_search_bar = StringField('To:', validators=[DataRequired()])
@@ -175,20 +179,6 @@ class SupplierRegistrationForm(FlaskForm):
 		if supplier is not None:
 			raise ValidationError('Supplier name already registered!')'''
 	
-#class ItemEntryForm(FlaskForm):
-#	department = SelectMultipleField('Select Department', coerce=int)
-#	item = SelectMultipleField('Select Product', coerce=int)
-	
-	#def select_department(request, id):
-	#	department = Department.query.get(id)
-	#	form = ItemEntryForm(request.POST, obj=item)
-	#	form.department.choices = [(d.id, d.name) for d in Department.query.order_by('name')]
-	
-	#def select_product(request, id):
-		#department = ItemEntryForm(request.GET, obj=department)
-	#	product = Product.query.get(id)
-	#	form = ItemEntryForm(request.POST, obj=item)
-	#	form.item.choices = [(p.id, p.name) for p in Product.query.order_by('name')]
 
 class CreateOrderIDForm(FlaskForm):
 	order_no = StringField('Create Order ID', validators=[DataRequired()])
