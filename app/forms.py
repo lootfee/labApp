@@ -4,6 +4,7 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextA
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User, Product, Item, Department, Supplier, Type, Order, Company
+from flask_pagedown.fields import PageDownField
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -229,8 +230,17 @@ class CreateDepartmentForm(FlaskForm):
 	department_name = StringField('Deparment name:', validators=[DataRequired()])
 	submit = SubmitField('Submit')
 
-
 class CreateDocumentForm(FlaskForm):
-	document_id = StringField('Document id:', validators=[DataRequired()], render_kw={"placeholder": "ex. SOP-001"})
+	dept_name = StringField('Deparment name:', validators=[DataRequired()], render_kw={'readonly': True})
+	document_no = StringField('Document id:', validators=[DataRequired()], render_kw={"placeholder": "ex. SOP-001"})
 	document_name = StringField('Document name:', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUCOSE"})
+	submit = SubmitField('Submit')
+	
+class CreateDocumentSectionForm(FlaskForm):
+	section_number = IntegerField('Section Number', validators=[DataRequired()])
+	section_title = StringField('Section title:', validators=[DataRequired()])
+	submit = SubmitField('Submit')
+	
+class EditDocumentBodyForm(FlaskForm):
+	body = PageDownField('Edit Document', validators=[DataRequired()])
 	submit = SubmitField('Submit')

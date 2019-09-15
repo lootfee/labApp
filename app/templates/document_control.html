@@ -28,24 +28,25 @@
 	<div class="col-md-6">
 		<p><a href="#" data-toggle="modal" data-target="#create_dept_modal" style="float:right;">Create Department</a></p>
 		<br>
-		<ul class="nav nav-tabs nav-stacked" role="tablist">
+		<ul class="nav nav-pills nav-stacked" role="tablist">
 			{% for dept in departments %}
-			<li role="presentation" class="active"><a href="#documentation_deptname_{{ dept.department_name }}" aria-controls="home" role="tab" data-toggle="tab">{{ dept.department_name }}</a></li>
+			<li role="presentation"><a href="#documentation_deptname_{{ dept.department_name }}" aria-controls="documentation_deptname_{{ dept.department_name }}" role="tab" data-toggle="tab">{{ dept.department_name }}</a></li>
 			{% endfor %}
 		</ul>
 	</div>
 	<div class="col-md-6">
-		<p><a href="#" data-toggle="modal" data-target="#create_sop_modal" style="float:right;">Create SOP</a></p>
-			<br>
-		<div class="tab-content">
-			<ul class="nav nav-tabs nav-stacked" role="tablist">
-				{% for dept in departments %}
-				{% for doc in documents %}
-				<li role="presentation" id="documentation_deptname_{{ dept.department_name }}" class="active"><a href="#" aria-controls="home" role="tab" data-toggle="tab">{{ doc.document_id}}-{{ doc.document_name}}</a></li>
+		<div class="tab-content" >
+			{% for dept in departments %}
+			<div role="tabpanel" class="tab-pane" id="documentation_deptname_{{ dept.department_name }}">
+				<p><a href="#" data-toggle="modal" data-target="#create_sop_modal_{{ dept.department_name }}" style="float:right;">Create SOP for {{ dept.department_name }}</a></p>
+				<br>
+				<ul class="nav nav-pills nav-stacked" role="tablist" >
+				{% for doc in dept.documents %}
+					<li role="presentation"><a href="{{ url_for('documents', company_name=company.company_name, department_name=dept.department_name, document_no=doc.document_no, document_name=doc.document_name ) }}" target="_blank">{{ doc.document_no }}-{{ doc.document_name}}</a></li>
 				{% endfor %}
-				{% endfor %}
-		</ul>
-			</ul>
+				</ul>
+			</div>
+			{% endfor %}
 		</div>
 	</div>
 
@@ -65,14 +66,31 @@
 	</div>
   </div>
 </div>
-<div class="modal fade" id="create_sop_modal" tabindex="-1" role="dialog" aria-labelledby="create_sop_modal_label">
+{% for dept in departments %}
+<div class="modal fade" id="create_sop_modal_{{ dept.department_name }}" tabindex="-1" role="dialog" aria-labelledby="create_sop_modal_label">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-body">
 		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		{{ wtf.quick_form(form2) }}
+		<form action method="post" class="form" role="form">
+		{{ form2.hidden_tag() }}
+		<div class="form-group required">
+			{{ form2.dept_name.label (class_="control-label") }}
+			{{ form2.dept_name (class_="form-control", value=dept.department_name) }}
+		</div>
+		<div class="form-group required">
+			{{ form2.document_no.label (class_="control-label") }}
+			{{ form2.document_no (class_="form-control") }}
+		</div>
+		<div class="form-group required">
+			{{ form2.document_name.label (class_="control-label") }}
+			{{ form2.document_name (class_="form-control") }}
+		</div>
+		{{ form2.submit (class_="btn btn-default") }}
+		</form>
 	  </div>
 	</div>
   </div>
 </div>
+{% endfor %}
 {% endblock %}

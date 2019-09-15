@@ -11,6 +11,8 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
 from flask_cors import CORS, cross_origin
 from flask_uploads import configure_uploads, patch_request_class, UploadSet, IMAGES
+from flask_pagedown import PageDown
+#import markdown2
 #from flask_babel import Babel
 
 app = Flask(__name__)
@@ -26,6 +28,7 @@ cors = CORS(app)
 photos = UploadSet('photos', IMAGES)
 configure_uploads(app, photos)
 patch_request_class(app)  # set maximum file size, default is 16MB
+pagedown = PageDown(app)
 #babel = Babel(app)
 
 if not app.debug:

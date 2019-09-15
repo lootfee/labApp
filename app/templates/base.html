@@ -29,7 +29,9 @@
 					<li><a href="{{ url_for('document_control_sample') }}">Document Control</a></li>
 					<li><a href="{{ url_for('inventory_management_sample')}}">Inventory</a></li>
 					{% if current_user.is_authenticated %}
+					{% if users %}
 					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
+					{% endif %}
 					{% endif %}
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
@@ -94,6 +96,7 @@
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
 	<script src="{{url_for('static', filename='js/calculators.js')}}"></script>
 	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	{% if current_user.is_authenticated %}
 	<script>
 		$(document).ready(function(){
 			var search_tags = [
@@ -125,5 +128,5 @@
 			};
 	   });
 	</script>
-
+	{% endif %}
 {% endblock %}

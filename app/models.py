@@ -553,16 +553,74 @@ class DocumentationDepartment(db.Model):
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
+	document = db.relationship('DocumentName', backref=db.backref('department', lazy=True))
+	sections = db.relationship('DocumentSection', backref=db.backref('department', lazy=True))
+	versions = db.relationship('DocumentVersion', backref=db.backref('department', lazy=True))
+	
 	def __repr__(self):
 		return '<DocumentationDepartment {}>'.format(self.id)
 
 
 class DocumentName(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	document_id = db.Column(db.String(50), index=True, unique=True)
-	document_name = db.Column(db.String(50), index=True, unique=True)
+	document_no = db.Column(db.String(50), index=True)
+	document_name = db.Column(db.String(50), index=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
+	
+	sections = db.relationship('DocumentSection', backref=db.backref('document_name', lazy=True))
+	versions = db.relationship('DocumentVersion', backref=db.backref('document_name', lazy=True))
+	body = db.relationship('DocumentSectionBody', backref=db.backref('document_name', lazy=True))
 	
 	def __repr__(self):
 		return '<DocumentName {}>'.format(self.id)
+		
+		
+class DocumentSection(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	section_number = db.Column(db.Integer)
+	section_title = db.Column(db.String(50))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
+	document_name_id = db.Column(db.Integer, db.ForeignKey('document_name.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	
+	body = db.relationship('DocumentSectionBody', backref=db.backref('document_section', lazy=True))
+	
+	def __repr__(self):
+		return '<DocumentSection {}>'.format(self.id)
+
+class DocumentSectionBody(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	section_body = db.Column(db.String(50000))
+	change_log = db.Column(db.String(400))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
+	document_name_id = db.Column(db.Integer, db.ForeignKey('document_name.id'))
+	document_section_id = db.Column(db.Integer, db.ForeignKey('document_section.id'))
+	submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_submitted = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+		
+	def __repr__(self):
+		return '<DocumentSectionBody {}>'.format(self.id)
+		
+class DocumentVersion(db.Model):
+	section_id = db.Column(db.Integer, db.ForeignKey('document_section.id'), primary_key=True)
+	section_body_id = db.Column(db.Integer, db.ForeignKey('document_section_body.id'), primary_key=True)
+	version_no = db.Column(db.Integer)
+	reviewed_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_reviewed = db.Column(db.DateTime, index=True)
+	approved_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_approved = db.Column(db.DateTime, index=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
+	document_name_id = db.Column(db.Integer, db.ForeignKey('document_name.id'))
+	
+	section = db.relationship('DocumentSection', backref=db.backref('version', lazy=True))
+	body = db.relationship('DocumentSectionBody', backref=db.backref('version', lazy=True))
+
+	def __repr__(self):
+		return '<DocumentVersion {}>'.format(self.id)
+
+

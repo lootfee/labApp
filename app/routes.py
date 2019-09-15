@@ -3,12 +3,13 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm, CreateDocumentForm, MessageFormDirect
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
 from link_preview import link_preview
 import requests
+import markdown2 
 
 
 
@@ -615,6 +616,7 @@ def inventory(company_name):
 			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
+			i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
 	return render_template('inventory_management/inventory.html', title='Inventory', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, my_products=my_products, orders=orders, dept=dept)
 
 @app.route('/<company_name>/consume_item/<ref_number>', methods=['GET', 'POST'])
@@ -1073,24 +1075,71 @@ def document_control(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	departments = DocumentationDepartment.query.filter_by(company_id=company.id).all()
-	documents = DocumentName.query.filter_by(company_id=company.id).all()
+	for dept in departments:
+		dept.documents = DocumentName.query.filter_by(company_id=company.id, department_id=dept.id).all()
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	form1 = CreateDepartmentForm()
-	if form1.validate_on_submit():
-		dept = DocumentationDepartment(department_name=form1.department_name.data, company_id=company.id, user_id=current_user.id)
-		db.session.add(dept)
-		db.session.commit()
-		return redirect(url_for('document_control', company_name=company.company_name))
+	if form1.submit.data:
+		if form1.validate_on_submit():
+			dept = DocumentationDepartment(department_name=form1.department_name.data, company_id=company.id, user_id=current_user.id)
+			db.session.add(dept)
+			db.session.commit()
+			return redirect(url_for('document_control', company_name=company.company_name))
 	form2 = CreateDocumentForm()
-	if form2.validate_on_submit():
-		doc = DocumentName(document_id=form2.document_id.data, document_name=form2.document_name.data, company_id=company.id, user_id=current_user.id)
-		db.session.add(doc)
+	if form2.submit.data:
+		if form2.validate_on_submit():
+			dept_id = DocumentationDepartment.query.filter_by(department_name=form2.dept_name.data).first().id
+			doc = DocumentName(document_no=form2.document_no.data, document_name=form2.document_name.data, company_id=company.id, user_id=current_user.id, department_id=dept_id)
+			db.session.add(doc)
+			db.session.commit()
+			return redirect(url_for('document_control', company_name=company.company_name))
+	return render_template('document_control.html', title='Document Control', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments)
+
+@app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>', methods=['GET', 'POST'])
+@login_required
+def documents(company_name, department_name, document_no, document_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	department = DocumentationDepartment.query.filter_by(company_id=company.id, department_name=department_name).first()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
+	sections = DocumentSection.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id).order_by(DocumentSection.section_number.asc()).all()
+	for sect in sections:
+		for s in sect.body:
+			s.body = markdown2.markdown(s.section_body)
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	form1 = CreateDocumentSectionForm()
+	if form1.validate_on_submit():
+		section = DocumentSection(section_number=form1.section_number.data, section_title=form1.section_title.data, company_id=company.id, department_id=department.id, document_name_id=document.id, user_id=current_user.id)
+		db.session.add(section)
 		db.session.commit()
-		return redirect(url_for('document_control', company_name=company.company_name))
-	return render_template('document_control.html', title='Document Control', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments, documents=documents)
+		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
+	return render_template('lab_document.html', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, sections=sections, form1=form1)
+	
+@app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>/<section_number>/<section_title>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_section_body(company_name, department_name, document_no, document_name, section_number, section_title):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	department = DocumentationDepartment.query.filter_by(company_id=company.id, department_name=department_name).first()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
+	section = DocumentSection.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, section_number=section_number, section_title=section_title).first()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	form2 = EditDocumentBodyForm()
+	if form2.validate_on_submit():
+		body = DocumentSectionBody(section_body=form2.body.data, company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id, submitted_by=current_user.id)
+		db.session.add(body)
+		db.session.commit()
+		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
+	return render_template('lab_document.html', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
 	
 @app.route('/document_control_sample')
 def document_control_sample():

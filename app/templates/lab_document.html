@@ -1,0 +1,172 @@
+{% extends "document_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+	<div class="row">
+		<div class="col-md-3 col-sm-12 col-xs-12" style="border-right:solid 2px #808080; position:fixed; height:100%;">
+			<div id="doc_header">
+				<h4><a href="#company_logo" rel="internal">{{ document.document_name }}</a></h4>
+				<ul class="versions" style="list-style-type: circle;font-size:12px">
+					<li>{{ document.document_no }}</li>
+					<li>Issued date: 15-03-2019</li>
+					<li>Effective date: 19-03-2019</li>
+				</ul>
+			</div>
+			{% if form1 %}
+			<div class="col-md-12">
+				<p><a href="#" data-toggle="modal" data-target="#create_section_modal" style="float:right;font-size:10px;">Create section</a></p>
+			</div>
+			{% endif %}
+			<br>
+			<div class="col-md-12">
+				<ul class="list-group" style="list-style-type:none;">
+				{% if sections %}
+				{% for sect in sections %}
+					<li><a href="#{{ sect.section_title }}" rel="internal">{{ sect.section_number }}. {{ sect.section_title }}</a><a href="{{ url_for('edit_section_body', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_number=sect.section_number, section_title=sect.section_title ) }}" style="float:right;"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a></li>
+				{% endfor %}
+				{% endif %}
+				{% if section %}
+					<li><a href="#{{ section.section_title }}" rel="internal">{{ section.section_number }}. {{ section.section_title }}</a></li>
+				{% endif %}
+				</ul>
+			</div>
+			
+		</div>
+		<div class="col-md-9 col-sm-12 col-xs-12 main_body" style="position:absolute; margin-left: 25%;">
+			<div class="row col-md-12 text-center">
+				<div class="col-md-2">
+				</div>
+				<div class="col-md-6">
+					<h2>{{ document.document_name }}</h2>
+				</div>
+				<div class="col-md-2" style="float:right;">
+					{% if company.logo %}
+					<img id="company_logo" src="{{ company.logo }}" alt="{{ company.company_name }}">
+					{% else %}
+					<img src="{{ company.company_avatar(128) }}">
+					{% endif %}
+				</div>
+			</div>
+			<div class="col-md-12">
+				<ol class="list-group">
+					{% if sections %}
+					{% for sect in sections %}
+					<section id="{{ sect.section_title }}">
+						<header class="section_header"><li>{{ sect.section_title }}</header>
+							<article>
+								{% if sect.body %}
+									{% for s in sect.body %}{{ s.body|safe }}{% endfor %}
+								{% endif %}
+							</article>
+						</li>
+					</section>
+					{% endfor %}
+					{% endif %}
+					{% if section %}
+					<section id="{{ section.section_title }}">
+						<h4>{{ section.section_number }}. {{ section.section_title }}</h4>
+							<div>
+								<ol>
+								{% if section.body %}
+								{% for s in section.body %}
+								<li>{{ s.section_body }}</li>
+								{% endfor %}
+								{% endif %}
+								</ol>
+							</div>
+						
+					</section>
+					{% endif %}
+				</ol>
+			</div>
+			{% if form2 %}
+			<div class="col-md-12">
+				<form action method="post" class="form" role="form">
+					{{form2.hidden_tag() }}
+					<div>
+						{{ form2.body(only_preview=True, class_="col-md-12") }}
+					</div>
+					<div class="col-md-12" >
+						{{ form2.body(only_input=True, class_="col-md-9") }}
+						<div class="col-md-2"></div>
+						
+						<div class="col-md-10">
+						<br>
+							 {{ form2.submit (class_="btn btn-default") }}
+						</div>
+			
+						
+					</div>
+				</form>
+			</div>
+			{% endif %}
+		</div>
+	</div>
+	{% if form1 %}
+	<div class="modal fade" id="create_section_modal" tabindex="-1" role="dialog" aria-labelledby="create_section_modal_label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		  </div>
+		  <div class="modal-body">
+			{{ wtf.quick_form(form1) }}
+		  </div>
+		</div>
+	  </div>
+	</div>
+	{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+	.main_body .list-group {
+		list-style: decimal inside;
+	}
+
+	.main_body .list-group-item {
+		display: list-item;
+	}
+
+	.main_body .list-sub-group {
+		margin-bottom: 10px;
+		padding-left: 0;
+	}
+
+	.main_body .list-sub-group li:before {
+		content: counters(item, ".") ". ";
+		counter-increment: item;
+		display: table-cell;
+		padding-left: 0;
+		padding-right: 10px;
+	}
+
+	.main_body ol {
+		counter-reset: item;
+		padding-left: 15px;
+	}
+
+	.main_body li {
+		display: table;
+	}
+
+	.main_body li:before {
+		content: counters(item, ".") ". ";
+		counter-increment: item;
+		display: table-cell;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+	
+	.main_body .section_header {
+		font-weight: bold;
+	}
+	
+	.main_body section article {
+		margin: 15px;
+		margin-left: 25px;
+	}
+
+</style>
+{% endblock %}

@@ -57,7 +57,7 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container" style="margin-bottom:40px;">
+	<div class="container-fluid" style="margin-bottom:40px;">
 		{% with messages = get_flashed_messages() %}
 		{% if messages %}
 			{% for message in messages %}
@@ -70,8 +70,6 @@
 		{% block app_content %}
 		{% endblock %}
 	</div>
-	{% block doc_content %}
-	{% endblock %}
 <footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px">© 2019 labApp All Right Reserved</footer>
 {% endblock %}
 
@@ -86,6 +84,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
 	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script-->
 	<link rel="shortcut icon" href="/static/logo.jpg">
+	{{ pagedown.include_pagedown() }}
 {% endblock %}
 
 {% block scripts %}
@@ -93,9 +92,5 @@
     {{ moment.include_moment() }}
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.quicksearch/2.4.0/jquery.quicksearch.min.js" integrity="sha256-hD1kpQcVntR40eMx9uED+E4HAjD2OJkLIFcP6ukVd+g=" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.0/JsBarcode.all.min.js"></script>
-	<script src="{{url_for('static', filename='js/calculator.js')}}"></script>
-	<script src="{{url_for('static', filename='js/biochem.js')}}"></script>
-	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
-	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	
 {% endblock %}

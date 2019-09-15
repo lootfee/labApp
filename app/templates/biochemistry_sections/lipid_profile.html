@@ -1,34 +1,44 @@
 <div role="tabpanel" class="tab-pane" id="lipid_profile">
 	<div>
+		<div class="choose_unit">
+			<span class="lp_radio"><input type="radio" class="inputRadio lp_unit" name="lp_unit" id="lp_mgdl" checked>
+			<label for="lp_mgdl" class="radioLabel">mg/dL</label></span>
+			<span class="lp_radio"><input type="radio" class="inputRadio lp_unit" name="lp_unit" id="lp_mmoll">
+			<label for="lp_mmoll" class="radioLabel">mmol/L</label></span>	
+		</div>
 		<form>
 			<table id="lipidProfileTable" class="tableContainer">
 				<tr>
 					<td class="inputLabel">Cholesterol &nbsp;</td>
-					<td><input type="text" class="inputData data" name="cholesterol" id="cholesterol" placeholder="mg/dL" onkeypress="displayUnits('cholUnit')"><span class="units" id="cholUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="inputData data" name="cholesterol" id="cholesterol" placeholder="mg/dL" ><span class="units" id="chol_mgdl" style="left:310px">mg/dL</span><span class="units" id="chol_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">HDL &nbsp;</td>
-					<td><input type="text" class="inputData data" name="hdl" id="hdl" placeholder="mg/dL" onkeypress="displayUnits('hdlUnit')"><span class="units" id="hdlUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="inputData data" name="hdl" id="hdl" placeholder="mg/dL"><span class="units" id="hdl_mgdl" style="left:310px">mg/dL</span><span class="units" id="hdl_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">LDL &nbsp;</td>
-					<td><input type="text" class="inputData data" name="ldl" id="ldl" placeholder="mg/dL" onkeypress="displayUnits('ldlUnit')"><span class="units" id="ldlUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="inputData data" name="ldl" id="ldl" placeholder="mg/dL"><span class="units" id="ldl_mgdl" style="left:310px">mg/dL</span><span class="units" id="ldl_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">VLDL &nbsp;</td>
-					<td><input type="text" class="outputData data" name="vldl" id="vldl" placeholder="mg/dL" readonly><span class="units" id="vldlUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="outputData data" name="vldl" id="vldl" placeholder="mg/dL" readonly><span class="units" id="vldl_mgdl" style="left:310px">mg/dL</span><span class="units" id="vldl_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">Triglycerides &nbsp;</td>
-					<td><input type="text" class="inputData data" name="triglycerides" id="trig" placeholder="mg/dL" onkeypress="displayUnits('trigUnit')"><span class="units" id="trigUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="inputData data" name="triglycerides" id="trig" placeholder="mg/dL"><span class="units" id="trig_mgdl" style="left:310px">mg/dL</span><span class="units" id="trig_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">LDL Calculated &nbsp;</td>
-					<td><input type="text" class="outputData data" name="ldlc" id="ldlc" placeholder="mg/dL" readonly><span class="units" id="ldlcUnit" style="left:310px">mg/dL</span></td>
+					<td><input type="text" class="outputData data" name="ldlc" id="ldlc" placeholder="mg/dL" readonly><span class="units" id="ldlc_mgdl" style="left:310px">mg/dL</span><span class="units" id="ldlc_mmoll" style="left:310px">mmol/L</span></td>
 				  </tr>
 				  <tr>
 					<td class="inputLabel">Cholesterol/HDL ratio:&nbsp;</td>
 					<td><output type="text" class="outputData data" name="cholhdl" id="cholhdl" readonly></td>
+				  </tr>
+				  <tr>
+					<td class="inputLabel">Triglycerides/HDL ratio:&nbsp;</td>
+					<td><output type="text" class="outputData data" name="trighdl" id="trighdl" readonly></td>
 				  </tr>
 				  <tr> 
 					<td class="inputLabel">HDL/LDL ratio:&nbsp;</td>
@@ -40,7 +50,7 @@
 				  </tr>
 			</table>
 			<div class="buttonContainer">
-				<input type="button" class="button" value="CALCULATE" onclick="calclp()">
+				<input type="button" class="button" value="CALCULATE" id="calc_lipid_profile">
 				<input type="button" class="button clear_button" value="CLEAR">
 			</div>
 			
