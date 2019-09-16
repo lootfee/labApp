@@ -42,9 +42,9 @@
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
 					<td>{{ my_p.department }}</td>
-					<td></td>
-					<td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
-					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
+					<td class="text-center">{{ my_p.item_count }}</td>
+					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
+					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">Add</a></td>
 				</tr>
 				{% endfor %}
 			{% endif %}
@@ -64,21 +64,15 @@
 				<tr>
 					<th>Reference No</th>
 					<th>Name</th>
-					<th>Price Each</th>
 					<th>Quantity</th>
-					<th>Total Price</th>
 					<th>Added by</th>
 				</tr>
 				{% for list in order_list %}
 					<tr>
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
-						<td>{{ list.price }}</td>
 						<td>{{ list.quantity }}</td>
-						<td class='individual_total'>{{ list.total }}</td>
 						<td>{{ list.user.username }}</td>
-						<!--td><a href="#" data-toggle="modal" id="request_{{ list.ref_number }}" data-target="#request_reagent_modal_{{ list.ref_number }}">Edit</a></td-->
-						
 						{% if not order.date_submitted %}
 						<td><a href="{{url_for('remove_order_item', company_name=company.company_name, order_no=order.order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></a></td>
 						{% endif %}
@@ -91,51 +85,19 @@
 		<form action method="post" class="form" role="form" name="orders_list_form" id="orders_list_form">
 			{{ form.csrf_token() }}
 			<div style="width: 200px;float: right; margin-bottom: 20px;">
-				<div id="subtotal_container">Total: <span id="subtotal_price" style="color: blue;"></span></div>
 				{% if not order.date_submitted %}
 				<div>
 					{{ form.save(class_="btn btn-default")}}
 					{% if order_list %}
+					{% if is_inv_supervisor %}
 					{{ form.submit(class_="btn btn-default")}}
+					{% endif %}
 					{% endif %}
 				</div>
 				{% endif %}
 			</div>
 		</form>
 		</div>
-		<!-- using modal for editing quantity not working
-		{% for list in order_list %}
-		<div class="modal fade" id="request_reagent_modal_{{ list.ref_number }}" tabindex="-1" role="dialog">
-		  <div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-				<h4 class="modal-title">Order no: {{ order.order_no }}</h4>
-				<button type="button" class="close" id="close_{{ list.ref_number }}" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				</div>
-				<div class="modal-body">
-					
-						<table id="edit_qty_table_{{ list.ref_number }}">
-							<tr>
-								<th style="width:150px;">Ref No</th>
-								<th style="width:400px;">Name</th>
-								<th style="width:40px;">Qty</th>
-							</tr>
-							<!--tr>
-								<td>{{ list.ref_number }}</td>
-								<td>{{ list.name }}</td>
-								<td id="quantity_edit_{{ list.ref_number }}" contenteditable>{{ list.quantity }}</td>
-							</tr>
-						</table>
-					
-				</div>
-				<div class="modal-footer">
-				
-				</div>
-			</div>
-		  </div>
-		</div>
-		{% endfor %}
-			-->
     </div>
 {% endblock %}
 {% block scripts %}
@@ -145,14 +107,6 @@
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
 			
-			var sum = 0;
-			$(".individual_total").each(function() {
-				sum += parseFloat($(this).text());
-				$("#subtotal_price").html(sum);
-			});
-			if ($(".individual_total").length > 0) {
-			$("#subtotal_container").css("display", "block");
-			}
 			{% for my_p in my_products %}
 			
 				$("#add_{{ my_p.ref_number }}").click(function() {
@@ -161,73 +115,17 @@
 					  if (!exists ){
 						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
 						
-						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td></tr>");
-						
-						
-						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='tot_price' id='form_tot_price_{{ my_p.ref_number }}' value=''></div>");
-						
-						var total = {{ my_p.price }} * qty_req;
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td></tr>");
 						$("#qty_{{ my_p.ref_number}}").html(qty_req);
-						$("#total_price_{{ my_p.ref_number}}").html(total);
-						$('#form_qty_{{ my_p.ref_number }}').val(qty_req);
-						$('#form_tot_price_{{ my_p.ref_number }}').val(total);
 						
-						var sum = 0;
-						$(".individual_total").each(function() {
-							sum += parseFloat($(this).text());
-							$("#subtotal_price").html(sum);
-						});
-						if ($(".individual_total").length > 0) {
-						$("#subtotal_container").css("display", "block");
-						}
+						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''></div>");
+						$('#form_qty_{{ my_p.ref_number }}').val(qty_req);
+						
 					}
+					return false;  
 				});
 				
 			{% endfor %}
-			
-			/*$("#save_edit_btn").click(function() {
-			$("#form_save_edit").click();
-			});*/
-		} );
-		
-		{% for my_p in my_products %}
-		$(document).on( 'keyup', '#qty_{{ my_p.ref_number}}', function() {
-			var edit_qty = $("#qty_{{ my_p.ref_number}}").html();
-			var edit_total = {{ my_p.price }} * edit_qty;
-			$("#total_price_{{ my_p.ref_number}}").html(edit_total);
-			$('#form_qty_{{ my_p.ref_number }}').val(edit_qty);
-			$('#form_tot_price_{{ my_p.ref_number }}').val(edit_total);
-			var sum = 0;
-			$(".individual_total").each(function() {
-				sum += parseFloat($(this).text());
-				$("#subtotal_price").html(sum);
-			});
-			if ($(".individual_total").length > 0) {
-			$("#subtotal_container").css("display", "block");
-			}
 		});
-		
-		{% endfor %}
-		
-		{% for list in order_list %}
-		$("#request_{{ list.ref_number }}").click(function() {
-			
-			$("#edit_qty_table_{{ list.ref_number }} > tbody:last-child").append('<tr class="append_data"><form action method="post"class="form" role="form"><td>{{list.ref_number}}</td><td>{{list.name}}</td><td style="width:80px;">{{ form1.edit_qty(class_="form-control") }}</td><td><button type="button" class="btn btn-default" id="edit_item_qty"><a href="{{url_for("edit_item_qty", company_name=company.company_name, order_no=order.order_no, id=list.id)}}">Edit</a></button></td><td>{{ form1.orderlist_id(value=list.id)}}</td><td>{{ form1.csrf_token() }}</td></form></tr>');
-			print
-			/*$('input[name=orderlist_id]').val({{ list.id }});
-			$('input[name=edit_qty]').val({{ list.quantity }});*/
-		});
-		$("#close_{{ list.ref_number }}").click(function() {
-			$(".append_data").remove();
-		});
-		
-		/*$(document).on( 'keyup', '#edit_qty', function() {
-			var qty_val = $("#edit_qty").val();
-			//$('input[name=edit_qty]').val(edit_qty);
-		});*/
-		{% endfor %}
-		
-		
-		
 	</script>
 {% endblock %}

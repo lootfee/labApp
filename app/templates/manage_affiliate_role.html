@@ -14,18 +14,18 @@
 			<tr>
 				<th class="col-md-2 admin-table">Affiliate</th>
 				<th class="col-md-2 admin-table">{{ form.title.label}}</th>
-				<th class="col-md-1 admin-table">{{ form.qc_access.label}}</th>
-				<th class="col-md-1 admin-table">{{ form.inv_access.label}}</th>
-				<th class="col-md-1 admin-table">{{ form.qc_admin.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.inv_supervisor.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.doc_admin.label}}</th>
 				<th class="col-md-1 admin-table">{{ form.inv_admin.label}}</th>
 				<th class="col-md-1 admin-table table-bordered">{{ form.super_admin.label}}</th>
 			</tr>
 			<tr>
 				<td class="col-md-2 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ({{ affiliate.users.username }})</a></td>
 				<th class="col-md-2 admin-table">{{ form.title (class_="form-control") }}</th>
-				<td class="admin-table form-group">{{form.qc_access(class_="single_check")}}</td>
-				<td class="admin-table form-group">{{form.inv_access(class_="single_check")}}</td>
-				<td class="admin-table form-group">{{form.qc_admin(class_="single_check double_check")}}</td>
+				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
+				<td class="admin-table form-group">{{form.inv_supervisor(class_="single_check")}}</td>
+				<td class="admin-table form-group">{{form.doc_admin(class_="single_check double_check")}}</td>
 				<td class="admin-table form-group">{{form.inv_admin(class_="single_check double_check")}}</td>
 				<td class="admin-table table-bordered form-group">{{form.super_admin}}</td>	
 			</tr>

@@ -3,7 +3,9 @@
 		<li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Overview</a></li>
 		<li><a href="{{ url_for('inventory', company_name=company.company_name)}}">Inventory</a></li>
 		<li><a href="{{ url_for('orders', company_name=company.company_name)}}">Orders</a></li>
+		{% if is_inv_admin %}
 		<li><a href="{{ url_for('purchases', company_name=company.company_name)}}">Purchases</a></li>
+		{% endif %}
 		<li><a href="{{ url_for('deliveries', company_name=company.company_name)}}">Deliveries</a></li>
 		<li><a href="{{ url_for('products', company_name=company.company_name)}}">Products</a></li>
 		<li><a href="{{ url_for('suppliers', company_name=company.company_name)}}">Suppliers</a></li>

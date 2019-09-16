@@ -89,9 +89,9 @@ class ResetPasswordForm(FlaskForm):
 
 class UserRoleForm(FlaskForm):
 	title = StringField('Title', validators=[DataRequired()])
-	qc_access = BooleanField('QC Access')
-	inv_access = BooleanField('Inventory Access')
-	qc_admin = BooleanField('QC Admin')
+	doc_supervisor = BooleanField('Document Supervisor')
+	inv_supervisor = BooleanField('Inventory Supervisor')
+	doc_admin = BooleanField('Document Admin')
 	inv_admin = BooleanField('Inventory Admin')
 	super_admin = BooleanField('Super Admin')
 	submit = SubmitField('Save')
@@ -243,4 +243,5 @@ class CreateDocumentSectionForm(FlaskForm):
 	
 class EditDocumentBodyForm(FlaskForm):
 	body = PageDownField('Edit Document', validators=[DataRequired()])
+	changelog = StringField('Changelog:')
 	submit = SubmitField('Submit')

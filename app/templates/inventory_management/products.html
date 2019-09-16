@@ -5,7 +5,7 @@
 {% include 'inventory_management/inventory_manager_nav.html' %}	
     <h3 class="inventory_headers">Manage Products</h3>
 	<hr class="inventory_hr">
-	{% if is_inv_admin %}
+	{% if is_inv_supervisor %}
 	<div class="row sidenav" id="product_sidenav">
 		<div class="col-md-12">
 			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
@@ -14,6 +14,7 @@
 			<h4>Register Product</h4>
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}
+				<div>
 				<div class="col-md-6">
 					{{ form.reference_number.label(class_="contol-label") }}
 					{{ form.reference_number(class_="form-control") }}
@@ -40,8 +41,11 @@
 					{{ form.type.label(class_="contol-label") }}
 					{{ form.type(class_="form-control") }}
 				</div>
+				</div>
 				<br>
-				<input class="btn btn-default" id="submit" name="submit" type="submit" value="Register" style="float: right; margin-bottom: 10px;">
+				
+				<input class="btn btn-default" id="submit" name="submit" type="submit" value="Register" style="float: right; margin-bottom: 10px;margin-top: 10px;">
+
 			</form>
 				
 		</div>
@@ -49,7 +53,7 @@
 	{% endif %}
 	<div class="row">
 		<div class="col-md-12">
-			{% if is_inv_admin %}
+			{% if is_inv_supervisor %}
 			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align" style="float: left;">
 				<span>Register Product</span>
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>

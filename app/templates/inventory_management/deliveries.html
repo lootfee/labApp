@@ -10,21 +10,20 @@
 			<table class="text-center table-bordered table-hover">
 				<tr>
 					<th class="col-md-2">Purchase Order</th>
-					{% if all_deliveries %}
-					<th class="col-md-1">View Delivery</th>
-					{% else %}
 					<th class="col-md-1">Status</th>
-					{% endif %}
 					<th class="col-md-1">Action</th>
-					
 				</tr>
 				{% if purchases %}
 					{% for purchase in purchases %}
 					{% if purchase.date_purchased %}
 					<tr>
+						{% if is_inv_admin %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
-						{% if purchase.delivered_purchases %}
+						{% else %}
+						<td>{{ purchase.purchase_order_no }}</td>
+						{% endif %}
 						
+						{% if purchase.delivered_purchases %}
 						<td>{% for p in purchase.delivered_purchases %}<div><a href="{{ url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=p.delivery_no)}}">{{ p.delivery_no }}</a></div>{% endfor %}</td>
 						{% else %}
 						<td>Ordered</td>

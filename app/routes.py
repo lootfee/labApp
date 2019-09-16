@@ -390,29 +390,37 @@ def manage_affiliate(user_id, comp_id):
 	if form.submit.data:
 		if form.validate_on_submit():
 			affiliate.title = form.title.data
-			affiliate.qc_access = form.qc_access.data
-			affiliate.inv_access = form.inv_access.data
-			affiliate.qc_admin = form.qc_admin.data
+			#affiliate.qc_supervisor = form.qc_supervisor.data
+			affiliate.inv_supervisor = form.inv_supervisor.data
+			affiliate.doc_supervisor = form.doc_supervisor.data
+			#affiliate.qc_admin = form.qc_admin.data
 			affiliate.inv_admin = form.inv_admin.data
+			affiliate.doc_admin = form.doc_admin.data
 			affiliate.super_admin = form.super_admin.data
-			if form.qc_admin.data:
-				affiliate.qc_access = True
+			#if form.qc_admin.data:
+			#	affiliate.qc_supervisor = True
 			if form.inv_admin.data:
-				affiliate.inv_access = True
+				affiliate.inv_supervisor = True
+			if form.doc_admin.data:
+				affiliate.doc_supervisor = True
 			if form.super_admin.data:
-				affiliate.qc_access = True
-				affiliate.inv_access = True
-				affiliate.qc_admin = True
+				#affiliate.qc_supervisor = True
+				affiliate.inv_supervisor = True
+				affiliate.doc_supervisor = True
+				#affiliate.qc_admin = True
 				affiliate.inv_admin = True
+				affiliate.doc_admin = True
 			db.session.commit()
 			flash('Your changes has been saved!')
 			return redirect(url_for('admin', company_name=company.company_name))
 	elif request.method == 'GET':
 		form.title.data = affiliate.title
-		form.qc_access.data = affiliate.qc_access
-		form.inv_access.data = affiliate.inv_access
-		form.qc_admin.data = affiliate.qc_admin
+		#form.qc_supervisor.data = affiliate.qc_supervisor
+		form.inv_supervisor.data = affiliate.inv_supervisor
+		form.doc_supervisor.data = affiliate.doc_supervisor
+		#form.qc_admin.data = affiliate.qc_admin
 		form.inv_admin.data = affiliate.inv_admin
+		form.doc_admin.data = affiliate.doc_admin
 		form.super_admin.data = affiliate.super_admin
 	return render_template('manage_affiliate_role.html', user=user, form=form, company=company, affiliate=affiliate, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
 
@@ -482,6 +490,7 @@ def inventory_management(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -519,7 +528,7 @@ def inventory_management(company_name):
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases)	
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases)	
 
 
 @app.route('/<company_name>/inventory_management/products', methods=['GET', 'POST'])
@@ -529,6 +538,7 @@ def products(company_name):
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -573,7 +583,7 @@ def products(company_name):
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, my_products=my_products)
+	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products)
 	
 
 @app.route('/delete_product/<int:prod_id>, <int:comp_id>')	
@@ -594,6 +604,7 @@ def inventory(company_name):
 	orders = Order.query.filter_by(company_id=company.id).first()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -617,7 +628,7 @@ def inventory(company_name):
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
 			i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
-	return render_template('inventory_management/inventory.html', title='Inventory', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, my_products=my_products, orders=orders, dept=dept)
+	return render_template('inventory_management/inventory.html', title='Inventory', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, orders=orders, dept=dept)
 
 @app.route('/<company_name>/consume_item/<ref_number>', methods=['GET', 'POST'])
 @login_required	
@@ -658,6 +669,7 @@ def orders(company_name):
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -682,7 +694,7 @@ def orders(company_name):
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
-	return render_template('inventory_management/orders.html', title='Orders', user=user, company=company, form=form, form1=form1, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, purchases=purchases)
+	return render_template('inventory_management/orders.html', title='Orders', user=user, company=company, form=form, form1=form1, orders=orders, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
 
 
 
@@ -696,6 +708,8 @@ def create_orders(company_name, order_no):
 		list.user = User.query.filter_by(id=list.user_id).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -707,15 +721,14 @@ def create_orders(company_name, order_no):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
 		refnum_list = request.form.getlist('refnum')
 		name_list = request.form.getlist('name')
-		price_list = request.form.getlist('price')
 		qty_list = request.form.getlist('qty')
-		tot_list = request.form.getlist('tot_price')
 		for i in range(0, len(refnum_list) ):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], order_id=order.id, user_id=user.id, company_id=company.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], order_id=order.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
@@ -724,7 +737,7 @@ def create_orders(company_name, order_no):
 		order.date_submitted = datetime.utcnow()
 		db.session.commit()
 		return redirect (url_for('orders', company_name=company.company_name))
-	return render_template('inventory_management/create_orders.html', title='Create Orders', user=user, company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
+	return render_template('inventory_management/create_orders.html', title='Create Orders', user=user, company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
 
 
 @app.route('/<company_name>/<order_no>/remove_order_item/<int:id>')
@@ -760,10 +773,12 @@ def purchases(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_inv_admin = company.is_inv_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	purchases = Purchase.query.filter_by(company_id=company.id).all()
+	purchases = Purchase.query.filter_by(company_id=company.id).order_by(Purchase.date_created.desc()).all()
 	for purchase in purchases:
 		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
@@ -780,7 +795,7 @@ def purchases(company_name):
 	#form = CreatePurchaseOrderForm()
 	#for purchase in purchases:
 	#	purchase.purchase_created_by = User.query.filter_by(id=purchase.created_by).first().username
-	return render_template('inventory_management/purchases.html', title='Purchases', user=user, company=company, purchases=purchases, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)		
+	return render_template('inventory_management/purchases.html', title='Purchases', user=user, company=company, purchases=purchases, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)		
 
 
 @app.route('/<company_name>/inventory_management/purchase_list/<purchase_order_no>', methods=['GET', 'POST'])
@@ -791,8 +806,12 @@ def purchase_list(company_name, purchase_order_no):
 	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	for list in purchase_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
+		list.product_id = Product.query.filter_by(ref_number=list.ref_number).first().id
+		list.pricee = MyProducts.query.filter_by(company_id=company.id, product_id=list.product_id).first().price
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_inv_admin = company.is_inv_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -803,6 +822,7 @@ def purchase_list(company_name, purchase_order_no):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
 		refnum_list = request.form.getlist('refnum')
@@ -823,7 +843,7 @@ def purchase_list(company_name, purchase_order_no):
 		purchase.date_purchased = datetime.utcnow()
 		db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
-	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchase_list=purchase_list, form=form, dept=dept, my_products=my_products)		
+	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_products=my_products)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/remove_purchase_item/<int:id>')
@@ -855,10 +875,12 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_inv_admin = company.is_inv_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchase_list=purchase_list, delivery=delivery)		
+	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, delivery=delivery)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/receive_delivery_item/<delivery_order_no>/<int:id>', methods=['GET', 'POST'])
@@ -909,7 +931,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 def deliveries(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
-	purchases = Purchase.query.filter_by(company_id=company.id).all()
+	purchases = Purchase.query.filter_by(company_id=company.id).order_by(Purchase.date_purchased.desc()).all()
 	for purchase in purchases:
 		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
@@ -925,6 +947,8 @@ def deliveries(company_name):
 			purchase.purchase_order_complete = True
 		#print(completed_item , len(purchase.purchase_list))
 	is_super_admin = company.is_super_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_inv_admin = company.is_inv_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -935,7 +959,7 @@ def deliveries(company_name):
 		db.session.add(delivery)
 		db.session.commit()
 		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
-	return render_template('inventory_management/deliveries.html', title='Deliveries', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form)
+	return render_template('inventory_management/deliveries.html', title='Deliveries', user=user, company=company, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form)
 	
 @app.route('/<company_name>/inventory_management/suppliers',  methods=['GET', 'POST'])
 @login_required
@@ -944,7 +968,7 @@ def suppliers(company_name):
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
-	is_qc_admin = company.is_qc_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -960,7 +984,7 @@ def suppliers(company_name):
 		db.session.commit()
 		return redirect(url_for('suppliers', company_name=company.company_name))
 	suppliers = Supplier.query.order_by(Supplier.name.asc()).all()
-	return render_template('inventory_management/suppliers.html', title='Suppliers', user=user, form=form, suppliers=suppliers, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_qc_admin=is_qc_admin)
+	return render_template('inventory_management/suppliers.html', title='Suppliers', user=user, form=form, suppliers=suppliers, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
 
 
 
@@ -982,9 +1006,7 @@ def departments(company_name):
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
-	is_qc_admin = company.is_qc_admin(user)
-	is_inv_access = company.is_inv_access(user)
-	is_qc_access = company.is_qc_access(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -1012,7 +1034,7 @@ def departments(company_name):
 		return redirect(url_for('departments', company_name=company.company_name))	
 	departments = Department.query.order_by(Department.name.asc()).all()
 	types = Type.query.order_by(Type.name.asc()).all()
-	return render_template('inventory_management/departments.html', title='Departments', user=user, form1=form1, form2=form2, types=types, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_qc_admin=is_qc_admin, is_inv_access=is_inv_access, is_qc_access=is_qc_access, departments=departments)
+	return render_template('inventory_management/departments.html', title='Departments', user=user, form1=form1, form2=form2, types=types, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, departments=departments)
 
 @app.route('/remove_dept/<int:dept_id>, <int:comp_id>')
 @login_required
@@ -1078,6 +1100,8 @@ def document_control(company_name):
 	for dept in departments:
 		dept.documents = DocumentName.query.filter_by(company_id=company.id, department_id=dept.id).all()
 	is_super_admin = company.is_super_admin(user)
+	is_doc_supervisor = company.is_doc_supervisor(user)
+	is_doc_admin = company.is_doc_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -1096,7 +1120,7 @@ def document_control(company_name):
 			db.session.add(doc)
 			db.session.commit()
 			return redirect(url_for('document_control', company_name=company.company_name))
-	return render_template('document_control.html', title='Document Control', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments)
+	return render_template('document_control.html', title='Document Control', user=user, company=company, is_super_admin=is_super_admin, is_doc_supervisor=is_doc_supervisor, is_doc_admin=is_doc_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments)
 
 @app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>', methods=['GET', 'POST'])
 @login_required
@@ -1129,16 +1153,21 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
 	section = DocumentSection.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, section_number=section_number, section_title=section_title).first()
+	#for sect in section.body:
+	#	sect.section_body = 
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	form2 = EditDocumentBodyForm()
 	if form2.validate_on_submit():
-		body = DocumentSectionBody(section_body=form2.body.data, company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id, submitted_by=current_user.id)
+		body = DocumentSectionBody(section_body=form2.body.data, change_log=form2.changelog.data, company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id, submitted_by=current_user.id)
 		db.session.add(body)
 		db.session.commit()
 		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
+	elif request.method == 'GET':
+		for sect in section.body:
+			form2.body.data = sect.section_body 
 	return render_template('lab_document.html', user=user, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
 	
 @app.route('/document_control_sample')

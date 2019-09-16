@@ -42,8 +42,8 @@
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
 					<td>{{ my_p.department }}</td>
-					<td></td>
-					<td id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
+					<td class="text-center">{{ my_p.item_count }}</td>
+					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
 					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
 				</tr>
 				{% endfor %}
@@ -73,7 +73,7 @@
 					<tr>
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
-						<td>{{ list.price }}</td>
+						<td>{{ list.pricee }}</td>
 						<td>{{ list.quantity }}</td>
 						<td class='individual_total'>{{ list.total }}</td>
 						<td>{{ list.user.username }}</td>
@@ -147,6 +147,7 @@
 						$("#subtotal_container").css("display", "block");
 						}
 					}
+					return false;
 				});
 				
 			{% endfor %}

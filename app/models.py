@@ -106,17 +106,23 @@ class Company(db.Model):
 	def is_super_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first()
 		
-	def is_qc_access(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_access==True).first()
+	def is_qc_supervisor(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_supervisor==True).first()
 		
 	def is_qc_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_admin==True).first()
 		
-	def is_inv_access(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_access==True).first()
+	def is_inv_supervisor(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_supervisor==True).first()
 		
 	def is_inv_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_admin==True).first()
+		
+	def is_doc_supervisor(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_supervisor==True).first()
+		
+	def is_doc_admin(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_admin==True).first()
 		
 		
 
@@ -127,10 +133,15 @@ class Affiliates(db.Model):
 	start_date = db.Column(db.DateTime)
 	end_date = db.Column(db.DateTime)
 	title = db.Column(db.String(64), index=True)
-	qc_access = db.Column(db.Boolean, default=False)
-	inv_access = db.Column(db.Boolean, default=False)
+	#qc_access = db.Column(db.Boolean, default=False)
+	#inv_access = db.Column(db.Boolean, default=False)
+	#doc_access = db.Column(db.Boolean, default=False)
+	qc_supervisor = db.Column(db.Boolean, default=False)
+	inv_supervisor = db.Column(db.Boolean, default=False)
+	doc_supervisor = db.Column(db.Boolean, default=False)
 	qc_admin = db.Column(db.Boolean, default=False)
 	inv_admin = db.Column(db.Boolean, default=False)
+	doc_admin = db.Column(db.Boolean, default=False)
 	super_admin	= db.Column(db.Boolean, default=False)
 	
 	company = db.relationship('Company', backref=db.backref('affiliate', lazy='dynamic'))

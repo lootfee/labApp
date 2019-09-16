@@ -39,28 +39,41 @@ $(document).ready(function() {
 
 
 
-$(document).ready(function() {
+/*$(document).ready(function() {
 	$("#qc_admin").change(function(){
 		if (this.checked) {
-			$("#qc_access").prop("disabled", true);
-			$("#qc_access").prop("checked", true);
+			$("#qc_supervisor").prop("disabled", true);
+			$("#qc_supervisor").prop("checked", true);
 		}
 		else {
-			$("#qc_access").prop("disabled", false);
-			$("#qc_access").prop("checked", false);
+			$("#qc_supervisor").prop("disabled", false);
+			$("#qc_supervisor").prop("checked", false);
+		}
+	});
+});*/
+
+$(document).ready(function() {
+	$("#inv_admin").change(function(){
+		if (this.checked) {
+			$("#inv_supervisor").prop("checked", true);
+			$("#inv_supervisor").prop("disabled", true);
+		}
+		else {
+			$("#inv_supervisor").prop("checked", false);
+			$("#inv_supervisor").prop("disabled", false);
 		}
 	});
 });
 
 $(document).ready(function() {
-	$("#inv_admin").change(function(){
+	$("#doc_admin").change(function(){
 		if (this.checked) {
-			$("#inv_access").prop("checked", true);
-			$("#inv_access").prop("disabled", true);
+			$("#doc_supervisor").prop("checked", true);
+			$("#doc_supervisor").prop("disabled", true);
 		}
 		else {
-			$("#inv_access").prop("checked", false);
-			$("#inv_access").prop("disabled", false);
+			$("#doc_supervisor").prop("checked", false);
+			$("#doc_supervisor").prop("disabled", false);
 		}
 	});
 });

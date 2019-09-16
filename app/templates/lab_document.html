@@ -65,7 +65,7 @@
 					{% if section %}
 					<section id="{{ section.section_title }}">
 						<h4>{{ section.section_number }}. {{ section.section_title }}</h4>
-							<div>
+							<!--div>
 								<ol>
 								{% if section.body %}
 								{% for s in section.body %}
@@ -73,7 +73,7 @@
 								{% endfor %}
 								{% endif %}
 								</ol>
-							</div>
+							</div-->
 						
 					</section>
 					{% endif %}
@@ -92,7 +92,10 @@
 						
 						<div class="col-md-10">
 						<br>
-							 {{ form2.submit (class_="btn btn-default") }}
+							{{ form2.changelog.label (class_="control-label") }}
+							{{ form2.changelog (class_="form form-control") }}
+							<br>
+							{{ form2.submit (class_="btn btn-default") }}
 						</div>
 			
 						
