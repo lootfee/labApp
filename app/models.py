@@ -604,7 +604,7 @@ class DocumentSection(db.Model):
 
 class DocumentSectionBody(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	section_body = db.Column(db.String(50000))
+	section_body = db.Column(db.Text(50000))
 	change_log = db.Column(db.String(400))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
