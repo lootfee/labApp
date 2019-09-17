@@ -24,9 +24,10 @@
 				<p><a href="#" id="edit_company_profile">Edit/Update company profile?</a></p>
 				{% endif %}
 				{% if not is_my_affiliate %}
+				{% if not is_pending_affiliate %}
 				<p><a href="{{ url_for('request_affiliate', company_name=company.company_name) }}" id="request_affiliate">Request to affiliate to company?</a></p>
 				{% endif %}
-				
+				{% endif %}
 				
 			</div>
 			<div id="edit_company_profile_form" class="col-md-8">

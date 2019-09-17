@@ -22,15 +22,17 @@
 					</select>
 				</div>
 			</div>
-			<table class="table table-bordered table-hover" id="create_order_table">
-				<tr>
-					<th style="width:120px;">Ref No</th>
-					<th style="width:400px;">Name</th>
-					<th style="width:300px;">Description</th>
-					<!--th style="width:150px;">Department</th-->
-					<th style="width:180px;">Lot No / Expiry : Stocks</th>
-					<th style="width:40px;">Action</th>
-				</tr>
+			<table class="sort_table table table-bordered table-hover" id="create_order_table">
+				<thead>
+					<tr>
+						<th style="width:120px;">Ref No</th>
+						<th style="width:400px;">Name</th>
+						<th style="width:300px;">Description</th>
+						<th style="width:150px;display:none;">Department</th-->
+						<th style="width:180px;">Lot No / Expiry : Stocks</th>
+						<th style="width:40px;">Action</th>
+					</tr>
+				</thead>
 				{% if my_products %}
 					{% for my_p in my_products %}
 					<tr class="my_products_row">

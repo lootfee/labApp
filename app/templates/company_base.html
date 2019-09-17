@@ -10,7 +10,42 @@
 	
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
-			<div class="collapse navbar-collapse col-md-12" id="bs-example-navbar-collapse-1">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="{{ url_for('index')}}" title="Home"><span><img src="/static/logo.jpg" alt="labApp logo" style="width: 22px; height: 22px;" ></span><span> labApp</span></a>
+			</div>
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li>
+					<li><a href="{{ url_for('document_control', company_name=company.company_name) }}">Document Control</a></li>
+					<li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li>
+					{% if is_super_admin %}
+					<li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li>
+					{% endif %}
+				</ul>
+				<ul class="nav navbar-nav text-center">
+					<marquee><li><a class="navbar-brand company_name_nav" href="{{ url_for('company', company_name=company.company_name)}}">{{ company.company_name}}</a></li></marquee>
+				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					{% if current_user.is_anonymous %}
+					<li><a href="{{ url_for('login') }}">Login</a></li>
+					{% else %}
+					<li><a href="{{ url_for('user', username=current_user.username) }}">{% if current_user.profile_pic %}<span><img src="{{ current_user.profile_pic }}" alt="user profile pic" style="width: 22px; height: 22px;"></span>{% else %}<span><img src="{{ current_user.avatar(256) }}" alt="user avatar" style="width: 22px; height: 22px;"></span>{% endif %}<span> {{ current_user.username }}</span></a></li>
+					{% if current_user.new_messages() %}
+					<li><a href="{{ url_for('messages') }}" title="Messages"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;color:blue;"></span><span class="badge">{{ current_user.new_messages() }}</span></a></li>
+					{% else %}
+					<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;" title="Messages"></span></a></li>
+					{% endif %}
+					<li><a href="{{ url_for('logout') }}">Logout</a></li>
+					{% endif %}
+				</ul>
+			</div>
+			<!--div class="collapse navbar-collapse col-md-12" id="bs-example-navbar-collapse-1">
 				<div class="col-md-6">
 					<div class="navbar-header">
 						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -40,7 +75,6 @@
 						{% if current_user.is_anonymous %}
 						<li><a href="{{ url_for('login') }}">Login</a></li>
 						{% else %}
-						<!--li><a href="{{ url_for('index')}}">Home</a></li-->
 						<li><a href="{{ url_for('user', username=current_user.username) }}">{% if current_user.profile_pic %}<span><img src="{{ current_user.profile_pic }}" alt="user profile pic" style="width: 22px; height: 22px;"></span>{% else %}<span><img src="{{ current_user.avatar(256) }}" alt="user avatar" style="width: 22px; height: 22px;"></span>{% endif %}<span> {{ current_user.username }}</span></a></li>
 						{% if current_user.new_messages() %}
 						<li><a href="{{ url_for('messages') }}" title="Messages"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;color:blue;"></span><span class="badge">{{ current_user.new_messages() }}</span></a></li>
@@ -51,7 +85,7 @@
 						{% endif %}
 					</ul>
 				</div>
-			</div>
+			</div-->
 		</div>
 	</nav>
 {% endblock %}
@@ -81,9 +115,11 @@
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/company.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/qc.css')}}">
+	<link src="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css">
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+	
 	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script-->
 	<link rel="shortcut icon" href="/static/logo.jpg">
 {% endblock %}
@@ -94,8 +130,20 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.quicksearch/2.4.0/jquery.quicksearch.min.js" integrity="sha256-hD1kpQcVntR40eMx9uED+E4HAjD2OJkLIFcP6ukVd+g=" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.0/JsBarcode.all.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
 	<script src="{{url_for('static', filename='js/calculator.js')}}"></script>
 	<script src="{{url_for('static', filename='js/biochem.js')}}"></script>
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
 	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	<script>
+		$(document).ready(function() {
+			$('.sort_table').DataTable({
+				"paging":   false,
+				"ordering": true,
+				"info":     false,
+				"searching": false,
+			});
+		} );
+	</script>
 {% endblock %}

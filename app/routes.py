@@ -11,7 +11,11 @@ from link_preview import link_preview
 import requests
 import markdown2 
 
-
+# TO DO
+# - reaffiliate/rehire code
+# - remove accepted from affiliates, change to start_date
+# - improve user search algo
+# - verify reset password
 
 @app.before_request
 def before_request():
@@ -98,13 +102,12 @@ def user(username):
 		company = Company(company_name=form.company_name.data, user_id=current_user.id)
 		db.session.add(company)
 		db.session.commit()
-		accept = Affiliates(accepted=True, super_admin=True, start_date=datetime.utcnow())
+		accept = Affiliates(super_admin=True, start_date=datetime.utcnow())
 		accept.user_id = current_user.id
 		company.affiliate.append(accept)
 		db.session.commit()
 		return redirect(url_for('company', company_name=company.company_name))
-	my_affiliates = Affiliates.query.filter_by(user_id=user.id, accepted=True).all()
-	past_affiliates = Affiliates.query.filter(Affiliates.end_date.isnot(None)).filter_by(user_id=user.id, accepted=True).order_by(Affiliates.start_date.desc()).all()
+	my_affiliates = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(user_id=user.id).all()
 	#for affiliate in my_affiliates:
 	#	affiliate.comp_id = affiliate.company_id
 		#affiliate.company = Company.query.filter_by(id=affiliate.company_id).first()
@@ -114,7 +117,7 @@ def user(username):
         if posts.has_next else None
 	prev_url = url_for('user', username=user.username, page=posts.prev_num) \
         if posts.has_prev else None
-	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates, companies=companies, users=users, past_affiliates=past_affiliates)
+	return render_template('user.html', title=user.username, user=user, posts=posts.items, prev_url=prev_url, next_url=next_url, form=form, my_affiliates=my_affiliates, companies=companies, users=users)
 		
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
@@ -303,8 +306,9 @@ def company(company_name):
 	companies = Company.query.order_by(Company.company_name.desc()).all()
 	users = User.query.order_by(User.username.desc()).all()
 	affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=True, end_date=None).all()
-	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=False).all()
+	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, start_date=None).all()
 	is_my_affiliate = company.is_my_affiliate(user)
+	is_pending_affiliate = company.is_pending_affiliate(user)
 	is_super_admin = company.is_super_admin(user)
 	form = CompanyProfileForm()
 	if form.submit.data:
@@ -334,16 +338,16 @@ def company(company_name):
 			form.logo.data = company.logo
 		if company.contact_info:
 			form.contact_info.data = company.contact_info
-	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, companies=companies, users=users)
+	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates,  is_my_affiliate=is_my_affiliate, is_pending_affiliate=is_pending_affiliate, is_super_admin=is_super_admin, companies=companies, users=users)
 
 @app.route('/accept_affiliate/<int:user_id>, <int:comp_id>')
 @login_required
 def accept_affiliate(user_id, comp_id):
 	company = Company.query.filter_by(id=comp_id).first_or_404()
-	pending_affiliate = Affiliates.query.filter_by(user_id=user_id, company_id=comp_id, accepted=False).first()
+	pending_affiliate = Affiliates.query.filter_by(user_id=user_id, company_id=comp_id, start_date=None).first()
 	#user = User.query.filter_by(username=current_user.username).first_or_404()
 	#if user.id == pending_affiliate.user_id:
-	pending_affiliate.accepted = True
+	#pending_affiliate.accepted = True
 	pending_affiliate.start_date = datetime.utcnow()
 	db.session.commit()
 	return redirect(url_for('admin', company_name=company.company_name))
@@ -355,10 +359,12 @@ def retire_affiliate(user_id, comp_id):
 	#user = User.query.filter(id==user_id).first_or_404()
 	affiliate = Affiliates.query.filter_by(user_id=user_id, company_id=comp_id).first()
 	affiliate.end_date = datetime.utcnow()
-	affiliate.inv_access = False
+	affiliate.inv_supervisor = False
 	affiliate.inv_admin = False
-	affiliate.qc_access = False
+	affiliate.qc_supervisor = False
 	affiliate.qc_admin = False
+	affiliate.doc_supervisor = False
+	affiliate.doc_admin = False
 	affiliate.super_admin = False
 	db.session.commit()
 	return redirect(url_for('admin', company_name=company.company_name))
@@ -379,7 +385,7 @@ def delete_affiliate(user_id, comp_id):
 def manage_affiliate(user_id, comp_id):
 	company = Company.query.filter_by(id=comp_id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
-	affiliate = Affiliates.query.filter_by(user_id=user_id, company_id=comp_id, accepted=True, end_date=None).first()
+	affiliate = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(user_id=user_id, company_id=comp_id, end_date=None).first()
 	is_super_admin = company.is_super_admin(user)
 	if not is_super_admin:
 		return redirect(url_for('company', company_name=company.company_name))
@@ -445,17 +451,18 @@ def admin(company_name):
 	form = UserRoleForm()
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
-	affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=True, end_date=None).all()
-	for affiliate in affiliates:
-		affiliate.this_affiliate = affiliate.users.username
-		this_aff = affiliate.this_affiliate
-	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=False).all()
+	affiliates = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(company_id=company.id, end_date=None).all()
+	#for affiliate in affiliates:
+	#	affiliate.this_affiliate = affiliate.users.username
+	#	this_aff = affiliate.this_affiliate
+	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, start_date=None).all()
+	past_affiliates = Affiliates.query.filter(Affiliates.end_date.isnot(None), Affiliates.start_date.isnot(None)).filter_by(company_id=company.id).order_by(Affiliates.start_date.desc()).all()
 	is_super_admin = company.is_super_admin(user)
 	if not is_super_admin:
 		return redirect(url_for('company', company_name=company.company_name))
 	is_my_affiliate = company.is_my_affiliate(user)
 	if is_my_affiliate:
-		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, is_my_affiliate=is_my_affiliate, this_aff=this_aff, is_super_admin=is_super_admin)
+		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, past_affiliates=past_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin)
 	else:
 		return redirect(url_for('company', company_name=company.company_name))
 				

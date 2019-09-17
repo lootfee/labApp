@@ -100,8 +100,11 @@ class Company(db.Model):
 	def remove_affiliate(self, user):
 		return self.affiliate.remove(user)
 		
+	def is_pending_affiliate(self, user):
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date==None).count() > 0
+		
 	def is_my_affiliate(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.accepted==True).count() > 0
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date.isnot(None)).count() > 0
 		
 	def is_super_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first()
