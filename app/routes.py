@@ -98,7 +98,7 @@ def user(username):
 		company = Company(company_name=form.company_name.data, user_id=current_user.id)
 		db.session.add(company)
 		db.session.commit()
-		accept = Affiliates(accepted=True, super_admin=True)
+		accept = Affiliates(accepted=True, super_admin=True, start_date=datetime.utcnow())
 		accept.user_id = current_user.id
 		company.affiliate.append(accept)
 		db.session.commit()
@@ -428,13 +428,14 @@ def manage_affiliate(user_id, comp_id):
 @login_required
 def request_affiliate(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
-	user = User.query.filter_by(username=current_user.username).first_or_404()
-	#request_query_false = Affiliates.query.filter_by(user_id=current_user.id, company_id=company.id, accepted=False).first_or_404()
-	#request_query_true = Affiliates.query.filter_by(user_id=current_user.id, company_id=company.id, accepted=True).first_or_404()
-	request = Affiliates(user_id=current_user.id, company_id=company.id)
-	company.affiliate.append(request)
-	db.session.commit()
-	flash('Affiliate request sent!')
+	user_query = Affiliates.query.filter_by(user_id=current_user.id, company_id=company.id).first()
+	if user_query is None:
+		request = Affiliates(user_id=current_user.id, company_id=company.id)
+		company.affiliate.append(request)
+		db.session.commit()
+		flash('Affiliate request sent!')
+	else:
+		flash('You already have sent a request or is affiliated to the company!')
 	return redirect(url_for('company', company_name=company.company_name))
 	
 	
