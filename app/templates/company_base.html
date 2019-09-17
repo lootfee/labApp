@@ -19,7 +19,7 @@
 							<span class="icon-bar"></span>
 							<span class="icon-bar"></span>
 						</button>
-						<a class="navbar-brand" href="{{ url_for('index')}}"><span><img src="/static/logo.jpg" alt="labApp logo" style="width: 22px; height: 22px;"></span><span> labApp</span></a>
+						<a class="navbar-brand" href="{{ url_for('index')}}" title="Home"><span><img src="/static/logo.jpg" alt="labApp logo" style="width: 22px; height: 22px;"></span><span> labApp</span></a>
 					</div>
 					<ul class="nav navbar-nav">
 						<li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li>
@@ -40,12 +40,12 @@
 						{% if current_user.is_anonymous %}
 						<li><a href="{{ url_for('login') }}">Login</a></li>
 						{% else %}
-						<li><a href="{{ url_for('index')}}">Home</a></li>
+						<!--li><a href="{{ url_for('index')}}">Home</a></li-->
 						<li><a href="{{ url_for('user', username=current_user.username) }}">{% if current_user.profile_pic %}<span><img src="{{ current_user.profile_pic }}" alt="user profile pic" style="width: 22px; height: 22px;"></span>{% else %}<span><img src="{{ current_user.avatar(256) }}" alt="user avatar" style="width: 22px; height: 22px;"></span>{% endif %}<span> {{ current_user.username }}</span></a></li>
 						{% if current_user.new_messages() %}
-						<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;color:blue;"></span><span class="badge">{{ current_user.new_messages() }}</span></a></li>
+						<li><a href="{{ url_for('messages') }}" title="Messages"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;color:blue;"></span><span class="badge">{{ current_user.new_messages() }}</span></a></li>
 						{% else %}
-						<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;"></span></a></li>
+						<li><a href="{{ url_for('messages') }}"><span class="glyphicon glyphicon-envelope" aria-hidden="true" style="font-size: 20px;" title="Messages"></span></a></li>
 						{% endif %}
 						<li><a href="{{ url_for('logout') }}">Logout</a></li>
 						{% endif %}
