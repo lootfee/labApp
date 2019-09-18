@@ -1,6 +1,4 @@
 migrations
-venv
-.env
 app.db
 Procfile
 
