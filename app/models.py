@@ -391,9 +391,9 @@ class Supplier(db.Model):
 		'Company', secondary='suppliers',
 		backref=db.backref('suppliers', lazy='dynamic'), lazy='dynamic'
 	)
-	
+		
 	def __repr__(self):
-		return '<Supplier {} {} {} {}>'.format(self.name, seld.address, self.email, self.contact)
+		return '<Supplier {}>'.format(self.name)
 		
 	def my_suppliers(company):
 		return company.query.filter(suppliers.c.company_id == company.id).all()
@@ -478,6 +478,7 @@ class OrdersList(db.Model):
 	price = db.Column(db.Numeric(10,2), index=True)
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
+	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
@@ -508,6 +509,7 @@ class PurchaseList(db.Model):
 	price = db.Column(db.Numeric(10,2), index=True)
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
+	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))

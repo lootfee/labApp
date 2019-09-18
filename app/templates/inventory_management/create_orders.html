@@ -33,6 +33,7 @@
 				<th class="col-md-3" style="width:150px;">Ref No</th>
 				<th class="col-md-6" style="width:600px;">Name</th>
 				<th class="col-md-3" style="width:150px;">Department</th>
+				<th class="col-md-3" style="width:150px;">Supplier</th>
 				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
 				<th class="col-md-1" style="width:40px;">Quantity Request </th>
 			</tr>
@@ -42,6 +43,7 @@
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
 					<td>{{ my_p.department }}</td>
+					<td>{{ my_p.supplier }}</td>
 					<td class="text-center">{{ my_p.item_count }}</td>
 					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
 					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">Add</a></td>
@@ -65,6 +67,7 @@
 					<th>Reference No</th>
 					<th>Name</th>
 					<th>Quantity</th>
+					<th>Supplier</th>
 					<th>Added by</th>
 				</tr>
 				{% for list in order_list %}
@@ -72,6 +75,7 @@
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.quantity }}</td>
+						<td>{{ list.supplier }}</td>
 						<td>{{ list.user.username }}</td>
 						{% if not order.date_submitted %}
 						<td><a href="{{url_for('remove_order_item', company_name=company.company_name, order_no=order.order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></a></td>
@@ -115,10 +119,10 @@
 					  if (!exists ){
 						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
 						
-						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td></tr>");
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td>{{ my_p.supplier }}</td></tr>");
 						$("#qty_{{ my_p.ref_number}}").html(qty_req);
 						
-						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''></div>");
+						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_p.supplier_id }}'></div>");
 						$('#form_qty_{{ my_p.ref_number }}').val(qty_req);
 						
 					}

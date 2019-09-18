@@ -1,0 +1,60 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Edit Product</h3>
+	<div class="text-center" style="color: blue;">
+		<p><h4>{{ product.ref_number }}</h4></p>
+		<p><h4>{{ product.name }}</h4></p>
+		<p><h4>{{ product.description }}</h4></p>
+	</div>
+	<hr class="inventory_hr">
+	<div class="col-md-12">
+		<form action method="post" class="form" role="form">
+			{{ form.hidden_tag() }}
+			<div>
+				<div class="col-md-3"></div>
+				<div class="col-md-3">
+					{{ form.price.label(class_="contol-label") }}
+					{{ form.price(class_="form-control") }}
+					{{ form.min_quantity.label(class_="contol-label") }}
+					{{ form.min_quantity(class_="form-control") }}
+					{{ form.min_expiry.label(class_="contol-label") }}
+					{{ form.min_expiry(class_="form-control") }}
+				</div>
+				<div class="col-md-3">
+					{{ form.department.label(class_="contol-label") }}
+					{{ form.department(class_="form-control") }}
+					{{ form.supplier.label(class_="contol-label") }}
+					{{ form.supplier(class_="form-control") }}
+					{{ form.type.label(class_="contol-label") }}
+					{{ form.type(class_="form-control") }}
+					<input class="btn btn-default" id="submit" name="submit" type="submit" value="Save" style="float: right; margin-bottom: 10px;margin-top: 10px;">
+				</div>
+				<div class="col-md-3"></div>
+				
+			</div>
+			<br>
+			
+		</form>
+	</div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function(){			
+			var temp_tags = [
+				{label: "2 - 8 °C"},
+				{label: "15 - 25 °C"},
+				{label: "20 - 25 °C"},
+				{label: "(-15) - (-25) °C"},
+				{label: "(-20) - (-25) °C"},
+			]
+			
+			$( "#storage_req" ).autocomplete({
+				  source: temp_tags,
+			});
+	   });
+	</script>
+{% endblock %}

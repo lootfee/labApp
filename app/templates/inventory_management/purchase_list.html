@@ -33,6 +33,7 @@
 				<th class="col-md-3" style="width:150px;">Ref No</th>
 				<th class="col-md-6" style="width:600px;">Name</th>
 				<th class="col-md-3" style="width:150px;">Department</th>
+				<th class="col-md-3" style="width:150px;">Supplier</th>
 				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
 				<th class="col-md-1" style="width:40px;">Quantity Request </th>
 			</tr>
@@ -42,6 +43,7 @@
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
 					<td>{{ my_p.department }}</td>
+					<td>{{ my_p.supplier }}</td>
 					<td class="text-center">{{ my_p.item_count }}</td>
 					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
 					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
@@ -67,6 +69,7 @@
 					<th>Price Each</th>
 					<th>Quantity</th>
 					<th>Total Price</th>
+					<th>Supplier</th>
 					<th>Added by</th>
 				</tr>
 				{% for list in purchase_list %}
@@ -76,6 +79,7 @@
 						<td>{{ list.pricee }}</td>
 						<td>{{ list.quantity }}</td>
 						<td class='individual_total'>{{ list.total }}</td>
+						<td>{{ list.supplier }}</td>
 						<td>{{ list.user.username }}</td>
 						<!--td><a href="#" data-toggle="modal" id="edit_{{ list.ref_number }}" data-target="#edit_purchase_list_modal_{{ list.ref_number }}">Edit</a></td-->
 						{% if not purchase.date_purchased %}
@@ -127,10 +131,10 @@
 					  if (!exists ){
 						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
 						
-						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td></tr>");
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td><td>{{ my_p.supplier}}</td></tr>");
 						
 						
-						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='tot_price' id='form_tot_price_{{ my_p.ref_number }}' value=''></div>");
+						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='tot_price' id='form_tot_price_{{ my_p.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_p.supplier_id }}'></div>");
 						
 						var total = {{ my_p.price }} * qty_req;
 						$("#qty_{{ my_p.ref_number}}").html(qty_req);

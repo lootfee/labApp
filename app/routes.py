@@ -594,6 +594,47 @@ def products(company_name):
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
 	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products)
+
+@app.route('/edit_my_product/<int:prod_id>, <int:comp_id>')	
+@login_required	
+def edit_my_product(prod_id, comp_id):
+	my_product = MyProducts.query.filter_by(product_id=prod_id, company_id=comp_id).first()
+	product = Product.query.filter_by(id=prod_id).first()
+	company = Company.query.filter_by(id=comp_id).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments
+	dept_list = [(d.id, d.name) for d in dept]
+	type = company.types
+	type_list = [(t.id, t.name) for t in type]
+	supplier = company.suppliers
+	supplier_list = [(s.id, s.name) for s in supplier]
+	form = ProductRegistrationForm()
+	form.department.choices = dept_list
+	form.type.choices = type_list
+	form.supplier.choices = supplier_list
+	if form.validate_on_submit():
+		my_product.price = form.price.data
+		my_product.min_expiry = form.min_expiry.data
+		my_product.min_quantity = form.min_quantity.data
+		my_product.department_id = form.department.data
+		my_product.type_id = form.type.data
+		my_product.supplier_id = form.supplier.data
+		db.session.commit()
+		return redirect(url_for('products', company_name=company.company_name))	
+	elif request.method == 'GET':
+		form.price.data = my_product.price
+		form.min_expiry.data = my_product.min_expiry
+		form.min_quantity.data = my_product.min_quantity
+		form.department.data = my_product.department_id
+		form.type.data = my_product.type_id
+		form.supplier.data = my_product.supplier_id
+	return render_template('inventory_management/edit_product.html', title='Edit Products', user=user, form=form, product=product, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
 	
 
 @app.route('/delete_product/<int:prod_id>, <int:comp_id>')	
@@ -716,6 +757,7 @@ def create_orders(company_name, order_no):
 	order_list = OrdersList.query.filter_by(order_id=order.id, company_id=company.id).all()
 	for list in order_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
+		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first().name
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
 	is_inv_admin = company.is_inv_admin(user)
@@ -731,14 +773,16 @@ def create_orders(company_name, order_no):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+		my_p.supplier = Supplier.query.filter_by(id=my_p.supplier_id).first().name
 		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
 		refnum_list = request.form.getlist('refnum')
 		name_list = request.form.getlist('name')
 		qty_list = request.form.getlist('qty')
+		supplier_list = request.form.getlist('supplier')
 		for i in range(0, len(refnum_list) ):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], order_id=order.id, user_id=user.id, company_id=company.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], supplier=supplier_list[i],order_id=order.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
@@ -817,6 +861,7 @@ def purchase_list(company_name, purchase_order_no):
 	for list in purchase_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
 		list.product_id = Product.query.filter_by(ref_number=list.ref_number).first().id
+		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first().name
 		list.pricee = MyProducts.query.filter_by(company_id=company.id, product_id=list.product_id).first().price
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -832,6 +877,7 @@ def purchase_list(company_name, purchase_order_no):
 		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
 		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
 		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
+		my_p.supplier = Supplier.query.filter_by(id=my_p.supplier_id).first().name
 		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
@@ -997,6 +1043,23 @@ def suppliers(company_name):
 	return render_template('inventory_management/suppliers.html', title='Suppliers', user=user, form=form, suppliers=suppliers, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
 
 
+'''@app.route('/edit_supplier/<int:supp_id>, <int:comp_id>', methods=['GET', 'POST'])
+def edit_supplier(supp_id, comp_id):
+	company = Company.query.filter_by(id=comp_id).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	supplier = Supplier.query.filter_by(id=supp_id)
+	is_super_admin = company.is_super_admin(user)
+	form = SupplierRegistrationForm()
+	if form.submit.data:
+		if form.validate_on_submit():
+			dept.name = form1.dept_name.data
+			db.session.commit()
+			return redirect(url_for('departments', company_name=company.company_name))	
+	elif request.method == 'GET':
+		form1.dept_name.data = dept.name
+	departments = Department.query.order_by(Department.name.asc()).all()
+	return render_template('inventory_management/departments.html', title='Departments', form1=form1, departments=departments, is_super_admin=is_super_admin, company=company)'''
+
 
 @app.route('/remove_supplier/<int:supp_id>, <int:comp_id>')	
 @login_required	
@@ -1056,7 +1119,7 @@ def remove_dept(dept_id, comp_id):
 	flash('Department name removed.')
 	return redirect(url_for('departments', company_name=company.company_name))
 	
-'''@app.route('/edit_dept/<int:id>, <int:comp_id>', methods=['GET', 'POST'])
+@app.route('/edit_dept/<int:id>, <int:comp_id>', methods=['GET', 'POST'])
 def edit_dept(id, comp_id):
 	company = Company.query.filter_by(id=comp_id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
@@ -1071,7 +1134,7 @@ def edit_dept(id, comp_id):
 	elif request.method == 'GET':
 		form1.dept_name.data = dept.name
 	departments = Department.query.order_by(Department.name.asc()).all()
-	return render_template('inventory_management/departments.html', title='Departments', form1=form1, departments=departments, is_super_admin=is_super_admin, company=company)'''
+	return render_template('inventory_management/departments.html', title='Departments', form1=form1, departments=departments, is_super_admin=is_super_admin, company=company)
 
 @app.route('/remove_type/<int:type_id>, <int:comp_id>', methods=['GET', 'POST'])
 @login_required
@@ -1083,7 +1146,7 @@ def remove_type(type_id, comp_id):
 	flash('Type name deleted.')
 	return redirect(url_for('departments', company_name=company.company_name))
 	
-'''@app.route('/edit_type/<int:id>, <int:comp_id>', methods=['GET', 'POST'])
+@app.route('/edit_type/<int:id>, <int:comp_id>', methods=['GET', 'POST'])
 def edit_type(id, comp_id):
 	company = Company.query.filter_by(id=comp_id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
@@ -1098,7 +1161,7 @@ def edit_type(id, comp_id):
 	elif request.method == 'GET':
 		form1.type_name.data = type.name
 	types = Type.query.order_by(Type.name.asc()).all()
-	return render_template('inventory_management/departments.html', title='Departments', form1=form1, types=types, is_super_admin=is_super_admin, company=company)'''
+	return render_template('inventory_management/departments.html', title='Departments', form1=form1, types=types, is_super_admin=is_super_admin, company=company)
 	
 
 @app.route('/<company_name>/document_control/', methods=['GET', 'POST'])
