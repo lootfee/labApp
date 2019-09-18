@@ -564,13 +564,15 @@ def products(company_name):
 		raw_refnum = form.reference_number.data
 		alnum_refnum = ''.join(e for e in raw_refnum if e.isalnum())
 		prod = Product.query.filter_by(ref_number=alnum_refnum).first()
-		my_prod = MyProducts.query.filter_by(product_id=prod.id, company_id=company.id).first()
-		if my_prod:
-			flash('Product already registered, if you wish to edit, delete the product and register again.')
-		elif prod:
-			p = MyProducts(company_id=company.id, product_id=prod.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data, user_id=current_user.id)
-			db.session.add(p)
-			db.session.commit()
+		if prod:
+			my_prod = MyProducts.query.filter_by(product_id=prod.id, company_id=company.id).first()
+			if my_prod:
+				flash('Product already registered, if you wish to edit, delete the product and register again.')
+			else:
+				p = MyProducts(company_id=company.id, product_id=prod.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data, user_id=current_user.id)
+				db.session.add(p)
+				db.session.commit()
+			return redirect(url_for('products', company_name=company.company_name))	
 		else:
 			product = Product(ref_number=alnum_refnum, name=form.name.data, description=form.description.data, storage_req=form.storage_req.data, user_id=current_user.id)
 			db.session.add(product)
