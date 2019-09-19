@@ -794,7 +794,7 @@ def create_orders(company_name, order_no):
 		qty_list = request.form.getlist('qty')
 		supplier_list = request.form.getlist('supplier')
 		for i in range(0, len(refnum_list) ):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], supplier=supplier_list[i],order_id=order.id, user_id=user.id, company_id=company.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], supplier_id=supplier_list[i],order_id=order.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
