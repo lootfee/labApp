@@ -753,7 +753,7 @@ def orders(company_name):
 		db.session.commit()
 		purchase_list = OrdersList.query.filter_by(order_id=order_id, company_id=company.id).all()
 		for i in purchase_list:
-			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id)
+			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, supplier_id=i.supplier_id, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
@@ -980,7 +980,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
 				db.session.add(item)
-				purchased_item.deliveries.append(delivery)
+				#purchased_item.deliveries.append(delivery)
 				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
 		if lot_query is not None:
@@ -988,7 +988,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 			for i in range(0, qty):
 				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
 				db.session.add(item)
-				purchased_item.deliveries.append(delivery)
+				#purchased_item.deliveries.append(delivery)
 				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase_order_no, delivery_order_no=delivery_order_no))
 	return render_template('inventory_management/receive_delivery_item.html', title='Receive Item', user=user, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, purchased_item=purchased_item, form=form, delivery=delivery)	
