@@ -2,9 +2,56 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<span>Please login and create a company or affiliate yourself to one in order to access this page.</span>
-<ul>
+<h4>Please login and create a company or affiliate yourself to one in order to access this page.</h4>
+<ol>
+	<li>Register and login.</li>
 	<li>Click on your username.</li>
-	<li>Register a company.</li>
-</ul>
+	<li>Click on edit profile and update your user data.</li>
+	<li>Affiliate yourself to a company.</li>
+	<ol>
+		<li>Search for company's name.</li>
+		<li>Click request to affiliate to company.</li>
+		<li>Wait for the admin of the company to accept your request.</li>
+		<li>Once accepted, your title/role and affiliated company will show on your user profile page.</li>
+		<li>Click on the company name to go to company profile page.</li>
+		<li>Once in the company page, click on Inventory Management tab at the top of the page to acces company inventory software.</li>
+	</ol>
+	<li>If the company is not yet registered on labApp, click on register a company. </li>
+	<ol>
+		<li>Type your company's name, click submit.</li>
+		<li>It will take you to the company profile page</li>
+		<li>Click on edit/update company profile and fill up the details and save.</li>
+		<li>Click on Admin tab at the top of the page.</li>
+		<li>Find your username and click edit role.</li>
+		<li>Assign yourself a title and click save.</li>
+		<li>Your title and company will now be visible on your profile page.</li>
+		<li>Click on the company name to go to company profile page.</li>
+		<li>Once in the company page, click on Inventory Management tab at the top of the page to acces company inventory software.</li>
+	</ol>
+</ol>
+<br>
+<h4>Inventory Management guide (for company admins)</h4>
+<p>Please follow as per the order of instructions.</p>
+<ol>
+	<li>On company profile page, click on Inventory Management at the top of the page.</li>
+	<li>Once inside the Inventory Management page, click on Departments tab.</li>
+	<ol>
+		<li>Register supplies department name (e.g. Biochemistry, Hematology, Microbiology, etc.).</li>
+		<li>Register supplies type (e.g. Reagent, Control, Calibrator, etc.)</li>
+	</ol>
+	<li>Click on Suppliers tab.</li>
+	<ol>
+		<li>Click on register supplier.</li>
+		<li>Fill out supplier details.</li>
+	</ol>
+	<li>Click on products tab.</li>
+	<ol>
+		<li>Click on register product.</li>
+		<li>Type product reference number.</li>
+		<li>If product is already registered in our database, reference number will show.</li>
+		<li>Click on the reference number to auto populate item name, description and storage requirement.</li>
+		<li>Fill out other details as per your companys data and click register.</li>
+		<li>Do this for all your companys inventory supplies.</li>
+	</ol>
+</ol>
 {% endblock %}
