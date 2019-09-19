@@ -113,10 +113,10 @@ class CompanyProfileForm(FlaskForm):
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
 	
-	def validate_email(self, email):
-		user = Company.query.filter_by(email=email.data).first()
-		if user is not None:
-			raise ValidationError('Email is already registered!')
+	'''def validate_email(self, email):
+		email = Company.query.filter_by(email=email.data).first()
+		if email is not None:
+			raise ValidationError('Email is already registered!')'''
 	
 class ProductRegistrationForm(FlaskForm):
 	reference_number = StringField('Reference Number', validators=[DataRequired()])

@@ -1046,7 +1046,7 @@ def suppliers(company_name):
 		if supp is not None:
 			company.suppliers.append(supp)
 		else:
-			supplier = Supplier(name=form.supplier_name.data, address=form.address.data, email=form.email.data, contact=form.contact.data)
+			supplier = Supplier(name=form.supplier_name.data, address=form.address.data, email=form.email.data, contact=form.contact.data, user_id=current_user.id)
 			db.session.add(supplier)
 			company.suppliers.append(supplier)
 		db.session.commit()
@@ -1102,7 +1102,7 @@ def departments(company_name):
 		if dept is not None:
 			company.departments.append(dept)
 		else:
-			department_name = Department(name=form1.dept_name.data, abbrv = form1.dept_abbrv.data)
+			department_name = Department(name=form1.dept_name.data, abbrv = form1.dept_abbrv.data, user_id=current_user.id)
 			db.session.add(department_name)
 			company.departments.append(department_name)
 		db.session.commit()
@@ -1112,7 +1112,7 @@ def departments(company_name):
 		if type is not None:
 			company.types.append(type)
 		else:
-			type_name = Type(name=form2.type_name.data)
+			type_name = Type(name=form2.type_name.data, user_id=current_user.id)
 			db.session.add(type_name)
 			company.types.append(type_name)
 		db.session.commit()
