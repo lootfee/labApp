@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDepartmentForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
@@ -314,6 +314,7 @@ def company(company_name):
 	if form.submit.data:
 		if form.validate_on_submit():
 			company.company_name = form.company_name.data
+			company.company_abbrv = form.company_abbrv.data
 			company.about_me = form.about_me.data
 			company.email = form.email.data
 			company.address = form.address.data
@@ -328,6 +329,7 @@ def company(company_name):
 			flash('Unable to update changes, please complete missing fields!')
 	elif request.method == 'GET':
 		form.company_name.data = company.company_name
+		form.company_abbrv.data = company.company_abbrv
 		if company.email:
 			form.email.data = company.email
 		if company.about_me:
@@ -497,6 +499,7 @@ def inventory_management_sample():
 def inventory_management(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
+	select_dept = company.departments.order_by(Department.name.asc())
 	is_inv_admin = company.is_inv_admin(user)
 	is_inv_supervisor = company.is_inv_supervisor(user)
 	is_super_admin = company.is_super_admin(user)
@@ -534,9 +537,12 @@ def inventory_management(company_name):
 			pl.date_purchased = Purchase.query.filter_by(company_id=company.id, id=pl.purchase_id).first().date_purchased
 			pl.qty = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, id=pl.id).first().quantity
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
+			pl.product_id = Product.query.filter_by(ref_number=pl.ref_number).first().id
+			pl.dept_id = MyProducts.query.filter_by(company_id=company.id, product_id=pl.product_id).first().department_id
+			pl.dept_name = Department.query.filter_by(id=pl.dept_id).first().name
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases)	
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
 
 
 @app.route('/<company_name>/inventory_management/products', methods=['GET', 'POST'])
@@ -550,6 +556,7 @@ def products(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
+	select_dept = company.departments.order_by(Department.name.asc())
 	dept = company.departments
 	dept_list = [(d.id, d.name) for d in dept]
 	type = company.types
@@ -593,7 +600,7 @@ def products(company_name):
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products)
+	return render_template('inventory_management/products.html', title='Manage Products', user=user, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, select_dept=select_dept)
 
 @app.route('/edit_my_product/<int:prod_id>, <int:comp_id>')	
 @login_required	
@@ -726,9 +733,14 @@ def orders(company_name):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	form = CreateOrderIDForm()
+	dept = company.departments
+	dept_list = [(d.id, d.name) for d in dept]
+	form.department.choices = dept_list
 	form1 = CreatePurchaseOrderForm()
 	if form.validate_on_submit():
-		order = Order(order_no=form.order_no.data, company_id=company.id)
+		dept = Department.query.filter_by(id=form.department.data).first()
+		order_n = company.company_abbrv + "-ORD-" + dept.abbrv + "-" + datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+		order = Order(order_no=order_n, company_id=company.id, department_id=dept.id)
 		db.session.add(order)
 		order.order_creator.append(user)
 		db.session.commit()
@@ -1090,7 +1102,7 @@ def departments(company_name):
 		if dept is not None:
 			company.departments.append(dept)
 		else:
-			department_name = Department(name=form1.dept_name.data)
+			department_name = Department(name=form1.dept_name.data, abbrv = form1.dept_abbrv.data)
 			db.session.add(department_name)
 			company.departments.append(department_name)
 		db.session.commit()
@@ -1178,10 +1190,10 @@ def document_control(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	form1 = CreateDepartmentForm()
+	form1 = DepartmentRegistrationForm()
 	if form1.submit.data:
 		if form1.validate_on_submit():
-			dept = DocumentationDepartment(department_name=form1.department_name.data, company_id=company.id, user_id=current_user.id)
+			dept = DocumentationDepartment(department_name=form1.department_name.data, dept_abbrv=form.dept_abbrv.data, company_id=company.id, user_id=current_user.id)
 			db.session.add(dept)
 			db.session.commit()
 			return redirect(url_for('document_control', company_name=company.company_name))

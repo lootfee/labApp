@@ -59,7 +59,23 @@
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 			</button>
 			{% endif %}
-			<table class="table table-bordered table-hover text-center">
+			<div class="col-md-5" style="margin-bottom: 10px;">
+				<div class="col-md-6">
+					<label class="control-label" for="search_products">Search</label>
+					<input class="form-control" id="search_products">
+				</div>
+				<div class="col-md-6">
+					<label class="control-label" for="department">Department</label>
+					<select class="form-control" id="department">
+						<option value=''>All</option>
+						{% for d in select_dept %}
+						<option value='{{ d.name }}'>{{ d.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+			<table class="sort_table table table-bordered table-hover text-center" id="products_table">
+				<thead>
 				<tr>
 					<th>Reference No</th>
 					<th>Product Name</th>
@@ -71,10 +87,13 @@
 					<th>Department</th>
 					<th>Type</th>
 					<th>Supplier</th>
+					<th>Action</th>
+					<th></th>
 				</tr>
+				</thead>
 				{% if products %}
 					{% for my_p in my_products %}
-					<tr>
+					<tr class="my_products_row">
 						<td>{{ my_p.ref_number }}</td>
 						<td>{{ my_p.name }}</td>
 						<td>{{ my_p.description }}</td>
@@ -106,6 +125,9 @@
 	{{ super() }}
 	<script>
 		$(document).ready(function(){
+			$('input#search_products').quicksearch('table#products_table .my_products_row');
+			$('select#department').quicksearch('table#products_table .my_products_row');	
+		
 			var product_tags = [
 				{% for prod in products %}
 					{
@@ -116,7 +138,7 @@
 					},
 				{% endfor %}
 			  ]
-				$( "#reference_number" ).autocomplete({
+			$( "#reference_number" ).autocomplete({
 			  source: product_tags,
 			  focus: function(event, ui) {
 			  event.preventDefault();

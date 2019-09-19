@@ -29,7 +29,7 @@
 				
 					{% for depts in company.departments %}
 					<tr>
-						<td>{{ depts.name }}</td>
+						<td>{{ depts.name }} ({{ depts.abbrv }})</td>
 						{% if is_inv_admin %}
 						<td class="del-edit-btn"><a href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
 						{% endif %}
@@ -63,12 +63,26 @@
 		$(document).ready(function(){
 			var dept_tags = [
 				{% for dept in departments %}
-					{label: "{{ dept.name}}"},
+					{
+						label: "{{ dept.name}}",
+						abbrv: "{{ dept.abbrv }}",
+					},
+					
 				{% endfor %}
 			];
 			$( "#dept_name" ).autocomplete({
-			  source: dept_tags
+			  source: dept_tags,
+			  focus: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  },
+			  select: function(event, ui) {
+			  event.preventDefault();
+			  $(this).val(ui.item.label);
+			  $("#dept_abbrv").val(ui.item.abbrv);
+			  }
 			});
+		
 			
 			var type_tags = [
 				{% for type in types %}

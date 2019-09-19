@@ -75,13 +75,14 @@ downvotes = db.Table('downvotes',
 class Company(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	company_name = db.Column(db.String(128), index=True)
+	company_abbrv = db.Column(db.String(8))
 	email = db.Column(db.String(120), index=True, unique=True )
 	address = db.Column(db.String(254))
 	contact_info = db.Column(db.String(254))
 	logo = db.Column(db.String(1000))
 	about_me = db.Column(db.String(400))
-	products = db.Column(db.Integer, db.ForeignKey('product.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	company_created = db.Column(db.DateTime, default=datetime.utcnow)
 	
 	order = db.relationship('Order', backref=db.backref('company', lazy=True))
 	
@@ -135,7 +136,7 @@ class Affiliates(db.Model):
 	accepted = db.Column(db.Boolean, default=False)
 	start_date = db.Column(db.DateTime)
 	end_date = db.Column(db.DateTime)
-	title = db.Column(db.String(64), index=True)
+	title = db.Column(db.String(64))
 	#qc_access = db.Column(db.Boolean, default=False)
 	#inv_access = db.Column(db.Boolean, default=False)
 	#doc_access = db.Column(db.Boolean, default=False)
@@ -153,8 +154,8 @@ class Affiliates(db.Model):
 
 class User(UserMixin, db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	firstname = db.Column(db.String(64), index=True)
-	lastname = db.Column(db.String(64), index=True)
+	firstname = db.Column(db.String(64))
+	lastname = db.Column(db.String(64))
 	username = db.Column(db.String(64), index=True, unique=True)
 	email = db.Column(db.String(120), index=True, unique=True )
 	password_hash = db.Column(db.String(128))
@@ -360,6 +361,7 @@ class Message(db.Model):
 class Department(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(50), index=True, unique=True)
+	abbrv = db.Column(db.String(5))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company = db.relationship(
 		'Company', secondary='departments',
@@ -383,7 +385,7 @@ class Department(db.Model):
 class Supplier(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(50), index=True, unique=True)
-	address = db.Column(db.String(200), index=True)
+	address = db.Column(db.String(200))
 	email = db.Column(db.String(120))
 	contact = db.Column(db.String(120))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -432,10 +434,10 @@ class Type(db.Model):
 	
 class Product(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	ref_number = db.Column(db.String(100), unique=True)
-	name = db.Column(db.String(200), index=True)
+	ref_number = db.Column(db.String(100), index=True, unique=True)
+	name = db.Column(db.String(200))
 	description = db.Column(db.String(100))
-	storage_req = db.Column(db.String(50), index=True)
+	storage_req = db.Column(db.String(50))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	lot_no = db.relationship('Lot', backref=db.backref('ref_no', lazy=True))
 		
@@ -448,7 +450,7 @@ class MyProducts(db.Model):
 	product_id = db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
 	min_expiry = db.Column(db.Integer)
 	min_quantity = db.Column(db.Integer)
-	price = db.Column(db.Numeric(10,2), index=True)
+	price = db.Column(db.Numeric(10,2))
 	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
 	type_id = db.Column(db.Integer, db.ForeignKey('type.id'))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
@@ -464,6 +466,7 @@ class Order(db.Model):
 	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	date_submitted = db.Column(db.DateTime, index=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
 	
 	order_list = db.relationship('OrdersList', backref=db.backref('order_list', lazy=True))
 	puchase_no = db.relationship('Purchase', backref=db.backref('purchase_no', lazy=True))
@@ -475,7 +478,7 @@ class OrdersList(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	ref_number = db.Column(db.String(100))
 	name = db.Column(db.String(200), index=True)
-	price = db.Column(db.Numeric(10,2), index=True)
+	price = db.Column(db.Numeric(10,2))
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
@@ -506,7 +509,7 @@ class PurchaseList(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	ref_number = db.Column(db.String(100))
 	name = db.Column(db.String(200), index=True)
-	price = db.Column(db.Numeric(10,2), index=True)
+	price = db.Column(db.Numeric(10,2))
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
@@ -566,6 +569,7 @@ class Lot(db.Model):
 class DocumentationDepartment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	department_name = db.Column(db.String(50), index=True, unique=True)
+	department_abbrv = db.Column(db.String(5))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	

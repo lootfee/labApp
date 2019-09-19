@@ -6,9 +6,24 @@
     <h2 class="inventory_headers">Overview</h2>
 	<hr class="inventory_hr">
     <div class="row text-center">
+		<div class="col-md-5" style="margin-bottom: 10px;">
+				<div class="col-md-6">
+					<label class="control-label" for="search_overview">Search</label>
+					<input class="form-control" id="search_overview">
+				</div>
+				<div class="col-md-6">
+					<label class="control-label" for="department">Department</label>
+					<select class="form-control" id="department">
+						<option value=''>All</option>
+						{% for d in select_dept %}
+						<option value='{{ d.name }}'>{{ d.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
 		<div class="col-md-12">
 			<div class="col-md-5" style="border: 2px solid #dedede;border-radius: 8px;width:auto; margin: 10px;">
-				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+			<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4> Reagents less than minimum quantity</h4>
 				<tr>
 					<th>Ref Number</th>
@@ -17,17 +32,18 @@
 				</tr>
 				{% for my_p in my_products %}
 				{% if my_p.less_quantity %}
-				<tr>
+				<tr class="my_products_row">
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td> 
 					<td>{{ my_p.current_quantity }}</td>
+					<td style="display:none;">{{ my_p.dept_name }}</td>
 				</tr>
 				{% endif %}
 				{% endfor %}
 				</table>
 			</div>
 			<div class="col-md-7" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
-				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4>Reagents near expiry</h4>
 				<tr>
 					<th>Ref Number</th>
@@ -38,11 +54,12 @@
 				{% for my_p in my_products %}
 				{% for i in my_p.item_query %}
 				{% if i.greater_expiry  %}
-				<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}">
+				<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}" class="my_products_row">
 					<td>{{ my_p.ref_number }}</td>
 					<td>{{ my_p.name }}</td>
 					<td>{{ i.lot_num }}</td>
 					<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
+					<td style="display:none;">{{ my_p.dept_name }}</td>
 				</tr>
 				{% endif %}
 				{% endfor %}
@@ -54,7 +71,7 @@
 	<div class="row text-center">
 		
 			<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px; margin-left: 5%;">
-				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4>Undelivered reagents</h4>
 				<tr>
 					<th>Reference number</th>
@@ -67,13 +84,14 @@
 				{% for dp in delivered_purchases %}
 				{% for pl in dp.purchase_list %}
 				{% if pl.delivered_qty < pl.qty %}
-				<tr>
+				<tr class="my_products_row">
 					<td>{{ pl.ref_number }}</td>
 					<td>{{ pl.name }}</td>
 					<td>{{ pl.purchase_order_no }}</td>
 					<td>{{ pl.date_purchased }}</td>
 					<td>{{ pl.qty }}</td>
 					<td>{{ pl.delivered_qty }}</td>
+					<td style="display:none;">{{ pl.dept_name }}</td>
 				</tr>
 				{% endif %}
 				{% endfor %}
@@ -145,8 +163,8 @@
 	{{ super() }}
 	<script>
 		$(document).ready(function() {
-			//$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
-			//$('select#department').quicksearch('table#create_order_table .my_products_row');
+			$('input#search_overview').quicksearch('table.overview_table .my_products_row');
+			$('select#department').quicksearch('table.overview_table .my_products_row');
 			
 			$('[id]').each(function () {
 				{% for my_p in my_products %}{% for i in my_p.item_query %}

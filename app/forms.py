@@ -104,6 +104,7 @@ class CompanyRegistrationForm(FlaskForm):
 	
 class CompanyProfileForm(FlaskForm):
 	company_name = StringField('Company Name:', validators=[DataRequired()])
+	company_abbrv = StringField('Company Abbreviation:', validators=[DataRequired(), Length(min=1, max=8)], render_kw={"placeholder": "To be used in company documents"})
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	address = TextAreaField('Address:', validators=[Length(min=1, max=1000)])
 	contact_info = StringField('Contact info:')
@@ -131,7 +132,8 @@ class ProductRegistrationForm(FlaskForm):
 	submit = SubmitField('Register')
 	
 class DepartmentRegistrationForm(FlaskForm):
-	dept_name = StringField('Department Name', validators=[DataRequired()])
+	dept_name = StringField('Department Name', validators=[DataRequired()], render_kw={"placeholder": "ex. Biochemistry"})
+	dept_abbrv = StringField('Abbreviation (to be used in order names)', validators=[DataRequired(), Length(min=1, max=5)], render_kw={"placeholder": "ex. BIO"})
 	submit = SubmitField('Register')
 	
 	#def validate_dept_name(self, dept_name):
@@ -182,7 +184,8 @@ class SupplierRegistrationForm(FlaskForm):
 	
 
 class CreateOrderIDForm(FlaskForm):
-	order_no = StringField('Create Order ID', validators=[DataRequired()])
+	#order_no = StringField('Create Order ID', validators=[DataRequired()])
+	department = SelectField('Select Department', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
 class CreatePurchaseOrderForm(FlaskForm):
@@ -226,9 +229,9 @@ class ConsumeItemForm(FlaskForm):
 	lot_numbers = SelectField('Lot Number-Item id / Expiry', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
-class CreateDepartmentForm(FlaskForm):
-	department_name = StringField('Deparment name:', validators=[DataRequired()])
-	submit = SubmitField('Submit')
+#class CreateDepartmentForm(FlaskForm):
+#	department_name = StringField('Deparment name:', validators=[DataRequired()])
+#	submit = SubmitField('Submit')
 
 class CreateDocumentForm(FlaskForm):
 	dept_name = StringField('Deparment name:', validators=[DataRequired()], render_kw={'readonly': True})
