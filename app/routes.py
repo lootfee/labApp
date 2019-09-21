@@ -196,7 +196,7 @@ def explore():
 		if posts.has_next else None
 	prev_url = url_for('explore', page=posts.prev_num) \
 		if posts.has_prev else None
-	return render_template('index.html', title='Global', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url, companies=companies, users=users, superuser=superuser)
+	return render_template('index.html', title='Explore', user=user, posts=posts.items, next_url=next_url, prev_url=prev_url, companies=companies, users=users, superuser=superuser)
 
 
 @app.route('/post/<int:id>', methods=['GET', 'POST'])
@@ -558,12 +558,12 @@ def inventory_management(company_name):
 			pl.dept_name = Department.query.filter_by(id=pl.dept_id).first().name
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, user=user, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
 
 
-@app.route('/<company_name>/inventory_management/products', methods=['GET', 'POST'])
+@app.route('/<company_name>/inventory_management/supplies', methods=['GET', 'POST'])
 @login_required
-def products(company_name):
+def supplies(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
@@ -617,7 +617,7 @@ def products(company_name):
 		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
 		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
 		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	return render_template('inventory_management/products.html', title='Manage Products', user=user, superuser=superuser, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, select_dept=select_dept)
+	return render_template('inventory_management/supplies.html', title='Manage Supplies', description="Manage clinical laboratory supplies, encode supplies data that are used by your clinical laboratory.", user=user, superuser=superuser, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, select_dept=select_dept)
 
 @app.route('/edit_my_product/<int:prod_id>, <int:comp_id>')	
 @login_required	

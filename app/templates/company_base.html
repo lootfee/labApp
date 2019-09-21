@@ -1,10 +1,15 @@
 {% extends 'bootstrap/base.html' %}
 
-{% block title %}
-	
-	labApp - {{company.company_name }} {% if title %} - {{ title }} {% endif %}
-	
-{% endblock %}
+{% block title %}labApp - {{company.company_name }} {% if title %} - {{ title }} {% endif %}{% endblock %}
+{% block description %} {% if description %} {{ description }} {% endif %} {% endblock %}
+
+{% macro nav_link(endpoint, name) %}
+{% if request.endpoint.endswith(endpoint) %}
+  <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+{% else %}
+  <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+{% endif %}
+{% endmacro %}
 
 {% block navbar %}
 	
@@ -21,13 +26,13 @@
 			</div>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li>
+					<!--li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li-->{{ nav_link('quality_control', 'Quality Control') }}
 					{% if user == superuser %}
-					<li><a href="{{ url_for('document_control', company_name=company.company_name) }}">Document Control</a></li>
+					<!--li><a href="{{ url_for('document_control', company_name=company.company_name) }}">Document Control</a></li-->{{ nav_link('document_control', 'Document Control') }}
 					{% endif %}
-					<li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li>
+					<!--li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li-->{{ nav_link('inventory_management', 'Inventory Management') }}
 					{% if is_super_admin %}
-					<li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li>
+					<!--li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li-->{{ nav_link('admin', 'Admin') }}
 					{% endif %}
 				</ul>
 				<ul class="nav navbar-nav text-center">
@@ -110,10 +115,20 @@
 	</div>
 	{% block doc_content %}
 	{% endblock %}
+{% block footer %}
 <footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px">© 2019 labApp All Right Reserved</footer>
+{% endblock %}
 {% endblock %}
 
 {% block styles %}
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129673699-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-129673699-2');
+	</script>
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">

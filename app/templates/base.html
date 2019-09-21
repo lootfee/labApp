@@ -7,6 +7,13 @@
 	labApp
 	{% endif %}
 {% endblock %}
+{% macro nav_link(endpoint, name) %}
+{% if request.endpoint.endswith(endpoint) %}
+  <li class="active"><a href="{{ url_for(endpoint) }}">{{name}}</a></li>
+{% else %}
+  <li><a href="{{ url_for(endpoint) }}">{{name}}</a></li>
+{% endif %}
+{% endmacro %}
 
 {% block navbar %}
 	
@@ -23,13 +30,13 @@
 			</div>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				<ul class="nav navbar-nav">
-					<li><a href="{{ url_for('explore')}}">Explore</a></li>
-					<li><a href="{{ url_for('calculators')}}">Calculators</a></li>
-					<li><a href="{{ url_for('quality_control_sample')}}">Quality Control</a></li>
+					<!--li><a href="{{ url_for('explore')}}">Explore</a></li-->{{ nav_link('explore', 'Explore') }}
+					<!--li><a href="{{ url_for('calculators')}}">Calculators</a></li-->{{ nav_link('calculators', 'Calculators') }}
+					<!--li><a href="{{ url_for('quality_control_sample')}}">Quality Control</a></li-->{{ nav_link('quality_control_sample', 'Quality Control') }}
 					{% if user == superuser %}
-					<li><a href="{{ url_for('document_control_sample') }}">Document Control</a></li>
+					<!--li><a href="{{ url_for('document_control_sample') }}">Document Control</a></li-->{{ nav_link('document_control_sample', 'Document Control') }}
 					{% endif %}
-					<li><a href="{{ url_for('inventory_management_sample')}}">Inventory</a></li>
+					<!--li><a href="{{ url_for('inventory_management_sample')}}">Inventory</a></li-->{{ nav_link('inventory_management_sample', 'Inventory Management') }}
 					{% if current_user.is_authenticated %}
 					{% if users %}
 					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
@@ -70,11 +77,23 @@
 		{% block app_content %}
 		{% endblock %}
 	</div>
-	
+{% block footer %}	
 <footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px;">© 2019 labApp All Right Reserved</footer>
 {% endblock %}
 
+{% endblock %}
+
 {% block styles %}
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129673699-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-129673699-2');
+	</script>
+
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
