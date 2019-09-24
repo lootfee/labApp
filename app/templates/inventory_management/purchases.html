@@ -20,7 +20,7 @@
 				{% if purchases %}
 					{% for purchase in purchases %}
 					<tr>
-						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ company.company_abbrv}}-PO-{{ purchase.purchase_order_no }}</a></td>
 						{% for p in purchase.purchase_created_by %}
 						<td>{{ p.username }}</td>
 						{% endfor %}

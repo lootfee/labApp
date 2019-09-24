@@ -33,18 +33,18 @@
 						<th style="width:40px;">Action</th>
 					</tr>
 				</thead>
-				{% if my_products %}
-					{% for my_p in my_products %}
+				{% if my_supplies %}
+					{% for my_s in my_supplies %}
 					<tr class="my_products_row">
-						<td>{{ my_p.ref_number }}</td>
-						<td>{{ my_p.name }}</td>
-						<td>{{ my_p.description }}</td>
-						<td class="dept_name" style="display:none">{{ my_p.dept }}</td>
-						<td>{% for i in my_p.item_query %}
-						<div id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}"><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></div>
+						<td>{{ my_s.ref_number }}</td>
+						<td>{{ my_s.name }}</td>
+						<td>{{ my_s.description }}</td>
+						<td class="dept_name" style="display:none">{{ my_s.dept }}</td>
+						<td>{% for i in my_s.item_query %}
+						<div id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}"><span class="dept_name" style="display:none">{{ i.dept }}</span><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></div>
 						{% endfor %}</td>
-						<td>{% if my_p.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_p.ref_number)}}">Consume</a>
-						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_p.ref_number }}">Barcode</a>
+						<td>{% if my_s.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_s.ref_number, id=my_s.id)}}">Consume</a>
+						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_s.ref_number }}">Barcode</a>
 						{% endif %}</td>
 						
 					</tr>
@@ -53,30 +53,30 @@
 				{% endif %}
 			</table>
 		</div>
-		{% if my_products %}
-		{% for my_p in my_products %}
-		<div class="modal fade" id="barcode_modal_{{ my_p.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="barcode_modal_{{ my_p.ref_number }}_label">
+		{% if my_supplies %}
+		{% for my_s in my_supplies %}
+		<div class="modal fade" id="barcode_modal_{{ my_s.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="barcode_modal_{{ my_s.ref_number }}_label">
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
 			  <div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<span class="text-center"><h4>Ref No: <span style="color: blue;">{{ my_p.ref_number }}</span></h4> </span>
-				<span class="text-center"><h4>Name: <span style="color: blue;">{{ my_p.name }}</span></h4> </span>
+				<span class="text-center"><h4>Ref No: <span style="color: blue;">{{ my_s.ref_number }}</span></h4> </span>
+				<span class="text-center"><h4>Name: <span style="color: blue;">{{ my_s.name }}</span></h4> </span>
 			  </div>
 			  <div class="modal-body">
 				
-				<select class="form-control" id="select_{{ my_p.ref_number }}">
-					{% for i in my_p.item_query %}
+				<select class="form-control" id="select_{{ my_s.ref_number }}">
+					{% for i in my_s.item_query %}
 					<option value="{{ i.lot_num }}{{ i.id }}">{{ i.lot_num }} - {{ i.id }} / {{ i.expiry.strftime('%d-%m-%Y') }}</option>
 					
 					{% endfor %}
 				</select>
 					<br>
-					{% for i in my_p.item_query %}
-					<div class="bcodes bcodes_{{ my_p.ref_number }} text-center" id="bc_container_{{ i.lot_num }}{{ i.id }}" style="text-align:center;margin:0 auto;">
+					{% for i in my_s.item_query %}
+					<div class="bcodes bcodes_{{ my_s.ref_number }} text-center" id="bc_container_{{ i.lot_num }}{{ i.id }}" style="text-align:center;margin:0 auto;">
 						<svg  id="bc_{{ i.lot_num }}{{ i.id }}" style="margin: 0;">
 						<p style="margin: 0;font-size:10px;">{{ i.lot_num }}-{{ i.id }} &nbsp&nbsp&nbsp Date received: {{ i.received_date.strftime('%d-%m-%Y') }}</p>
-						<p style="margin: 0;font-size:10px;">{{ my_p.name }}</p>
+						<p style="margin: 0;font-size:10px;">{{ my_s.name }}</p>
 						<!--p style="margin: 0;">Lot: {{ i.lot_num }} &nbsp&nbsp&nbsp Expiry: {{ i.expiry.strftime('%d-%m-%Y') }}</p-->
 						<br>
 						<p><input type="button" class="btn btn-default" id="print_{{ i.lot_num }}{{ i.id }}" value="Print"></p>
@@ -101,15 +101,15 @@
 			
 			
 			$('[id]').each(function () {
-				{% for my_p in my_products %}{% for i in my_p.item_query %}
+				{% for my_s in my_supplies %}{% for i in my_s.item_query %}
 				$('[id="' + this.id + '"]:gt(0)').remove();
 				{% endfor %}{% endfor %}
 			});
 			});
 			
-			{% if my_products %}
-			{% for my_p in my_products %}
-			{% for i in my_p.item_query %}
+			{% if my_supplies %}
+			{% for my_s in my_supplies %}
+			{% for i in my_s.item_query %}
 			$("#bc_{{ i.lot_num }}{{ i.id }}").JsBarcode("{{ i.lot_num }}-{{ i.id }}", {
 				width: 2,
 				height: 40,
@@ -118,8 +118,8 @@
 				displayValue: false,
 			});
 			
-			$('#select_{{ my_p.ref_number }}').change(function(){
-				$('.bcodes_{{ my_p.ref_number }}').hide();
+			$('#select_{{ my_s.ref_number }}').change(function(){
+				$('.bcodes_{{ my_s.ref_number }}').hide();
 				$('#bc_container_' + $(this).val()).show();
 			  });
 			  
@@ -135,7 +135,7 @@
 						"height: 2in;" +
 						"margin: 0;" +
 					"}" +
-					 ".bcodes_{{ my_p.ref_number }} {" +
+					 ".bcodes_{{ my_s.ref_number }} {" +
 						"width: 100%;" +
 						"height: 100%;" +
 						 "}" +
@@ -171,13 +171,13 @@
 			{% endfor %}
 			{% endif %}
 			
-			/*{% for my_p in my_products %}
+			/*{% for my_s in my_supplies %}
 				
-				$("#request_{{ my_p.ref_number }}").click(function() {
-					var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
+				$("#request_{{ my_s.ref_number }}").click(function() {
+					var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 					
-					var total = {{ my_p.price }} * qty_req;
-					$("#total_price_{{ my_p.ref_number}}").html(total);
+					var total = {{ my_s.price }} * qty_req;
+					$("#total_price_{{ my_s.ref_number}}").html(total);
 					$('input[name=qty]').val(qty_req);
 					$('input[name=tot_price]').val(total);
 					console.log(qty_req)
@@ -185,26 +185,26 @@
 				});
 				
 				$("#submit").click(function() {
-				$('#request_reagent_modal_{{ my_p.ref_number }}').modal('hide')		
+				$('#request_reagent_modal_{{ my_s.ref_number }}').modal('hide')		
 			});
 			{% endfor %}
 			
 			
 		});*/
 			
-			/*{% for my_p in my_products %}
+			/*{% for my_s in my_supplies %}
 			
-				$("#add_{{ my_p.ref_number }}").click(function() {
-					var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
+				$("#add_{{ my_s.ref_number }}").click(function() {
+					var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 					
-					$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td></tr>");
+					$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_s.ref_number}}</td><td>{{ my_s.name }}</td><td id='price_{{ my_s.ref_number}}'>{{ my_s.price }}</td><td id='qty_{{ my_s.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_s.ref_number}}'></td></tr>");
 					
 					
-					$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' value=''><input type='hidden' name='tot_price' value=''></div>");
+					$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_s.ref_number}}'><input type='hidden' name='name' value='{{ my_s.name }}'><input type='hidden' name='price' value='{{ my_s.price }}'><input type='hidden' name='qty' value=''><input type='hidden' name='tot_price' value=''></div>");
 					
-					var total = {{ my_p.price }} * qty_req;
-					$("#qty_{{ my_p.ref_number}}").html(qty_req);
-					$("#total_price_{{ my_p.ref_number}}").html(total);
+					var total = {{ my_s.price }} * qty_req;
+					$("#qty_{{ my_s.ref_number}}").html(qty_req);
+					$("#total_price_{{ my_s.ref_number}}").html(total);
 					$('input[name=qty]').val(qty_req);
 					$('input[name=tot_price]').val(total);
 					
@@ -221,21 +221,21 @@
 			{% endfor %}*/
 	
 		
-		/*{% for my_p in my_products %}
-		$(document).on( 'keyup', '#quantity_request_{{ my_p.ref_number }}', function() {
+		/*{% for my_s in my_supplies %}
+		$(document).on( 'keyup', '#quantity_request_{{ my_s.ref_number }}', function() {
 		
-			var edit_qty = $("#quantity_request_{{ my_p.ref_number }}").html();
-			var edit_total = {{ my_p.price }} * edit_qty;
+			var edit_qty = $("#quantity_request_{{ my_s.ref_number }}").html();
+			var edit_total = {{ my_s.price }} * edit_qty;
 			
 			$('input[name=qty]').val(edit_qty);
 			$('input[name=tot_price]').val(edit_total);
 		});
 		{% endfor %}*/
-		/*{% for my_p in my_products %}
-		$(document).on( 'keyup', '#qty_{{ my_p.ref_number}}', function() {
-			var edit_qty = $("#qty_{{ my_p.ref_number}}").html();
-			var edit_total = {{ my_p.price }} * edit_qty;
-			$("#total_price_{{ my_p.ref_number}}").html(edit_total);
+		/*{% for my_s in my_supplies %}
+		$(document).on( 'keyup', '#qty_{{ my_s.ref_number}}', function() {
+			var edit_qty = $("#qty_{{ my_s.ref_number}}").html();
+			var edit_total = {{ my_s.price }} * edit_qty;
+			$("#total_price_{{ my_s.ref_number}}").html(edit_total);
 			$('input[name=qty]').val(edit_qty);
 			$('input[name=tot_price]').val(edit_total);
 			var sum = 0;

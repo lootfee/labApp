@@ -37,16 +37,16 @@
 				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
 				<th class="col-md-1" style="width:40px;">Quantity Request </th>
 			</tr>
-			{% if my_products %}
-				{% for my_p in my_products %}
+			{% if my_supplies %}
+				{% for my_s in my_supplies %}
 				<tr class="my_products_row">
-					<td>{{ my_p.ref_number }}</td>
-					<td>{{ my_p.name }}</td>
-					<td>{{ my_p.department }}</td>
-					<td>{{ my_p.supplier }}</td>
-					<td class="text-center">{{ my_p.item_count }}</td>
-					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
-					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">{{ ('Add') }}</a></td>
+					<td>{{ my_s.ref_number }}</td>
+					<td>{{ my_s.name }}</td>
+					<td>{{ my_s.department }}</td>
+					<td>{{ my_s.supplier.name }}</td>
+					<td class="text-center">{{ my_s.item_count }}</td>
+					<td class="text-center" id="quantity_request_{{ my_s.ref_number }}" contenteditable></td>
+					<td><a href="#" class="add_item_to_order" id="add_{{ my_s.ref_number }}">{{ ('Add') }}</a></td>
 				</tr>
 				{% endfor %}
 			{% endif %}
@@ -61,7 +61,7 @@
 			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 		</button>
 		{% endif %}
-		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ purchase.purchase_order_no }}</span></h4> </span>
+		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</span></h4> </span>
 			<table class="table table-bordered table-hover text-center" id="orders_list_table">
 				<tr>
 					<th>Reference No</th>
@@ -76,10 +76,10 @@
 					<tr>
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
-						<td>{{ list.pricee }}</td>
+						<td>{{ list.price }}</td>
 						<td>{{ list.quantity }}</td>
-						<td class='individual_total'>{{ list.total }}</td>
-						<td>{{ list.supplier }}</td>
+						<td class='individual_total' id="{{ list.ref_number }}_total"></td>
+						<td>{{ list.supplier.name }}</td>
 						<td>{{ list.user.username }}</td>
 						<!--td><a href="#" data-toggle="modal" id="edit_{{ list.ref_number }}" data-target="#edit_purchase_list_modal_{{ list.ref_number }}">Edit</a></td-->
 						{% if not purchase.date_purchased %}
@@ -115,6 +115,10 @@
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
 			
+			{% for list in purchase_list %}
+				$("#{{ list.ref_number }}_total").html({{list.price }} * {{ list.quantity }})
+			{% endfor %}
+			
 			var sum = 0;
 			$(".individual_total").each(function() {
 				sum += parseFloat($(this).text());
@@ -123,24 +127,24 @@
 			if ($(".individual_total").length > 0) {
 			$("#subtotal_container").css("display", "block");
 			}
-			{% for my_p in my_products %}
+			{% for my_s in my_supplies %}
 			
-				$("#add_{{ my_p.ref_number }}").click(function() {
+				$("#add_{{ my_s.ref_number }}").click(function() {
 					
-					var exists=$('#orders_list_table tr td:contains('+{{ my_p.ref_number }}+')').length;
+					var exists=$('#orders_list_table tr td:contains('+{{ my_s.ref_number }}+')').length;
 					  if (!exists ){
-						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
+						var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 						
-						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='price_{{ my_p.ref_number}}'>{{ my_p.price }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_p.ref_number}}'></td><td>{{ my_p.supplier}}</td></tr>");
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_s.ref_number}}</td><td>{{ my_s.name }}</td><td id='price_{{ my_s.ref_number}}'>{{ my_s.price }}</td><td id='qty_{{ my_s.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_s.ref_number}}'></td><td>{{ my_s.supplier.name }}</td></tr>");
 						
 						
-						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='price' value='{{ my_p.price }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='tot_price' id='form_tot_price_{{ my_p.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_p.supplier_id }}'></div>");
+						$("#orders_list_form").append("<div><input type='hidden' name='supply_id' value='{{ my_s.id }}'><input type='hidden' name='refnum' value='{{ my_s.ref_number}}'><input type='hidden' name='name' value='{{ my_s.name }}'><input type='hidden' name='price' value='{{ my_s.price }}'><input type='hidden' name='qty' id='form_qty_{{ my_s.ref_number }}' value=''><input type='hidden' name='tot_price' id='form_tot_price_{{ my_s.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_s.supplier_id }}'></div>");
 						
-						var total = {{ my_p.price }} * qty_req;
-						$("#qty_{{ my_p.ref_number}}").html(qty_req);
-						$("#total_price_{{ my_p.ref_number}}").html(total);
-						$('#form_qty_{{ my_p.ref_number }}').val(qty_req);
-						$('#form_tot_price_{{ my_p.ref_number }}').val(total);
+						var total = {{ my_s.price }} * qty_req;
+						$("#qty_{{ my_s.ref_number}}").html(qty_req);
+						$("#total_price_{{ my_s.ref_number}}").html(total);
+						$('#form_qty_{{ my_s.ref_number }}').val(qty_req);
+						$('#form_tot_price_{{ my_s.ref_number }}').val(total);
 						
 						var sum = 0;
 						$(".individual_total").each(function() {
@@ -161,13 +165,13 @@
 			});*/
 		} );
 		
-		{% for my_p in my_products %}
-		$(document).on( 'keyup', '#qty_{{ my_p.ref_number}}', function() {
-			var edit_qty = $("#qty_{{ my_p.ref_number}}").html();
-			var edit_total = {{ my_p.price }} * edit_qty;
-			$("#total_price_{{ my_p.ref_number}}").html(edit_total);
-			$('#form_qty_{{ my_p.ref_number }}').val(edit_qty);
-			$('#form_tot_price_{{ my_p.ref_number }}').val(edit_total);
+		{% for my_s in my_supplies %}
+		$(document).on( 'keyup', '#qty_{{ my_s.ref_number}}', function() {
+			var edit_qty = $("#qty_{{ my_s.ref_number}}").html();
+			var edit_total = {{ my_s.price }} * edit_qty;
+			$("#total_price_{{ my_s.ref_number}}").html(edit_total);
+			$('#form_qty_{{ my_s.ref_number }}').val(edit_qty);
+			$('#form_tot_price_{{ my_s.ref_number }}').val(edit_total);
 			var sum = 0;
 			$(".individual_total").each(function() {
 				sum += parseFloat($(this).text());
@@ -177,27 +181,12 @@
 			$("#subtotal_container").css("display", "block");
 			}
 		});
-		
 		{% endfor %}
 		
 		{% for list in order_list %}
 			$("#close_{{ list.ref_number }}").click(function() {
 				$(".append_data").remove();
 			});
-		
-		/*$("#request_{{ list.ref_number }}").click(function() {
-			
-			$("#edit_qty_table_{{ list.ref_number }} > tbody:last-child").append('<tr class="append_data"><form action method="post"class="form" role="form"><td>{{list.ref_number}}</td><td>{{list.name}}</td><td style="width:80px;">{{ form1.edit_qty(class_="form-control") }}</td><td><button type="button" class="btn btn-default" id="edit_item_qty"><a href="{{url_for("edit_item_qty", company_name=company.company_name, order_no=order.order_no, id=list.id)}}">Edit</a></button></td><td>{{ form1.orderlist_id(value=list.id)}}</td><td>{{ form1.csrf_token() }}</td></form></tr>');
-			print
-			/*$('input[name=orderlist_id]').val({{ list.id }});
-			$('input[name=edit_qty]').val({{ list.quantity }});
-		});*/
-		
-		
-		/*$(document).on( 'keyup', '#edit_qty', function() {
-			var qty_val = $("#edit_qty").val();
-			//$('input[name=edit_qty]').val(edit_qty);
-		});*/
 		{% endfor %}
 		
 		

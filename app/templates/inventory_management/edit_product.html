@@ -14,25 +14,20 @@
 		<form action method="post" class="form" role="form">
 			{{ form.hidden_tag() }}
 			<div>
-				<div class="col-md-3"></div>
-				<div class="col-md-3">
+				<div class="col-md-4"></div>
+				<div class="col-md-4">
 					{{ form.price.label(class_="contol-label") }}
 					{{ form.price(class_="form-control") }}
 					{{ form.min_quantity.label(class_="contol-label") }}
 					{{ form.min_quantity(class_="form-control") }}
 					{{ form.min_expiry.label(class_="contol-label") }}
 					{{ form.min_expiry(class_="form-control") }}
-				</div>
-				<div class="col-md-3">
-					{{ form.department.label(class_="contol-label") }}
-					{{ form.department(class_="form-control") }}
-					{{ form.supplier.label(class_="contol-label") }}
-					{{ form.supplier(class_="form-control") }}
-					{{ form.type.label(class_="contol-label") }}
-					{{ form.type(class_="form-control") }}
+					{{ form.active.label(class_="contol-label") }}
+					{{ form.active(class_="form-control btn")  }}
+					<button id="status_button"></button>
 					<input class="btn btn-default" id="submit" name="submit" type="submit" value="Save" style="float: right; margin-bottom: 10px;margin-top: 10px;">
 				</div>
-				<div class="col-md-3"></div>
+				<div class="col-md-4"></div>
 				
 			</div>
 			<br>
@@ -40,20 +35,48 @@
 		</form>
 	</div>
 {% endblock %}
+{% block styles %}
+	{{ super() }}
+	<style>
+	#active {
+		display: none;
+	}
+	</style>
+{% endblock %}
 {% block scripts %}
 	{{ super() }}
 	<script>
 		$(document).ready(function(){			
-			var temp_tags = [
-				{label: "2 - 8 °C"},
-				{label: "15 - 25 °C"},
-				{label: "20 - 25 °C"},
-				{label: "(-15) - (-25) °C"},
-				{label: "(-20) - (-25) °C"},
-			]
-			
-			$( "#storage_req" ).autocomplete({
-				  source: temp_tags,
+			if ($("#active").is(":checked")){
+				$("#status_button").attr('class', 'form-control btn btn-success');
+				$("#status_button").html('ACTIVE');
+			}
+			else {
+				$("#status_button").attr('class', 'form-control btn btn-warning')
+				$("#status_button").html('INACTIVE');
+			}
+			/*$("#active").change(function() {
+				if (this.checked){
+					$("#status_button").attr('class', 'form-control btn btn-success');
+					$("#status_button").html('active');
+				}
+				else {
+					$("#status_button").attr('class', 'form-control btn btn-warning')
+					$("#status_button").html('inactive');
+				}
+			});*/
+			$("#status_button").click(function() {
+				if ($("#active").is(":checked")){
+					$("#active").prop("checked", false);
+					$("#status_button").attr('class', 'form-control btn btn-warning');
+					$("#status_button").html('INACTIVE');
+				}
+				else {
+					$("#active").prop("checked", true);
+					$("#status_button").attr('class', 'form-control btn btn-success')
+					$("#status_button").html('ACTIVE');
+				}
+			return false;
 			});
 	   });
 	</script>

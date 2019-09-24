@@ -32,21 +32,22 @@
 			<tr>
 				<th class="col-md-3" style="width:150px;">Ref No</th>
 				<th class="col-md-6" style="width:600px;">Name</th>
-				<th class="col-md-3" style="width:150px;">Department</th>
 				<th class="col-md-3" style="width:150px;">Supplier</th>
+				<th class="col-md-3" >Department</th>
 				<th class="col-md-1" style="width:40px;">Quantity Remaining </th>
 				<th class="col-md-1" style="width:40px;">Quantity Request </th>
 			</tr>
-			{% if my_products %}
-				{% for my_p in my_products %}
+			{% if my_supplies %}
+				{% for my_s in my_supplies %}
 				<tr class="my_products_row">
-					<td>{{ my_p.ref_number }}</td>
-					<td>{{ my_p.name }}</td>
-					<td>{{ my_p.department }}</td>
-					<td>{{ my_p.supplier }}</td>
-					<td class="text-center">{{ my_p.item_count }}</td>
-					<td class="text-center" id="quantity_request_{{ my_p.ref_number }}" contenteditable></td>
-					<td><a href="#" class="add_item_to_order" id="add_{{ my_p.ref_number }}">Add</a></td>
+					<td>{{ my_s.ref_number }}</td>
+					<td>{{ my_s.name }}</td>
+					<td>{{ my_s.supplier.name }}</td>
+					<td >{{ my_s.dept_id.department_id }}</td>
+					<td >{{ my_s.department }}</td>
+					<td class="text-center">{{ my_s.item_count }}</td>
+					<td class="text-center" id="quantity_request_{{ my_s.ref_number }}" contenteditable></td>
+					<td><a href="#" class="add_item_to_order" id="add_{{ my_s.ref_number }}">Add</a></td>
 				</tr>
 				{% endfor %}
 			{% endif %}
@@ -61,7 +62,7 @@
 			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 		</button>
 		{% endif %}
-		<span class="text-center"><h4>Order No: <span style="color: blue;">{{ order.order_no }}</span></h4> </span>
+		<span class="text-center"><h4>Order No: <span style="color: blue;">{{ company.company_abbrv }}-ORD-{{ order.order_no }}</span></h4> </span>
 			<table class="table table-bordered table-hover text-center" id="orders_list_table">
 				<tr>
 					<th>Reference No</th>
@@ -111,19 +112,19 @@
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
 			
-			{% for my_p in my_products %}
+			{% for my_s in my_supplies %}
 			
-				$("#add_{{ my_p.ref_number }}").click(function() {
+				$("#add_{{ my_s.ref_number }}").click(function() {
 					
-					var exists=$('#orders_list_table tr td:contains('+{{ my_p.ref_number }}+')').length;
+					var exists=$('#orders_list_table tr td:contains('+{{ my_s.ref_number }}+')').length;
 					  if (!exists ){
-						var qty_req = $("#quantity_request_{{ my_p.ref_number }}").html();
+						var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 						
-						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_p.ref_number}}</td><td>{{ my_p.name }}</td><td id='qty_{{ my_p.ref_number}}'contenteditable></td><td>{{ my_p.supplier }}</td></tr>");
-						$("#qty_{{ my_p.ref_number}}").html(qty_req);
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_s.ref_number}}</td><td>{{ my_s.name }}</td><td id='qty_{{ my_s.ref_number}}'contenteditable></td><td>{{ my_s.supplier.name }}</td></tr>");
+						$("#qty_{{ my_s.ref_number}}").html(qty_req);
 						
-						$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_p.ref_number}}'><input type='hidden' name='name' value='{{ my_p.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_p.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_p.supplier_id }}'></div>");
-						$('#form_qty_{{ my_p.ref_number }}').val(qty_req);
+						$("#orders_list_form").append("<div><input type='hidden' name='supply_id' value='{{ my_s.id }}'><input type='hidden' name='refnum' value='{{ my_s.ref_number}}'><input type='hidden' name='name' value='{{ my_s.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_s.ref_number }}' value=''><input type='hidden' name='supplier' value='{{ my_s.supplier_id }}'></div>");
+						$('#form_qty_{{ my_s.ref_number }}').val(qty_req);
 						
 					}
 					return false;  

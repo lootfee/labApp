@@ -43,10 +43,11 @@ class EditProfileForm(FlaskForm):
 	submit = SubmitField('Submit')
 	cancel = SubmitField('Cancel')
 	
-	def __init__(self, original_username, *args, **kwargs):
+	def __init__(self, original_username, original_email, *args, **kwargs):
 		super(EditProfileForm, self).__init__(*args, **kwargs)
 		self.original_username = original_username
-	
+		self.original_email = original_email
+			
 	def validate_username(self, username):
 		if username.data != self.original_username:
 			user = User.query.filter_by(username=self.username.data).first()
@@ -54,9 +55,10 @@ class EditProfileForm(FlaskForm):
 				raise ValidationError('Username already taken!')
 				
 	def validate_email(self, email):
-		user = User.query.filter_by(email=email.data).first()
-		if user is not None:
-			raise ValidationError('Email is already registered!')
+		if email.data != self.original_email:
+			user = User.query.filter_by(email=self.email.data).first()
+			if user is not None:
+				raise ValidationError('Email is already registered!')
 				
 
 class PostForm(FlaskForm):
@@ -99,36 +101,69 @@ class UserRoleForm(FlaskForm):
 
 
 class CompanyRegistrationForm(FlaskForm):
-	company_name = StringField('Company Name', validators=[DataRequired()])
-	submit = SubmitField('Submit')
+	company_name = StringField('Company Name:', validators=[DataRequired()])
+	company_abbrv = StringField('Company Abbreviation:', validators=[DataRequired(), Length(min=1, max=8)], render_kw={"placeholder": "To be used in company documents"})
+	email = StringField('Email', validators=[DataRequired(), Email()])
+	address = TextAreaField('Address:', validators=[Length(min=1, max=1000)])
+	contact_info = StringField('Contact info:', validators=[DataRequired()])
+	logo = FileField('Logo:', validators=[FileAllowed(photos)])
+	about_me = TextAreaField('About Company:', validators=[Length(min=1, max=3000)], render_kw={"rows": 5, "cols": 150})
+	submit = SubmitField('Save')
+	cancel = SubmitField('Cancel')
+	
+	def validate_company_name(self, company_name):
+		company = Company.query.filter_by(company_name=company_name.data).first()
+		if company is not None:
+			raise ValidationError('Company Name already taken! Please be more specific in creating your company name.(e.g. Include branch name or location.)')
 	
 class CompanyProfileForm(FlaskForm):
 	company_name = StringField('Company Name:', validators=[DataRequired()])
 	company_abbrv = StringField('Company Abbreviation:', validators=[DataRequired(), Length(min=1, max=8)], render_kw={"placeholder": "To be used in company documents"})
 	email = StringField('Email', validators=[DataRequired(), Email()])
 	address = TextAreaField('Address:', validators=[Length(min=1, max=1000)])
-	contact_info = StringField('Contact info:')
+	contact_info = StringField('Contact info:', validators=[DataRequired()])
 	logo = FileField('Logo:', validators=[FileAllowed(photos)])
 	about_me = TextAreaField('About Company:', validators=[Length(min=1, max=3000)], render_kw={"rows": 5, "cols": 150})
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
 	
-	'''def validate_email(self, email):
-		email = Company.query.filter_by(email=email.data).first()
-		if email is not None:
-			raise ValidationError('Email is already registered!')'''
+	def __init__(self, original_company_name, original_company_email, *args, **kwargs):
+		super(CompanyProfileForm, self).__init__(*args, **kwargs)
+		self.original_company_name = original_company_name
+		self.original_company_email = original_company_email
+			
+	def validate_companyname(self, company_name):
+		if company_name.data != self.original_company_name:
+			company_name = Company.query.filter_by(company_name=self.company_name.data).first()
+			if company_name is not None:
+				raise ValidationError('Company Name already taken! Please be more specific in creating your company name.(e.g. Include branch name or location.)')
+				
+	def validate_email(self, email):
+		if email.data != self.original_company_email:
+			email = Company.query.filter_by(email=self.email.data).first()
+			if email is not None:
+				raise ValidationError('Email is already registered!')
 	
 class ProductRegistrationForm(FlaskForm):
 	reference_number = StringField('Reference Number', validators=[DataRequired()])
 	name = StringField('Item Name', validators=[DataRequired()])
 	description = StringField('Description', validators=[DataRequired()])
+	type = StringField('Type', validators=[DataRequired()])
 	price = DecimalField('Price', places=2, rounding=None)
 	min_quantity = IntegerField('Minimum Quantity')
 	min_expiry = IntegerField('Minimum Expiry(Days)')
 	storage_req = StringField('Storage Requirement', validators=[DataRequired()])
-	department = SelectField('Department', coerce=int, validators=[InputRequired()])
+	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
 	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
-	type = SelectField('Type', coerce=int, validators=[InputRequired()])
+	active = BooleanField('Status')
+	#type = SelectField('Type', coerce=int, validators=[InputRequired()])
+	submit = SubmitField('Register')
+	
+class EditProductForm(FlaskForm):
+	price = DecimalField('Price', places=2, rounding=None)
+	min_quantity = IntegerField('Minimum Quantity')
+	min_expiry = IntegerField('Minimum Expiry(Days)')
+	active = BooleanField('Status')
 	submit = SubmitField('Register')
 	
 class DepartmentRegistrationForm(FlaskForm):
@@ -200,6 +235,7 @@ class InventorySearchForm(FlaskForm):
 	#type = SelectField('Type', coerce=int, validators=[InputRequired()])
 
 class OrderListForm(FlaskForm):
+	supply_id = HiddenField('Supply ID')
 	refnum = HiddenField('Reference Number')
 	name = HiddenField('Name')
 	qty = HiddenField('Quantity')
@@ -217,6 +253,7 @@ class EditOrderListForm(FlaskForm):#not used
 class AcceptDeliveryForm(FlaskForm):
 	delivery_no = StringField('Delivery Order No:', validators=[DataRequired()])
 	purchase_no = StringField('Purchase Order No:', validators=[DataRequired()])
+	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
 	
 class ItemReceiveForm(FlaskForm):

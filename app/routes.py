@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies
 from datetime import datetime, timedelta
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -129,7 +129,7 @@ def edit_profile():
 	superuser = User.query.filter_by(id=1).first_or_404()
 	companies = Company.query.order_by(Company.company_name.desc()).all()
 	users = User.query.order_by(User.username.desc()).all()
-	form = EditProfileForm(current_user.username)
+	form = EditProfileForm(current_user.username, current_user.email)
 	if form.submit.data:
 		if form.validate_on_submit():
 			current_user.firstname = form.firstname.data
@@ -316,23 +316,59 @@ def company(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	is_pending_affiliate = company.is_pending_affiliate(user)
 	is_super_admin = company.is_super_admin(user)
-	form = CompanyProfileForm()
-	if form.submit.data:
-		if form.validate_on_submit():
-			company.company_name = form.company_name.data
-			company.company_abbrv = form.company_abbrv.data
-			company.about_me = form.about_me.data
-			company.email = form.email.data
-			company.address = form.address.data
-			company.contact_info = form.contact_info.data
-			if form.logo.data:
-				logo_filename = photos.save(form.logo.data)
-				company.logo = photos.url(logo_filename)
-			db.session.commit()
-			flash('Your changes has been saved!')
-			return redirect(url_for('company', company_name=company.company_name))
-		else:
-			flash('Unable to update changes, please complete missing fields!')
+	return render_template('company.html', company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates,  is_my_affiliate=is_my_affiliate, is_pending_affiliate=is_pending_affiliate, is_super_admin=is_super_admin, companies=companies, users=users, superuser=superuser)
+
+@app.route('/register_company/', methods=['GET', 'POST'])
+@login_required
+def register_company():
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
+	form = CompanyRegistrationForm()
+	if form.validate_on_submit():
+		company = Company(company_name=form.company_name.data, company_abbrv=form.company_abbrv.data, about_me=form.about_me.data, email=form.email.data,  address=form.address.data, contact_info=form.contact_info.data, user_id=current_user.id)
+		if form.logo.data:
+			logo_filename = photos.save(form.logo.data)
+			company.logo = photos.url(logo_filename)
+		db.session.add(company)
+		db.session.commit()
+		accept = Affiliates(super_admin=True, start_date=datetime.utcnow())
+		accept.user_id = current_user.id
+		company.affiliate.append(accept)
+		db.session.commit()
+		flash('Your changes has been saved!')
+		return redirect(url_for('company', company_name=company.company_name))
+	return render_template('company_profile.html', form=form, user=user, companies=companies, users=users, superuser=superuser)
+
+
+@app.route('/edit_company_profile/<company_name>', methods=['GET', 'POST'])
+@login_required
+def edit_company_profile(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
+	affiliates = Affiliates.query.filter_by(company_id=company.id, accepted=True, end_date=None).all()
+	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, start_date=None).all()
+	is_my_affiliate = company.is_my_affiliate(user)
+	is_pending_affiliate = company.is_pending_affiliate(user)
+	is_super_admin = company.is_super_admin(user)
+	form = CompanyProfileForm(company.company_name, company.email)
+	if form.validate_on_submit():
+		company = Company(company_name=form.company_name.data, company_abbrv=form.company_abbrv.data, about_me=form.about_me.data, email=form.email.data,  address=form.address.data, contact_info=form.contact_info.data, user_id=current_user.id)
+		if form.logo.data:
+			logo_filename = photos.save(form.logo.data)
+			company.logo = photos.url(logo_filename)
+		db.session.add(company)
+		db.session.commit()
+		accept = Affiliates(super_admin=True, start_date=datetime.utcnow())
+		accept.user_id = current_user.id
+		company.affiliate.append(accept)
+		db.session.commit()
+		flash('Your changes has been saved!')
+		return redirect(url_for('company', company_name=company.company_name))
 	elif request.method == 'GET':
 		form.company_name.data = company.company_name
 		form.company_abbrv.data = company.company_abbrv
@@ -346,7 +382,7 @@ def company(company_name):
 			form.logo.data = company.logo
 		if company.contact_info:
 			form.contact_info.data = company.contact_info
-	return render_template('company.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates,  is_my_affiliate=is_my_affiliate, is_pending_affiliate=is_pending_affiliate, is_super_admin=is_super_admin, companies=companies, users=users, superuser=superuser)
+	return render_template('company_profile.html', form=form, company=company, user=user, affiliates=affiliates, pending_affiliates=pending_affiliates,  is_my_affiliate=is_my_affiliate, is_pending_affiliate=is_pending_affiliate, is_super_admin=is_super_admin, companies=companies, users=users, superuser=superuser)
 
 @app.route('/accept_affiliate/<int:user_id>, <int:comp_id>')
 @login_required
@@ -522,24 +558,24 @@ def inventory_management(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	my_products = MyProducts.query.filter_by(company_id=company.id).all()
-	for my_p in my_products:
-		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
-		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
-		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		my_p.storage_req = Product.query.filter_by(id=my_p.product_id).first().storage_req
-		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
-		my_p.current_quantity = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
-		my_p.less_quantity = my_p.min_quantity >= my_p.current_quantity
-		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
-		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
-		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
-		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, date_used=None).all()
-		for i in my_p.item_query:
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		my_s.storage_req = Product.query.filter_by(id=my_s.product_id).first().storage_req
+		my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id).first().min_quantity
+		my_s.current_quantity = Item.query.filter_by(product_id=my_s.product_id, date_used=None).count()
+		my_s.less_quantity = my_s.min_quantity >= my_s.current_quantity
+		my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id).first().min_expiry
+		#my_s.dept_name = Department.query.filter_by(id=my_s.department_id).first().name
+		#my_s.type_name = Type.query.filter_by(id=my_s.type_id).first().name
+		my_s.supplier_name = Supplier.query.filter_by(id=my_s.supplier_id).first().name
+		my_s.item_query = Item.query.filter_by(product_id=my_s.product_id, date_used=None).all()
+		for i in my_s.item_query:
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
+			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
 	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
 	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
@@ -558,7 +594,7 @@ def inventory_management(company_name):
 			pl.dept_name = Department.query.filter_by(id=pl.dept_id).first().name
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
-	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, user=user, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
+	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, user=user, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
 
 
 @app.route('/<company_name>/inventory_management/supplies', methods=['GET', 'POST'])
@@ -573,58 +609,56 @@ def supplies(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	select_dept = company.departments.order_by(Department.name.asc())
-	dept = company.departments
-	dept_list = [(d.id, d.name) for d in dept]
-	type = company.types
-	type_list = [(t.id, t.name) for t in type]
+	#select_dept = company.departments.order_by(Department.name.asc())
+	select_supplier = company.suppliers.order_by(Supplier.name.asc())
+	#dept = company.departments
+	#dept_list = [(d.id, d.name) for d in dept]
+	#type = company.types
+	#type_list = [(t.id, t.name) for t in type]
 	supplier = company.suppliers
 	supplier_list = [(s.id, s.name) for s in supplier]
 	form = ProductRegistrationForm()
-	form.department.choices = dept_list
-	form.type.choices = type_list
+	#form.department.choices = dept_list
+	#form.type.choices = type_list
 	form.supplier.choices = supplier_list
 	if form.validate_on_submit():
 		raw_refnum = form.reference_number.data
 		alnum_refnum = ''.join(e for e in raw_refnum if e.isalnum())
 		prod = Product.query.filter_by(ref_number=alnum_refnum).first()
 		if prod:
-			my_prod = MyProducts.query.filter_by(product_id=prod.id, company_id=company.id).first()
+			my_prod = MySupplies.query.filter_by(product_id=prod.id, company_id=company.id, supplier_id=form.supplier.data).first()
 			if my_prod:
-				flash('Product already registered, if you wish to edit, delete the product and register again.')
+				flash('Product already registered with same supplier.')
 			else:
-				p = MyProducts(company_id=company.id, product_id=prod.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data, user_id=current_user.id)
+				p = MySupplies(company_id=company.id, product_id=prod.id, price=form.price.data, supplier_id=form.supplier.data, user_id=current_user.id)
 				db.session.add(p)
 				db.session.commit()
-			return redirect(url_for('products', company_name=company.company_name))	
+			return redirect(url_for('supplies', company_name=company.company_name))	
 		else:
-			product = Product(ref_number=alnum_refnum, name=form.name.data, description=form.description.data, storage_req=form.storage_req.data, user_id=current_user.id)
+			product = Product(ref_number=alnum_refnum, name=form.name.data, description=form.description.data, storage_req=form.storage_req.data, type=form.type.data, user_id=current_user.id)
 			db.session.add(product)
 			db.session.commit()
-			p = MyProducts(company_id=company.id, product_id=product.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, department_id=form.department.data, type_id=form.type.data, supplier_id=form.supplier.data, user_id=current_user.id)
+			p = MySupplies(company_id=company.id, product_id=product.id, price=form.price.data, supplier_id=form.supplier.data, user_id=current_user.id)
 			db.session.add(p)
 			db.session.commit()
-		return redirect(url_for('products', company_name=company.company_name))
+		return redirect(url_for('supplies', company_name=company.company_name))
 	products = Product.query.order_by(Product.name.asc()).all()
-	my_products = MyProducts.query.filter_by(company_id=company.id).all()
-	for my_p in my_products:
-		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
-		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
-		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		my_p.storage_req = Product.query.filter_by(id=my_p.product_id).first().storage_req
-		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_quantity
-		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id).first().min_expiry
-		my_p.dept_name = Department.query.filter_by(id=my_p.department_id).first().name
-		my_p.type_name = Type.query.filter_by(id=my_p.type_id).first().name
-		my_p.supplier_name = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-	return render_template('inventory_management/supplies.html', title='Manage Supplies', description="Manage clinical laboratory supplies, encode supplies data that are used by your clinical laboratory.", user=user, superuser=superuser, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, select_dept=select_dept)
+	prod_type = Product.query.with_entities(Product.type).distinct()
+	my_supplies = MySupplies.query.filter_by(company_id=company.id).all()
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		my_s.storage_req = Product.query.filter_by(id=my_s.product_id).first().storage_req
+		my_s.type = Product.query.filter_by(id=my_s.product_id).first().type
+		my_s.supplier_name = Supplier.query.filter_by(id=my_s.supplier_id).first().name
+	return render_template('inventory_management/supplies.html', title='Manage Supplies', description="Manage clinical laboratory supplies, encode supplies data that are used by your clinical laboratory.", user=user, superuser=superuser, form=form, products=products, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, select_supplier=select_supplier, prod_type=prod_type)
 
-@app.route('/edit_my_product/<int:prod_id>, <int:comp_id>')	
-@login_required	
-def edit_my_product(prod_id, comp_id):
-	my_product = MyProducts.query.filter_by(product_id=prod_id, company_id=comp_id).first()
-	product = Product.query.filter_by(id=prod_id).first()
-	company = Company.query.filter_by(id=comp_id).first_or_404()
+
+@app.route('/<company_name>/inventory_management/link_supplies/<int:dept_id>', methods=['GET', 'POST'])
+@login_required
+def link_supplies(company_name, dept_id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -633,43 +667,95 @@ def edit_my_product(prod_id, comp_id):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	dept = company.departments
-	dept_list = [(d.id, d.name) for d in dept]
-	type = company.types
-	type_list = [(t.id, t.name) for t in type]
-	supplier = company.suppliers
-	supplier_list = [(s.id, s.name) for s in supplier]
-	form = ProductRegistrationForm()
-	form.department.choices = dept_list
-	form.type.choices = type_list
-	form.supplier.choices = supplier_list
+	department = Department.query.filter_by(id=dept_id).first()
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	my_department_supplies = MyDepartmentSupplies.query.filter_by(company_id=company.id, department_id=department.id).all()
+	linked_supply = False
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		my_s.storage_req = Product.query.filter_by(id=my_s.product_id).first().storage_req
+		my_s.type = Product.query.filter_by(id=my_s.product_id).first().type
+		my_s.supplier_name = Supplier.query.filter_by(id=my_s.supplier_id).first().name
+		my_s.department_supply = MyDepartmentSupplies.query.filter_by(company_id=company.id, department_id=department.id, my_supplies_id=my_s.id).first()
+		my_s.linked_supply = False
+		if my_s.department_supply:
+			my_s.linked_supply = True
+	return render_template('inventory_management/link_supplies.html', title='Link Supplies', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, department=department)
+
+@app.route('/<company_name>/inventory_management/link_supplies_to_department/<int:dept_id>/<int:supply_id>', methods=['GET', 'POST'])
+@login_required
+def link_supplies_to_department(company_name, dept_id, supply_id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	department = Department.query.filter_by(id=dept_id).first()
+	my_department_supplies = MyDepartmentSupplies(company_id=company.id, my_supplies_id=supply_id, department_id=dept_id, user_id=current_user.id)
+	db.session.add(my_department_supplies)
+	db.session.commit()
+	flash('Product has been added to ' + department.name + ' department.')
+	return redirect(url_for('link_supplies', company_name=company.company_name, dept_id=dept_id))
+
+@app.route('/<company_name>/edit_my_product/<ref_number>/<int:id>', methods=['GET', 'POST'])	
+@login_required	
+def edit_my_product(company_name, ref_number, id):
+	product = Product.query.filter_by(ref_number=ref_number).first()
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, product_id=product.id, id=id).first()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	#dept = company.departments
+	#dept_list = [(d.id, d.name) for d in dept]
+	#type = company.types
+	#type_list = [(t.id, t.name) for t in type]
+	#supplier = company.suppliers
+	#supplier_list = [(s.id, s.name) for s in supplier]
+	#form.department.choices = dept_list
+	#form.type.choices = type_list
+	#form.supplier.choices = supplier_list
+	form = EditProductForm()
 	if form.validate_on_submit():
-		my_product.price = form.price.data
-		my_product.min_expiry = form.min_expiry.data
-		my_product.min_quantity = form.min_quantity.data
-		my_product.department_id = form.department.data
-		my_product.type_id = form.type.data
-		my_product.supplier_id = form.supplier.data
+		my_supplies.price = form.price.data
+		my_supplies.active = form.active.data
+		my_supplies.min_expiry = form.min_expiry.data
+		my_supplies.min_quantity = form.min_quantity.data
+		#my_product.department_id = form.department.data
+		#my_product.type_id = form.type.data
 		db.session.commit()
-		return redirect(url_for('products', company_name=company.company_name))	
+		return redirect(url_for('supplies', company_name=company.company_name))	
 	elif request.method == 'GET':
-		form.price.data = my_product.price
-		form.min_expiry.data = my_product.min_expiry
-		form.min_quantity.data = my_product.min_quantity
-		form.department.data = my_product.department_id
-		form.type.data = my_product.type_id
-		form.supplier.data = my_product.supplier_id
+		form.price.data = my_supplies.price
+		form.active.data = my_supplies.active
+		form.min_expiry.data = my_supplies.min_expiry
+		form.min_quantity.data = my_supplies.min_quantity
+		#form.department.data = my_product.department_id
+		#form.type.data = my_product.type_id	
 	return render_template('inventory_management/edit_product.html', title='Edit Products', user=user, superuser=superuser, form=form, product=product, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
 	
 
-@app.route('/delete_product/<int:prod_id>, <int:comp_id>')	
+@app.route('/<company_name>/delete_product/<ref_number>/<int:id>')	
 @login_required	
-def delete_product(prod_id, comp_id):
-    product = MyProduct.query.filter_by(product_id=prod_id, company_id=comp_id)
-    db.session.delete(product)
-    db.session.commit()
-    flash('Product has been deleted.')
-    return redirect(url_for('products', company_name=company.company_name))	
+def delete_product(company_name, ref_number, id):
+	product = Product.query.filter_by(ref_number=ref_number).first()
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	my_supply = MySupplies.query.filter_by(company_id=company.id, product_id=product.id, id=id).first()
+	db.session.delete(my_supply)
+	db.session.commit()
+	flash('Product has been deleted.')
+	return redirect(url_for('supplies', company_name=company.company_name))	
 
 
 @app.route('/<company_name>/inventory_management/inventory', methods=['GET', 'POST'])
@@ -687,29 +773,31 @@ def inventory(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
 	products = Product.query.order_by(Product.name.asc())
-	my_products = MyProducts.query.filter_by(company_id=company.id).all()
-	for my_p in my_products:
-		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
-		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
-		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		my_p.dept = Department.query.filter_by(id=my_p.department_id).first().name
-		#my_p.stocks = Item.query.filter_by(product_id=my_p.product_id, date_used=None).count()
-		my_p.min_quantity = MyProducts.query.filter_by(product_id=my_p.product_id, company_id=company.id).first().min_quantity
-		my_p.min_expiry = MyProducts.query.filter_by(product_id=my_p.product_id, company_id=company.id).first().min_expiry
-		my_p.item_query = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).all()
-		#my_p.lot_list = []
-		for i in my_p.item_query:
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		#my_s.dept = Department.query.filter_by(id=my_s.department_id).first().name
+		#my_s.stocks = Item.query.filter_by(product_id=my_s.product_id, date_used=None).count()
+		my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_quantity
+		my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_expiry
+		my_s.item_query = Item.query.filter_by(my_supplies_id=my_s.id, company_id=company.id, date_used=None).all()
+		#my_s.lot_list = []
+		for i in my_s.item_query:
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_p.product_id, company_id=company.id, date_used=None).count()
-			i.min_expiry = datetime.utcnow() + timedelta(days=my_p.min_expiry)
+			i.dept = Department.query.filter_by(id=i.department_id).first().name
+			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
+			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
+			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
 			i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
-	return render_template('inventory_management/inventory.html', title='Inventory', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_products=my_products, orders=orders, dept=dept)
+	return render_template('inventory_management/inventory.html', title='Inventory', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, orders=orders, dept=dept)
 
-@app.route('/<company_name>/consume_item/<ref_number>', methods=['GET', 'POST'])
+@app.route('/<company_name>/consume_item/<ref_number>/<id>', methods=['GET', 'POST'])
 @login_required	
-def consume_item(company_name, ref_number):
+def consume_item(company_name, ref_number, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
@@ -718,9 +806,9 @@ def consume_item(company_name, ref_number):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	product = Product.query.filter_by(ref_number=ref_number).first()
-	min_expiry = MyProducts.query.filter_by(product_id=product.id, company_id=company.id).first().min_expiry
+	min_expiry = MySupplies.query.filter_by(id=id, product_id=product.id, company_id=company.id, active=True).first().min_expiry
 	#product_id = Product.query.filter_by(ref_number=ref_number).first().id
-	item_query = Item.query.filter_by(product_id=product.id, company_id=company.id, date_used=None).all()
+	item_query = Item.query.filter_by(my_supplies_id=id, product_id=product.id, company_id=company.id, date_used=None).all()
 	for i in item_query:
 		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
@@ -743,7 +831,7 @@ def orders(company_name):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	orders = Order.query.filter_by(company_id=company.id).order_by(Order.date_created.desc()).all()
 	for order in orders:
-		order.purchase_order = Purchase.query.filter_by(order_no=order.id, company_id=company.id).first()
+		order.purchase_order = Purchase.query.filter_by(order_id=order.id, company_id=company.id).first()
 	purchases = Purchase.query.filter_by(company_id=company.id).all()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
@@ -760,21 +848,22 @@ def orders(company_name):
 	form1 = CreatePurchaseOrderForm()
 	if form.validate_on_submit():
 		dept = Department.query.filter_by(id=form.department.data).first()
-		order_n = company.company_abbrv + "-ORD-" + dept.abbrv + "-" + datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+		order_n = dept.abbrv + "-" + datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
 		order = Order(order_no=order_n, company_id=company.id, department_id=dept.id)
 		db.session.add(order)
 		order.order_creator.append(user)
 		db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
 	if form1.validate_on_submit():
-		order_id = Order.query.filter_by(order_no=form1.order_no_purchase_form.data, company_id=company.id).first().id
-		purchase = Purchase(purchase_order_no=form1.purchase_order.data, company_id=company.id, order_no=order_id)
+		order = Order.query.filter_by(order_no=form1.order_no_purchase_form.data, company_id=company.id).first()
+		purchase = Purchase(purchase_order_no=form1.purchase_order.data, company_id=company.id, order_id=order.id)
 		db.session.add(purchase)
 		purchase.purchase_created_by.append(user)
 		db.session.commit()
-		purchase_list = OrdersList.query.filter_by(order_id=order_id, company_id=company.id).all()
+		purchase_list = OrdersList.query.filter_by(order_id=order.id, company_id=company.id).all()
 		for i in purchase_list:
-			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.price, quantity=i.quantity, supplier_id=i.supplier_id, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id)
+			i.my_supply = MySupplies.query.filter_by(id=i.my_supplies_id).first()
+			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.my_supply.price, quantity=i.quantity, supplier_id=i.supplier_id, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id, department_id=order.department_id, my_supplies_id=i.my_supplies_id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
@@ -801,22 +890,24 @@ def create_orders(company_name, order_no):
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
 	products = Product.query.order_by(Product.name.asc())
-	my_products = MyProducts.query.filter_by(company_id=company.id).all()
-	for my_p in my_products:
-		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
-		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
-		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
-		my_p.supplier = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		my_s.dept_id = Item.query.filter_by(my_supplies_id=my_s.id).first()
+		#my_s.department = Department.query.filter_by(id=my_s.dept_id).first()
+		my_s.supplier = Supplier.query.filter_by(id=my_s.supplier_id).first()
+		my_s.item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
+		supply_id_list = request.form.getlist('supply_id')
 		refnum_list = request.form.getlist('refnum')
 		name_list = request.form.getlist('name')
 		qty_list = request.form.getlist('qty')
 		supplier_list = request.form.getlist('supplier')
 		for i in range(0, len(refnum_list) ):
-			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], supplier_id=supplier_list[i],order_id=order.id, user_id=user.id, company_id=company.id)
+			list = OrdersList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], my_supplies_id=supply_id_list[i], supplier_id=supplier_list[i],order_id=order.id, user_id=user.id, company_id=company.id, department_id=order.department_id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('create_orders', company_name=company.company_name, order_no=order.order_no))
@@ -825,7 +916,7 @@ def create_orders(company_name, order_no):
 		order.date_submitted = datetime.utcnow()
 		db.session.commit()
 		return redirect (url_for('orders', company_name=company.company_name))
-	return render_template('inventory_management/create_orders.html', title='Create Orders', user=user, superuser=superuser, company=company, products=products, my_products=my_products, order=order, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
+	return render_template('inventory_management/create_orders.html', title='Create Orders', user=user, superuser=superuser, company=company, products=products, my_supplies=my_supplies, order=order, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, is_my_affiliate=is_my_affiliate, order_list=order_list, form=form, dept=dept)	
 
 
 @app.route('/<company_name>/<order_no>/remove_order_item/<int:id>')
@@ -896,8 +987,8 @@ def purchase_list(company_name, purchase_order_no):
 	for list in purchase_list:
 		list.user = User.query.filter_by(id=list.user_id).first()
 		list.product_id = Product.query.filter_by(ref_number=list.ref_number).first().id
-		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first().name
-		list.pricee = MyProducts.query.filter_by(company_id=company.id, product_id=list.product_id).first().price
+		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first()
+		#list.price = MySupplies.query.filter_by(id=list.my_supplies_id ,active=True).first().price
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -907,16 +998,17 @@ def purchase_list(company_name, purchase_order_no):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
-	my_products = MyProducts.query.filter_by(company_id=company.id).all()
-	for my_p in my_products:
-		my_p.name = Product.query.filter_by(id=my_p.product_id).first().name
-		my_p.ref_number = Product.query.filter_by(id=my_p.product_id).first().ref_number
-		my_p.description = Product.query.filter_by(id=my_p.product_id).first().description
-		my_p.department = Department.query.filter_by(id=my_p.department_id).first().name
-		my_p.supplier = Supplier.query.filter_by(id=my_p.supplier_id).first().name
-		my_p.item_count = Item.query.filter_by(product_id=my_p.product_id, company_id=company.id, date_used=None).count()
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	for my_s in my_supplies:
+		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		#my_s.department = Department.query.filter_by(id=my_s.department_id).first().name
+		my_s.supplier = Supplier.query.filter_by(id=my_s.supplier_id).first()
+		my_s.item_count = Item.query.filter_by(product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
+		supply_id_list = request.form.getlist('supply_id')
 		refnum_list = request.form.getlist('refnum')
 		name_list = request.form.getlist('name')
 		price_list = request.form.getlist('price')
@@ -926,7 +1018,7 @@ def purchase_list(company_name, purchase_order_no):
 		for i in range(0, len(refnum_list) ):
 			#print(refnum_list[i], name_list[i])
 		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
-			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], purchase_id=purchase.id, user_id=user.id, company_id=company.id)
+			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], my_supplies_id=supply_id_list[i], purchase_id=purchase.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
@@ -935,7 +1027,7 @@ def purchase_list(company_name, purchase_order_no):
 		purchase.date_purchased = datetime.utcnow()
 		db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
-	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_products=my_products)		
+	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/remove_purchase_item/<int:id>')
@@ -981,7 +1073,7 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
-	#purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+	order = Order.query.filter_by(id=purchase.order_id, company_id=company.id).first_or_404()
 	purchased_item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	product = Product.query.filter_by(ref_number=purchased_item.ref_number).first()
@@ -1000,11 +1092,11 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 		alnum_lotno = ''.join(e for e in raw_lotno if e.isalnum())
 		lot_query = Lot.query.filter_by(lot_no=alnum_lotno).first()
 		if lot_query is None:
-			lot = Lot(lot_no=alnum_lotno, product_id=product.id, expiry=form.expiry.data)
+			lot = Lot(lot_no=alnum_lotno, product_id=product.id, expiry=form.expiry.data, user_id=current_user.id)
 			db.session.add(lot)
 			db.session.commit()
 			for i in range(0, qty):
-				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
+				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, delivery_id=delivery.id, my_supplies_id=purchased_item.my_supplies_id)
 				db.session.add(item)
 				#purchased_item.deliveries.append(delivery)
 				db.session.commit()
@@ -1012,7 +1104,7 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 		if lot_query is not None:
 			lot = Lot.query.filter_by(lot_no=alnum_lotno).first()
 			for i in range(0, qty):
-				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id)
+				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, my_supplies_id=purchased_item.my_supplies_id)
 				db.session.add(item)
 				#purchased_item.deliveries.append(delivery)
 				db.session.commit()
@@ -1048,9 +1140,12 @@ def deliveries(company_name):
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
 	form = AcceptDeliveryForm()
+	suppliers = company.suppliers
+	supplier_list = [(d.id, d.name) for d in suppliers]
+	form.supplier.choices = supplier_list
 	if form.validate_on_submit():
 		purchase = Purchase.query.filter_by(purchase_order_no=form.purchase_no.data, company_id=company.id).first_or_404()
-		delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id)
+		delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id, supplier_id=form.supplier.data)
 		db.session.add(delivery)
 		db.session.commit()
 		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))

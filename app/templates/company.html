@@ -21,36 +21,18 @@
 				{% if company.address %}<p>Email: {{ company.email }}</p>{% endif %}
 				{% if company.contact_info %}<p>Contact: {{ company.contact_info }}</p>{% endif %}
 				{% if is_super_admin %}
-				<p><a href="#" id="edit_company_profile">Edit/Update company profile?</a></p>
+				<p><a href="{{ url_for('edit_company_profile', company_name=company.company_name) }}">Edit Company Profile</a></p>
 				{% endif %}
 				{% if not is_my_affiliate %}
 				{% if not is_pending_affiliate %}
 				<p><a href="{{ url_for('request_affiliate', company_name=company.company_name) }}" id="request_affiliate">Request to affiliate to company?</a></p>
+				
 				{% endif %}
 				{% endif %}
 				
-			</div>
-			<div id="edit_company_profile_form" class="col-md-8">
-				{% if form %}
-				{{ wtf.quick_form(form) }}
-				<br>
-				{% endif %}
-			</div>
-			
+			</div>		
 		</td>
 	</tr>
 </table>
 
-{% endblock %}
-
-{% block scripts %}
-	{{ super() }}
-	<script>
-		$(document).ready(function() {
-			$("#cancel").click(function(){
-				$("#edit_company_profile_form").hide();
-				$("#company_profile").show();
-			});
-		});
-	</script>
 {% endblock %}

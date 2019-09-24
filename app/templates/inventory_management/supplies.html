@@ -3,7 +3,7 @@
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}	
-    <h3 class="inventory_headers">Manage Products</h3>
+    <h3 class="inventory_headers">Manage Supplies</h3>
 	<hr class="inventory_hr">
 	{% if is_inv_supervisor %}
 	<div class="row sidenav" id="product_sidenav">
@@ -11,7 +11,7 @@
 			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
 				<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
 			</button>
-			<h4>Register Product</h4>
+			<h4>Register Supplies</h4>
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}
 				<div>
@@ -22,24 +22,23 @@
 					{{ form.name(class_="form-control") }}
 					{{ form.description.label(class_="contol-label") }}
 					{{ form.description(class_="form-control") }}
-					{{ form.storage_req.label(class_="contol-label") }}
-					{{ form.storage_req(class_="form-control") }}
+					
 				</div>
 				<div class="col-md-3">
-					{{ form.price.label(class_="contol-label") }}
-					{{ form.price(class_="form-control") }}
-					{{ form.min_quantity.label(class_="contol-label") }}
-					{{ form.min_quantity(class_="form-control") }}
-					{{ form.min_expiry.label(class_="contol-label") }}
-					{{ form.min_expiry(class_="form-control") }}
-				</div>
-				<div class="col-md-3">
-					{{ form.department.label(class_="contol-label") }}
-					{{ form.department(class_="form-control") }}
-					{{ form.supplier.label(class_="contol-label") }}
-					{{ form.supplier(class_="form-control") }}
 					{{ form.type.label(class_="contol-label") }}
 					{{ form.type(class_="form-control") }}
+					{{ form.storage_req.label(class_="contol-label") }}
+					{{ form.storage_req(class_="form-control") }}
+					{{ form.min_quantity.label(class_="contol-label") }}
+					{{ form.min_quantity(class_="form-control") }}
+				</div>
+				<div class="col-md-3">
+					{{ form.supplier.label(class_="contol-label") }}
+					{{ form.supplier(class_="form-control") }}
+					{{ form.price.label(class_="contol-label") }}
+					{{ form.price(class_="form-control") }}
+					{{ form.min_expiry.label(class_="contol-label") }}
+					{{ form.min_expiry(class_="form-control") }}
 				</div>
 				</div>
 				<br>
@@ -55,7 +54,7 @@
 		<div class="col-md-12">
 			{% if is_inv_supervisor %}
 			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align" style="float: left;">
-				<span>Register Product</span>
+				<span>Register Supplies</span>
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
 			</button>
 			{% endif %}
@@ -64,11 +63,20 @@
 					<label class="control-label" for="search_products">Search</label>
 					<input class="form-control" id="search_products">
 				</div>
-				<div class="col-md-6">
+				<!--div class="col-md-6">
 					<label class="control-label" for="department">Department</label>
 					<select class="form-control" id="department">
 						<option value=''>All</option>
 						{% for d in select_dept %}
+						<option value='{{ d.name }}'>{{ d.name }}</option>
+						{% endfor %}
+					</select>
+				</div-->
+				<div class="col-md-6">
+					<label class="control-label" for="department">Supplier</label>
+					<select class="form-control" id="select_supplier">
+						<option value=''>All</option>
+						{% for d in select_supplier %}
 						<option value='{{ d.name }}'>{{ d.name }}</option>
 						{% endfor %}
 					</select>
@@ -81,36 +89,36 @@
 					<th>Product Name</th>
 					<th>Description</th>
 					<th>Storage</th>
-					<th>Min Qty</th>
-					<th>Min Expiry</th>
-					<th>Price</th>
-					<th>Department</th>
 					<th>Type</th>
+					<th>Price</th>
 					<th>Supplier</th>
+					<th>Status</th>
 					<th>Action</th>
-					<th></th>
 				</tr>
 				</thead>
 				{% if products %}
-					{% for my_p in my_products %}
+					{% for my_s in my_supplies %}
 					<tr class="my_products_row">
-						<td>{{ my_p.ref_number }}</td>
-						<td>{{ my_p.name }}</td>
-						<td>{{ my_p.description }}</td>
-						<td>{{ my_p.storage_req }}</td>
-						<td>{{ my_p.min_quantity }}</td>
-						<td>{{ my_p.min_expiry }}</td>
-						<td>{{ my_p.price }}</td>
-						<td>{{ my_p.dept_name }}</td>
-						<td>{{ my_p.type_name }}</td>
-						<td>{{ my_p.supplier_name }}</td>
+						<td>{{ my_s.ref_number }}</td>
+						<td>{{ my_s.name }}</td>
+						<td>{{ my_s.description }}</td>
+						<td>{{ my_s.storage_req }}</td>
+						<td>{{ my_s.type }}</td>
+						<td>{{ my_s.price }}</td>
+						<td>{{ my_s.supplier_name }}</td>
+						{% if my_s.active == True %}
+						<td class="success">Active</td>
+						{% else %}
+						<td class="warning">Inactive</td>
+						{% endif %}
 						{% if is_inv_admin %}
-						<td><a href="{{ url_for('edit_my_product', prod_id=my_p.product_id, comp_id=company.id) }}">
-						<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
-						</a></td>
-						<td><a href="{{ url_for('delete_product', prod_id=my_p.product_id, comp_id=company.id) }}">
+						<td>
+						<span title="Edit price"><a href="{{ url_for('edit_my_product', company_name=company.company_name, ref_number=my_s.ref_number, id=my_s.id) }}">
+						<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></span>
+						<span title="Delete"><a data-toggle="modal" href="#" data-target="#{{ my_s.ref_number }}_{{ my_s.id }}">
 						<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-						</a></td>
+						</a></span>
+						</td>
 						{% endif %}
 					</tr>
 					{% endfor %}
@@ -118,15 +126,35 @@
 			</table>
 		</div>
 	</div>
-		
-    </div>
+	{% for my_s in my_supplies %}
+	<div class="modal fade" id="{{ my_s.ref_number }}_{{ my_s.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ my_s.ref_number }}_{{ my_s.id }}Label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<p><h4>Delete item: </h4></p>
+		  </div>
+		  <div class="modal-body">
+			<p><h4>Reference No: {{ my_s.ref_number }}</h4></p>
+			<p><h4>Name: {{ my_s.name }} </h4></p>
+			<p><h4>Price: {{ my_s.price }}</h4></p>
+			<p><h4>Supplier: {{ my_s.supplier_name }}</h4></p>
+		  </div>
+		  <div class="modal-footer">
+			<a class="btn btn-default" href="{{ url_for('delete_product', company_name=company.company_name, ref_number=my_s.ref_number, id=my_s.id) }}" role="button">Delete</a>
+		  </div>
+		</div>
+	  </div>
+	</div>	
+    {% endfor %}
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
 	<script>
 		$(document).ready(function(){
 			$('input#search_products').quicksearch('table#products_table .my_products_row');
-			$('select#department').quicksearch('table#products_table .my_products_row');	
+			$('select#department').quicksearch('table#products_table .my_products_row');
+			$('select#select_supplier').quicksearch('table#products_table .my_products_row');				
 		
 			var product_tags = [
 				{% for prod in products %}
@@ -135,6 +163,7 @@
 					name: "{{ prod.name }}",
 					description: "{{ prod.description }}",
 					storage_req: "{{ prod.storage_req }}",
+					type: "{{ prod.type }}",
 					},
 				{% endfor %}
 			  ]
@@ -150,6 +179,7 @@
 			  $("#name").val(ui.item.name);
 			  $("#description").val(ui.item.description);
 			  $("#storage_req").val(ui.item.storage_req);
+			  $("#type").val(ui.item.type);
 			  }
 			});
 			
@@ -163,6 +193,17 @@
 			
 			$( "#storage_req" ).autocomplete({
 				  source: temp_tags,
+			});
+			
+			var type_tags = [
+				{% for pt in prod_type %}
+				{label: "{{ pt.type }}" },
+				{% endfor %}
+			]
+			
+						
+			$( "#type" ).autocomplete({
+				  source: type_tags,
 			});
 	   });
 	</script>

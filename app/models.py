@@ -74,7 +74,7 @@ downvotes = db.Table('downvotes',
 
 class Company(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	company_name = db.Column(db.String(128), index=True)
+	company_name = db.Column(db.String(128), index=True, unique=True)
 	company_abbrv = db.Column(db.String(8))
 	email = db.Column(db.String(120), index=True, unique=True )
 	address = db.Column(db.String(254))
@@ -85,6 +85,7 @@ class Company(db.Model):
 	company_created = db.Column(db.DateTime, default=datetime.utcnow)
 	
 	order = db.relationship('Order', backref=db.backref('company', lazy=True))
+	employees = db.relationship("User", secondary="affiliates")
 	
 	def __repr__(self):
 		return '<Company {}>'.format(self.company_name)
@@ -438,6 +439,7 @@ class Product(db.Model):
 	name = db.Column(db.String(200))
 	description = db.Column(db.String(100))
 	storage_req = db.Column(db.String(50))
+	type = db.Column(db.String(50))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	lot_no = db.relationship('Lot', backref=db.backref('ref_no', lazy=True))
 		
@@ -458,6 +460,40 @@ class MyProducts(db.Model):
 	
 	company = db.relationship('Company', backref=db.backref('my_products', lazy='dynamic'))
 	product = db.relationship('Product', backref=db.backref('product_of_company', lazy='dynamic'))
+
+class MySupplies(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
+	price = db.Column(db.Numeric(10,2))
+	min_expiry = db.Column(db.Integer)
+	min_quantity = db.Column(db.Integer)
+	active = db.Column(db.Boolean, default=True)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	
+	company = db.relationship('Company', backref=db.backref('my_supplies', lazy='dynamic'))
+	product = db.relationship('Product', backref=db.backref('company_supplies', lazy='dynamic'))
+	supplier = db.relationship('Supplier', backref=db.backref('products', lazy='dynamic'))
+	
+	def __repr__(self):
+		return '<MySupplies {}>'.format(self.id)
+	
+	
+class MyDepartmentSupplies(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
+	min_expiry = db.Column(db.Integer)
+	min_quantity = db.Column(db.Integer)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	
+	department = db.relationship('Department', backref=db.backref('my_supplies', lazy='dynamic'))
+	supplies = db.relationship('MySupplies', backref=db.backref('department_supplies', lazy='dynamic'))
+	
+	def __repr__(self):
+		return '<MyDepartmentSupplies {}>'.format(self.id)
 
 
 class Order(db.Model):
@@ -481,7 +517,9 @@ class OrdersList(db.Model):
 	price = db.Column(db.Numeric(10,2))
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
+	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
@@ -497,7 +535,7 @@ class Purchase(db.Model):
 	#purchased_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_purchased = db.Column(db.DateTime, index=True)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	order_no = db.Column(db.Integer, db.ForeignKey('order.id'))
+	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	
 	purchase_to_purchase_list = db.relationship('PurchaseList', backref=db.backref('purchase_to_purchase_list', lazy=True))
 	purchase_to_delivery = db.relationship('Delivery', backref=db.backref('purchase_to_delivery', lazy=True))
@@ -512,7 +550,9 @@ class PurchaseList(db.Model):
 	price = db.Column(db.Numeric(10,2))
 	quantity = db.Column(db.Integer)
 	total = db.Column(db.Numeric(10,2))
+	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
+	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
@@ -522,9 +562,7 @@ class PurchaseList(db.Model):
 	def __repr__(self):
 		return '<PurchaseList {}>'.format(self.id)
 		
-	#def delivered_qty(self, delivery):
-	#	return self.deliveries.filter(deliveries.c.delivery_id == delivery.id).count()
-
+	
 
 class Delivery(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -533,6 +571,7 @@ class Delivery(db.Model):
 	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
+	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 	
 	delivery_to_item = db.relationship('Item', backref=db.backref('delivery_to_item', lazy=True))
 	
@@ -544,14 +583,16 @@ class Item(db.Model):
 	lot_id = db.Column(db.Integer, db.ForeignKey('lot.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
 	purchase_list_id = db.Column(db.Integer, db.ForeignKey('purchase_list.id'))
 	delivery_id = db.Column(db.Integer, db.ForeignKey('delivery.id'))
-	#sequence_no = db.Column(db.Integer)-use id instead
+	department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
+	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 	date_used = db.Column(db.DateTime, index=True)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	def __repr__(self):
-		return '<Item {}{}>'.format(self.id)
+		return '<Item {}>'.format(self.id)
 
 class Lot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

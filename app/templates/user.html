@@ -36,7 +36,7 @@
 				</ul>
                 {% if user == current_user %}
                 <p><a href="{{ url_for('edit_profile') }}">Edit your profile</a></p>
-				<p><a href="#" id="register_company">Register a company?</a></p>
+				<p><a href="{{ url_for('register_company') }}">Register a company?</a></p>
 				<div id="reg_company_form" class="col-md-6">
 					{% if form %}
 					{{ wtf.quick_form(form) }}

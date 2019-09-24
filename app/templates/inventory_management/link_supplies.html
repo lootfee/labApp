@@ -1,0 +1,38 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+<h3 class="inventory_headers">Link Supplies to {{ department.name }}</h3>
+<hr class="inventory_hr">
+<div class="col-md-12">
+	<table class="sort_table table table-bordered table-hover text-center" id="products_table">
+		<thead>
+		<tr>
+			<th>Reference No</th>
+			<th>Product Name</th>
+			<th>Description</th>
+			<th>Storage</th>
+			<th>Type</th>
+			<th>Supplier</th>
+			<th>Action</th>
+		</tr>
+		</thead>
+			{% for my_s in my_supplies %}
+			<tr class="my_products_row">
+				<td>{{ my_s.ref_number }}</td>
+				<td>{{ my_s.name }}</td>
+				<td>{{ my_s.description }}</td>
+				<td>{{ my_s.storage_req }}</td>
+				<td>{{ my_s.type }}</td>
+				<td>{{ my_s.supplier_name }}</td>
+				{% if my_s.linked_supply == False %}
+				<td class="warning"><a href="{{ url_for('link_supplies_to_department', company_name=company.company_name, dept_id=department.id, supply_id=my_s.id) }}">Link</a></td>
+				{% elif my_s.linked_supply == True %}
+				<td class="success"><a href="#">Linked</a></td>
+				{% endif %}
+			</tr>
+			{% endfor %}
+	</table>
+</div>
+{% endblock %}

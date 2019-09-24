@@ -13,23 +13,21 @@
 				{{ wtf.quick_form(form1) }}
 				<br>
 				{% endif %}
-				{% if form2 %}
-				{{ wtf.quick_form(form2) }}
-				<br>
-				{% endif %}
-				
 			</div>
 		</div>
 		{% endif %}
-		<div class="col-md-4">
+		<div class="col-md-6">
 			<table class="table table-hover">
 				<tr>
 					<th>Departments</th>
+					<th></th>
+					<th></th>
 				</tr>
 				
 					{% for depts in company.departments %}
 					<tr>
 						<td>{{ depts.name }} ({{ depts.abbrv }})</td>
+						<td><a href="{{ url_for('link_supplies', company_name=company.company_name, dept_id=depts.id) }}">Link supplies</a></td>
 						{% if is_inv_admin %}
 						<td class="del-edit-btn"><a href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
 						{% endif %}
@@ -38,7 +36,7 @@
 			
 			</table>
 		</div>
-		<div class="col-md-4">
+		<!--div class="col-md-4">
 			<table class="table table-hover">
 				<tr>
 					<th>Types</th>
@@ -54,7 +52,7 @@
 					{% endfor %}
 				{% endif %}
 			</table>
-		</div>
+		</div-->
     </div>
 {% endblock %}
 {% block scripts %}

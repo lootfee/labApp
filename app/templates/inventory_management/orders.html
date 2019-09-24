@@ -22,7 +22,7 @@
 				{% if orders %}
 					{% for order in orders %}
 					<tr>
-						<td><a href="{{ url_for('create_orders', company_name=company.company_name, order_no=order.order_no) }}">{{ order.order_no }}</a></td>
+						<td><a href="{{ url_for('create_orders', company_name=company.company_name, order_no=order.order_no) }}">{{ company.company_abbrv }}-ORD-{{ order.order_no }}</a></td>
 						{% for c in order.order_creator %}
 						<td>{{ c.username }}</td>
 						{% endfor %}
@@ -37,7 +37,7 @@
 						{% endif %}
 						{% if is_inv_admin %}
 						{% if order.purchase_order %}
-						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ order.purchase_order.purchase_order_no }}</a></td>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ company.company_abbrv }}-PO-{{ order.purchase_order.purchase_order_no }}</a></td>
 						{% elif  order.date_submitted %}
 						<td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_purchase_modal_{{ order.order_no }}">Create Purchase Order</button></td>
 						{% endif %}
@@ -73,12 +73,13 @@
 					<div class="modal-header">
 					<h4 style="display: inline;">For order no: </h4>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					{{ form1.order_no_purchase_form(class_="form-control modal-form-number", value=order.order_no, readonly=True) }}
+					<div class="input-group"><span class="input-group-addon  modal-form-number">{{ company.company_abbrv }}-ORD-</span>{{ form1.order_no_purchase_form(class_="form-control modal-form-number", value=order.order_no, readonly=True) }}</div>
 					</div>
 					<div class="modal-body">
 						<div class="form-group required">
 							{{ form1.purchase_order.label (class_="control-label") }}
-							{{ form1.purchase_order (class_="form-control modal-form-number", value= "PO-" + order.order_no, readonly=True) }}
+							<div class="input-group"><span class="input-group-addon  modal-form-number">{{ company.company_abbrv }}-PO-</span>
+							{{ form1.purchase_order (class_="form-control modal-form-number", value=order.order_no, readonly=True) }}</div>
 						</div>
 
 					</div>
