@@ -3,7 +3,7 @@ from app import app, photos
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, DecimalField, SelectField, SelectMultipleField, IntegerField, HiddenField, DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length, URL, InputRequired, Regexp
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from app.models import User, Product, Item, Department, Supplier, Type, Order, Company
+from app.models import User, Product, Item, Department, Supplier, Type, Order, Company, Delivery
 from flask_pagedown.fields import PageDownField
 
 class LoginForm(FlaskForm):
@@ -255,6 +255,11 @@ class AcceptDeliveryForm(FlaskForm):
 	purchase_no = StringField('Purchase Order No:', validators=[DataRequired()])
 	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
+	
+	'''def validate_delivery_no(self, delivery_no):
+		delivery = Delivery.query.filter_by(delivery_no=delivery_no.data).first()
+		if delivery is not None:
+			raise ValidationError('Delivery Number already registered! Please check that you have entered the correct data or add it to the existing one.')'''
 	
 class ItemReceiveForm(FlaskForm):
 	lot_no = StringField('Lot No:', validators=[DataRequired()])

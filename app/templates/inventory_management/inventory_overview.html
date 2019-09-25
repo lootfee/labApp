@@ -28,16 +28,19 @@
 				<tr>
 					<th>Ref Number</th>
 					<th>Name</th>
+					<th>Department</th>
 					<th>Qty</th>
 				</tr>
-				{% for my_p in my_products %}
-				{% if my_p.less_quantity %}
+				{% for my_s in my_supplies %}
+				{% if my_s.less_quantity %}
+				{% for i in my_s.item_query %}
 				<tr class="my_products_row">
-					<td>{{ my_p.ref_number }}</td>
-					<td>{{ my_p.name }}</td> 
-					<td>{{ my_p.current_quantity }}</td>
-					<td style="display:none;">{{ my_p.dept_name }}</td>
+					<td>{{ my_s.ref_number }}</td>
+					<td>{{ my_s.name }}</td>
+					<td>{{ i.dept }}</td>
+					<td>{{ i.quantity_dept }}</td>
 				</tr>
+				{% endfor %}
 				{% endif %}
 				{% endfor %}
 				</table>
@@ -51,15 +54,15 @@
 					<th>Lot no</th>
 					<th>Expiry</th>
 				</tr>
-				{% for my_p in my_products %}
-				{% for i in my_p.item_query %}
+				{% for my_s in my_supplies %}
+				{% for i in my_s.item_query %}
 				{% if i.greater_expiry  %}
-				<tr id="{{ my_p.ref_number }}_lot_qty_{{ i.lot_num }}" class="my_products_row">
-					<td>{{ my_p.ref_number }}</td>
-					<td>{{ my_p.name }}</td>
+				<tr id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}" class="my_products_row">
+					<td>{{ my_s.ref_number }}</td>
+					<td>{{ my_s.name }}</td>
 					<td>{{ i.lot_num }}</td>
 					<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
-					<td style="display:none;">{{ my_p.dept_name }}</td>
+					<td style="display:none;">{{ my_s.dept_name }}</td>
 				</tr>
 				{% endif %}
 				{% endfor %}
@@ -88,7 +91,7 @@
 					<td>{{ pl.ref_number }}</td>
 					<td>{{ pl.name }}</td>
 					<td>{{ pl.purchase_order_no }}</td>
-					<td>{{ pl.date_purchased }}</td>
+					<td>{{ pl.date_purchased.strftime('%d-%m-%Y') }}</td>
 					<td>{{ pl.qty }}</td>
 					<td>{{ pl.delivered_qty }}</td>
 					<td style="display:none;">{{ pl.dept_name }}</td>
@@ -167,7 +170,7 @@
 			$('select#department').quicksearch('table.overview_table .my_products_row');
 			
 			$('[id]').each(function () {
-				{% for my_p in my_products %}{% for i in my_p.item_query %}
+				{% for my_s in my_supplies %}{% for i in my_s.item_query %}
 				$('[id="' + this.id + '"]:gt(0)').remove();
 				{% endfor %}{% endfor %}
 			});

@@ -565,18 +565,20 @@ def inventory_management(company_name):
 		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
 		my_s.storage_req = Product.query.filter_by(id=my_s.product_id).first().storage_req
 		my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id).first().min_quantity
-		my_s.current_quantity = Item.query.filter_by(product_id=my_s.product_id, date_used=None).count()
+		my_s.current_quantity = Item.query.filter_by(company_id=company.id, product_id=my_s.product_id, date_used=None).count()
 		my_s.less_quantity = my_s.min_quantity >= my_s.current_quantity
 		my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id).first().min_expiry
 		#my_s.dept_name = Department.query.filter_by(id=my_s.department_id).first().name
 		#my_s.type_name = Type.query.filter_by(id=my_s.type_id).first().name
 		my_s.supplier_name = Supplier.query.filter_by(id=my_s.supplier_id).first().name
-		my_s.item_query = Item.query.filter_by(product_id=my_s.product_id, date_used=None).all()
+		my_s.item_query = Item.query.filter_by(company_id=company.id, product_id=my_s.product_id, date_used=None).all()
 		for i in my_s.item_query:
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
+			i.dept = Department.query.filter_by(id=i.department_id).first().name
+			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
 	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
 	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
 	pending_item = []
@@ -590,8 +592,8 @@ def inventory_management(company_name):
 			pl.qty = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, id=pl.id).first().quantity
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
 			pl.product_id = Product.query.filter_by(ref_number=pl.ref_number).first().id
-			pl.dept_id = MyProducts.query.filter_by(company_id=company.id, product_id=pl.product_id).first().department_id
-			pl.dept_name = Department.query.filter_by(id=pl.dept_id).first().name
+			#pl.dept_id = MySupplies.query.filter_by(company_id=company.id, product_id=pl.product_id).first().department_id
+			pl.dept_name = Department.query.filter_by(id=pl.department_id).first().name
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
 	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, user=user, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
@@ -630,7 +632,7 @@ def supplies(company_name):
 			if my_prod:
 				flash('Product already registered with same supplier.')
 			else:
-				p = MySupplies(company_id=company.id, product_id=prod.id, price=form.price.data, supplier_id=form.supplier.data, user_id=current_user.id)
+				p = MySupplies(company_id=company.id, product_id=prod.id, price=form.price.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, supplier_id=form.supplier.data, user_id=current_user.id)
 				db.session.add(p)
 				db.session.commit()
 			return redirect(url_for('supplies', company_name=company.company_name))	
@@ -638,7 +640,7 @@ def supplies(company_name):
 			product = Product(ref_number=alnum_refnum, name=form.name.data, description=form.description.data, storage_req=form.storage_req.data, type=form.type.data, user_id=current_user.id)
 			db.session.add(product)
 			db.session.commit()
-			p = MySupplies(company_id=company.id, product_id=product.id, price=form.price.data, supplier_id=form.supplier.data, user_id=current_user.id)
+			p = MySupplies(company_id=company.id, product_id=product.id, price=form.price.data, supplier_id=form.supplier.data, min_expiry=form.min_expiry.data, min_quantity=form.min_quantity.data, user_id=current_user.id)
 			db.session.add(p)
 			db.session.commit()
 		return redirect(url_for('supplies', company_name=company.company_name))
@@ -788,7 +790,7 @@ def inventory(company_name):
 			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 			i.dept = Department.query.filter_by(id=i.department_id).first().name
-			i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
+			#i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.expiry < i.min_expiry)
@@ -895,8 +897,10 @@ def create_orders(company_name, order_no):
 		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
 		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
 		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
-		my_s.dept_id = Item.query.filter_by(my_supplies_id=my_s.id).first()
-		#my_s.department = Department.query.filter_by(id=my_s.dept_id).first()
+		my_s.dept_id = MyDepartmentSupplies.query.filter_by(company_id=company.id, my_supplies_id=my_s.id).all()
+		for my_ds in my_s.dept_id:
+			my_ds.department = Department.query.filter_by(id=my_ds.department_id).first()
+			my_ds.item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, department_id=my_ds.department_id, date_used=None).count()
 		my_s.supplier = Supplier.query.filter_by(id=my_s.supplier_id).first()
 		my_s.item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
@@ -1005,7 +1009,11 @@ def purchase_list(company_name, purchase_order_no):
 		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
 		#my_s.department = Department.query.filter_by(id=my_s.department_id).first().name
 		my_s.supplier = Supplier.query.filter_by(id=my_s.supplier_id).first()
-		my_s.item_count = Item.query.filter_by(product_id=my_s.product_id, company_id=company.id, date_used=None).count()
+		my_s.dept_id = MyDepartmentSupplies.query.filter_by(company_id=company.id, my_supplies_id=my_s.id).all()
+		for my_ds in my_s.dept_id:
+			my_ds.department = Department.query.filter_by(id=my_ds.department_id).first()
+			my_ds.item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, department_id=my_ds.department_id, date_used=None).count()
+		#my_s.item_count = Item.query.filter_by(product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 	form = OrderListForm()
 	if form.save.data:
 		supply_id_list = request.form.getlist('supply_id')
@@ -1145,10 +1153,14 @@ def deliveries(company_name):
 	form.supplier.choices = supplier_list
 	if form.validate_on_submit():
 		purchase = Purchase.query.filter_by(purchase_order_no=form.purchase_no.data, company_id=company.id).first_or_404()
-		delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id, supplier_id=form.supplier.data)
-		db.session.add(delivery)
-		db.session.commit()
-		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
+		dq = Delivery.query.filter_by(delivery_no=form.delivery_no.data, company_id=company.id).first()
+		if dq is not None:
+			flash('Delivery Number already registered! Please check that you have entered the correct data or add it to the existing one.')
+		else:
+			delivery = Delivery(delivery_no=form.delivery_no.data, receiver_id=user.id, company_id=company.id, purchase_id=purchase.id, supplier_id=form.supplier.data)
+			db.session.add(delivery)
+			db.session.commit()
+			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
 	return render_template('inventory_management/deliveries.html', title='Deliveries', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, is_my_affiliate=is_my_affiliate, purchases=purchases, form=form)
 	
 @app.route('/<company_name>/inventory_management/suppliers',  methods=['GET', 'POST'])

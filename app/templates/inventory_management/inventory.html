@@ -27,9 +27,8 @@
 					<tr>
 						<th style="width:120px;">Ref No</th>
 						<th style="width:400px;">Name</th>
-						<th style="width:300px;">Description</th>
-						<th style="width:150px;display:none;">Department</th-->
-						<th style="width:180px;">Lot No / Expiry : Stocks</th>
+						<th style="width:100px;">Description</th>
+						<th style="width:300px;">Lot No / Expiry : Stocks</th>
 						<th style="width:40px;">Action</th>
 					</tr>
 				</thead>
@@ -39,9 +38,8 @@
 						<td>{{ my_s.ref_number }}</td>
 						<td>{{ my_s.name }}</td>
 						<td>{{ my_s.description }}</td>
-						<td class="dept_name" style="display:none">{{ my_s.dept }}</td>
 						<td>{% for i in my_s.item_query %}
-						<div id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}"><span class="dept_name" style="display:none">{{ i.dept }}</span><span style="font-weight: bold;color: blue;">{{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity }}</span></div>
+						<div id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}_{{ i.dept }}"><span class="dept_name">{{ i.dept }}: </span><span style="font-weight: bold;color: blue;"> {{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity_dept }}</span></div>
 						{% endfor %}</td>
 						<td>{% if my_s.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_s.ref_number, id=my_s.id)}}">Consume</a>
 						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_s.ref_number }}">Barcode</a>

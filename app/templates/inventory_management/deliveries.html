@@ -18,9 +18,9 @@
 					{% if purchase.date_purchased %}
 					<tr>
 						{% if is_inv_admin %}
-						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ purchase.purchase_order_no }}</a></td>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</a></td>
 						{% else %}
-						<td>{{ purchase.purchase_order_no }}</td>
+						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
 						{% endif %}
 						
 						{% if purchase.delivered_purchases %}
@@ -50,7 +50,7 @@
 					<div class="modal-header">
 					<h4 style="display: inline;">For order no: </h4>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					{{ form.purchase_no(class_="form-control modal-form-number", value=purchase.purchase_order_no, readonly=True) }}
+					<div class="input-group"><span class="input-group-addon  modal-form-number">{{ company.company_abbrv }}-PO-</span>{{ form.purchase_no(class_="form-control modal-form-number", value=purchase.purchase_order_no, readonly=True) }}</div>
 					</div>
 					<div class="modal-body">
 						<div class="form-group required">

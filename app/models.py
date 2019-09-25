@@ -566,7 +566,7 @@ class PurchaseList(db.Model):
 
 class Delivery(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	delivery_no = db.Column(db.String(50), index=True, unique=True)
+	delivery_no = db.Column(db.String(50), index=True)
 	receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_delivered = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
