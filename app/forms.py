@@ -64,7 +64,8 @@ class EditProfileForm(FlaskForm):
 class PostForm(FlaskForm):
 	post = TextAreaField('Say something', validators=[DataRequired(), Length(min=1, max=10000)], render_kw={'maxlength': 10000})
 	url = StringField('Paste URL here', validators=[URL()])
-	submit = SubmitField('Submit')
+	submit_url = SubmitField('Submit with URL')
+	submit_text = SubmitField('Submit only text')
 	
 class CommentForm(FlaskForm):
 	comment = TextAreaField('Post a comment', validators=[DataRequired(), Length(min=1, max=1000)], render_kw={'maxlength': 1000})

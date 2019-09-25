@@ -33,10 +33,10 @@
 					{{ nav_link('explore', 'Explore') }}
 					{{ nav_link('calculators', 'Calculators') }}
 					{{ nav_link('quality_control_sample', 'Quality Control') }}
+					{{ nav_link('guides', 'Guides') }}
 					{% if user == superuser %}
 					{{ nav_link('document_control_sample', 'Document Control') }}
 					{% endif %}
-					{{ nav_link('inventory_management_sample', 'Inventory Management') }}
 					{% if current_user.is_authenticated %}
 					{% if users %}
 					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
@@ -119,6 +119,7 @@
 	{% if current_user.is_authenticated %}
 	<script>
 		$(document).ready(function(){
+			{% if users %}
 			var search_tags = [
 				{% for comp in companies %}
 					{
@@ -146,6 +147,7 @@
 					.append('<div><a class="ac-item-a" href="' + item.url + '" target="_blank" style="display:block;"><span width="30px" style="margin:5px;"><img src="' + item.profile_pic + '" width="30px" height="30px"></span><span>' + item.label + '</span></a></div>')
 					.appendTo(ul);
 			};
+		{% endif %}
 	   });
 	</script>
 	{% endif %}

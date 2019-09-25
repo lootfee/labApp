@@ -34,17 +34,24 @@ def index():
 	companies = Company.query.order_by(Company.company_name.desc()).all()
 	users = User.query.order_by(User.username.desc()).all()
 	form = PostForm()
-	if form.validate_on_submit():
-		link_preview = 'https://api.linkpreview.net?key=5c6acce458459f41f44caa960c51d28fa218af3f05e30&q={}'.format(form.url.data)
-		response = requests.request("POST", link_preview)
-		results = response.json()
-		title = results['title']
-		description = results['description']
-		image = results['image']
-		post = Post(body=form.post.data, url=form.url.data, title=title, description=description, image=image, author=current_user)
-		db.session.add(post)
-		db.session.commit()
-		return redirect(url_for('index'))
+	if form.submit_url.data:
+		if form.validate_on_submit():
+			link_preview = 'https://api.linkpreview.net?key=5c6acce458459f41f44caa960c51d28fa218af3f05e30&q={}'.format(form.url.data)
+			response = requests.request("POST", link_preview)
+			results = response.json()
+			title = results['title']
+			description = results['description']
+			image = results['image']
+			post = Post(body=form.post.data, url=form.url.data, title=title, description=description, image=image, author=current_user)
+			db.session.add(post)
+			db.session.commit()
+			return redirect(url_for('index'))
+	if form.submit_text.data:
+		if form.post.data:
+			post = Post(body=form.post.data, author=current_user)
+			db.session.add(post)
+			db.session.commit()
+			return redirect(url_for('index'))
 	page = request.args.get('page', 1, type=int)
 	posts = current_user.followed_posts().paginate(
 		page, app.config['POSTS_PER_PAGE'], False)
@@ -539,9 +546,8 @@ def admin(company_name):
 				
 @app.route('/calculators')
 def calculators():
-	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('calculators.html', title='Calculators', user=user, superuser=superuser)
+	return render_template('calculators.html', title='Calculators', superuser=superuser)
 	
 
 @app.route('/<company_name>/quality_control', methods=['GET', 'POST'])
@@ -557,17 +563,21 @@ def quality_control(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	return render_template('quality_control.html', title='Quality Control', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser)
 
+@app.route('/guides')
+def guides():
+	superuser = User.query.filter_by(id=1).first_or_404()
+	return render_template('guides.html', title='Guides', superuser=superuser)
+
+
 @app.route('/quality_control_')
 def quality_control_sample():
-	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('quality_control_sample.html', title='Quality Control', user=user, superuser=superuser)
+	return render_template('quality_control_sample.html', title='Quality Control', superuser=superuser)
 	
 @app.route('/inventory_management_')	
 def inventory_management_sample():
-	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('inventory_management/inventory_overview_sample.html', title='Inventory Overview', user=user, superuser=superuser)
+	return render_template('inventory_management/inventory_overview_sample.html', title='Inventory Overview', superuser=superuser)
 	
 @app.route('/<company_name>/inventory_management/overview', methods=['GET', 'POST'])	
 @login_required
@@ -1081,7 +1091,7 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	for list in purchase_list:
 		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
-		list.complete_delivery = list.delivered_qty == list.quantity
+		list.complete_delivery = list.delivered_qty >= list.quantity
 		list.purchase_list_id = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).all()
 		list.delivery_no_list = []
 		for l in list.purchase_list_id:

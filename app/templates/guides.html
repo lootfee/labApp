@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h3>Guides in using labApp</h3>
+<div class="row container">
+	<div class="col-md-3">
+		<ul class="nav nav-stacked" role="tablist">
+		  <li role="presentation"><a href="#getting_started" aria-controls="general_use" role="tab" data-toggle="tab">Getting started</a></li>
+		  <li role="presentation"><a href="#creating_company_profile" aria-controls="general_use" role="tab" data-toggle="tab">Creating a company profile</a></li>
+		  <li role="presentation"><a href="#affiliating" aria-controls="general_use" role="tab" data-toggle="tab">Affiliating to a company</a></li>
+		  <li role="presentation"><a href="#inventory_management" aria-controls="general_use" role="tab" data-toggle="tab">Using the Inventory Management</a></li>
+		</ul>
+	</div>
+	<div class="col-md-9">
+		<div class="tab-content">
+			<div rol="tabpanel" class="tab-pane" id="getting_started">
+				<h4>Getting started</h4>
+				<ul>
+					<li>Calculators and Quality Control can be used without signing in.</li>
+					<li>To use other services, please sign up and login.</li>
+					<li>After signing in you will be taken to the Home Page, you can access your Home Page by clicking the labApp logo on top left.</li>
+					<li>In the Home Page is where you can create posts ,view your post and posts of the users you follow.</li>
+					<li>In the Explore page is where you can see posts of other users that you do not follow.</li>
+					<li>To like/unlike or comment on a post, click the body of the post to redirect you to the post page.</li>
+					<li>To update/view your user profile, click on your username at the top-right of the page.</li>
+				</ul>
+			</div>
+			<div rol="tabpanel" class="tab-pane" id="creating_company_profile">
+				<h4>Creating a profile for your company.</h4>
+				<ul>
+					<li>If you are an owner or admin of a Clinical Laboratory, you can create a profile page for your company.</li>
+					<li>You will then have access to the built in Inventory Manager Software within labApp.</li>
+					<li>To register a company, go to your users profile by clicking your username at the top-right of the page.</li>
+					<li>Click on register a company, and fill up the company profile form.</li>
+					<li>After successfully registering a company, it will take you to the company profile page.</li>
+					<li>Click on the Admin tab at the top center.</li>
+					<li>In the Admin tab is where you can manage your affiliate roles and titles as well and accept users that requests to affiliate to your company.</li>
+					<li>Look for your username and click Edit Role.</li>
+					<li>Enter your title on the company and click save. <strong>(Do not remove the check on the Super Admin!)</strong></li>
+					<li>Do this for other users that you have accepted as your affiliates. (A user must be assigned a role so the affiliated company will show on their profile. )</li>
+					<li>Your role and affiliated company can now be seen on your users profile.</li>
+				</ul>
+			</div>
+			<div rol="tabpanel" class="tab-pane" id="affiliating">
+				<h4>Affiliating to a company.</h4>
+				<ul>
+					<li>If you are an employee of a company that is registered on labApp, you can access its built in softwares within labApp by affiliating your user profile to the company profile.</li>
+					<li>Search for the name of the company on the search bar and click on it.</li>
+					<li>Once on the company profile page, click on request to affiliate to company.</li>
+					<li>Wait for the admin of the company to accept your request.</li>
+					<li>Once accepted and given a role, your affiliated company and role will be visible on your users profile.</li>
+				</ul>
+			</div>
+			<div rol="tabpanel" class="tab-pane" id="inventory_management">
+				<h4>Using the Inventory Management Software.</h4>
+				<p>Please follow as per the order of instructions.</p>
+				<ol>
+					<li>On company profile page, click on Inventory Management at the top of the page.</li>
+					<li>Once inside the Inventory Management page, click on Departments tab.</li>
+					<ol>
+						<li>Register supplies department name (e.g. Biochemistry, Hematology, Microbiology, Phlebotomy etc.).</li>
+						<li>Some basic departments are auto completed.</li>
+						<li>For smaller laboratories that only have a few number of supplies and only 1 or 2 persons rotating on all departments, you can use a not so specific department name(e.g General, Lab Supplies, etc.).</li>
+					</ol>
+					<li>Click on Suppliers tab.</li>
+					<ol>
+						<li>Click on register supplier.</li>
+						<li>Fill out supplier details.</li>
+					</ol>
+					<li>Click on Supplies tab (To be done by Inventory Admin(to be set on the Admin page) ).</li>
+					<ol>
+						<li>Click on register supplies.</li>
+						<li>Type product reference number.</li>
+						<li>If product is already registered in our database, reference number will show.</li>
+						<li>Click on the reference number to auto populate item name, description and storage requirement and type.</li>
+						<li>Fill out other details as per your company's data and click register.</li>
+						<li>Do this for all your company's inventory supplies.</li>
+						<li>If you have multiple suppliers on a single item, you can click the edit(pencil) button and set the item you don't usually use a inactive.</li>
+					</ol>
+					<li>Go back to the Departments page and click link supplies on the side of the department name.</li>
+					<ol>
+						<li>Choose the item that you want to link to the certain department (this will be used for querying supplies).</li>
+					</ol>
+				</ol>
+				<br>
+				<h4>Process of ordering supplies (use this same process when encoding your initial inventory).</h4>
+				<ol>
+					<li>Go to Orders tab and click on Create New Order tab on top left of the page.</li>
+					<li>Choose which department to link the order and click submit.</li>
+					<li>Order number is auto-generated based on your company abbreviation, department and date.</li>
+					<li>Click on add items on top left to add items to your order.</li>
+					<li>Click save.</li>
+					<li>You can still add items on the order if it still not submitted.</li>
+					<li>If all the items you wish to order is saved, click on submit.</li>
+					<li>For Inventory Admins.</li>
+					<ol>
+						<li>On the Order Status column, Create Purchase Order tab will show.</li>
+						<li>Click on Create Purchase Order tab to create purchase order.</li>
+						<li>Purchase Order number is auto generated, click Create.</li>
+						<li>On the Purchases tab, your Purchase Order Number will show.</li>
+						<li>Click on Purchase Order Number to view or edit the order.</li>
+						<li>Once submitted, the Purchase Order Number can be viewed on the Deliveries tab.</li>
+					</ol>
+					<li>If supplies have been delivered, click on Accept Delivery.</li>
+					<li>Choose the supplier name and enter the Delivery Order Number.</li>
+					<li>It will then take you to the Accept Delivery page.</li>
+					<li>Choose on the items that were delivered by clicking receive.</li>
+					<li>Enter the lot number, expiry date and quantity of items received.</li>
+					<li>If all items were delivered, the actions tab will show Delivery Complete.</li>
+					<li>If delivered items were not complete, click on Accept Delivery again to encode a new Delivery Order Number once a new delivery is made.</li>
+					<li>Delivered items will now show on your Inventory page.</li>
+					<li>Expiry date of items that are below the minimum expiry that was set will be marked red.</li>
+					<li>On the Overview page, Reagents that are less than minimum quantity, near expiry, undelivered reagents will be visible.</li>
+					<li>Submitted orders, Pending purchases and Pending deliveries will be visible for inventory admins as well.</li>
+				</ol>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
