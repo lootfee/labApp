@@ -180,6 +180,30 @@ def unfollow(username):
 	db.session.commit()
 	flash('You just unfollowed {}!'.format(username))
 	return redirect(url_for('user', username=username))
+
+
+@app.route('/<username>/followers')
+@login_required
+def followers(username):
+	this_user = User.query.filter_by(username=username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
+	for user in users:
+		user.my_affiliates = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(user_id=user.id).all()
+	return render_template('followers.html', title='Followers', companies=companies, this_user=this_user, users=users, superuser=superuser)
+
+@app.route('/<username>/following')
+@login_required
+def following(username):
+	this_user = User.query.filter_by(username=username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	companies = Company.query.order_by(Company.company_name.desc()).all()
+	users = User.query.order_by(User.username.desc()).all()
+	for user in users:
+		user.my_affiliates = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(user_id=user.id).all()
+	return render_template('following.html', title='Following', companies=companies, this_user=this_user, users=users, superuser=superuser)
+
 	
 @app.route('/explore')
 @login_required

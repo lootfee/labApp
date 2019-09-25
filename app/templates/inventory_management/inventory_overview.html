@@ -7,24 +7,25 @@
 	<hr class="inventory_hr">
     <div class="row text-center">
 		<div class="col-md-5" style="margin-bottom: 10px;">
-				<div class="col-md-6">
-					<label class="control-label" for="search_overview">Search</label>
-					<input class="form-control" id="search_overview">
-				</div>
-				<div class="col-md-6">
-					<label class="control-label" for="department">Department</label>
-					<select class="form-control" id="department">
-						<option value=''>All</option>
-						{% for d in select_dept %}
-						<option value='{{ d.name }}'>{{ d.name }}</option>
-						{% endfor %}
-					</select>
-				</div>
+			<div class="col-md-6">
+				<label class="control-label" for="search_overview">Search</label>
+				<input class="form-control" id="search_overview">
 			</div>
-		<div class="col-md-12">
-			<div class="col-md-5" style="border: 2px solid #dedede;border-radius: 8px;width:auto; margin: 10px;">
-			<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
-				<h4> Reagents less than minimum quantity</h4>
+			<div class="col-md-6">
+				<label class="control-label" for="department">Department</label>
+				<select class="form-control" id="department">
+					<option value=''>All</option>
+					{% for d in select_dept %}
+					<option value='{{ d.name }}'>{{ d.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+		</div>
+	</div>
+	 <div class="row text-center">
+		<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; margin: 10px;">
+			<h4> Reagents less than minimum quantity</h4>
+			<table class=" text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px; width: 100%;">
 				<tr>
 					<th>Ref Number</th>
 					<th>Name</th>
@@ -34,7 +35,7 @@
 				{% for my_s in my_supplies %}
 				{% if my_s.less_quantity %}
 				{% for i in my_s.item_query %}
-				<tr class="my_products_row">
+				<tr id="{{ my_s.ref_number }}_less_qty_{{ i.lot_num }}_{{ i.dept }}" class="my_products_row">
 					<td>{{ my_s.ref_number }}</td>
 					<td>{{ my_s.name }}</td>
 					<td>{{ i.dept }}</td>
@@ -43,72 +44,74 @@
 				{% endfor %}
 				{% endif %}
 				{% endfor %}
-				</table>
-			</div>
-			<div class="col-md-7" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
-				<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
-				<h4>Reagents near expiry</h4>
-				<tr>
-					<th>Ref Number</th>
-					<th>Name</th>
-					<th>Lot no</th>
-					<th>Expiry</th>
-				</tr>
-				{% for my_s in my_supplies %}
-				{% for i in my_s.item_query %}
-				{% if i.greater_expiry  %}
-				<tr id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}" class="my_products_row">
-					<td>{{ my_s.ref_number }}</td>
-					<td>{{ my_s.name }}</td>
-					<td>{{ i.lot_num }}</td>
-					<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
-					<td style="display:none;">{{ my_s.dept_name }}</td>
-				</tr>
-				{% endif %}
-				{% endfor %}
-				{% endfor %}
-				</table>
-			</div>
+			</table>
 		</div>
 	</div>
+	 <div class="row text-center">
+		<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; margin: 10px;">
+			<h4>Reagents near expiry</h4>
+			<table class=" text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px; width: 100%;">
+			<tr>
+				<th>Ref Number</th>
+				<th>Name</th>
+				<th>Department</th>
+				<th>Lot no</th>
+				<th>Expiry</th>
+			</tr>
+			{% for my_s in my_supplies %}
+			{% for i in my_s.item_query %}
+			{% if i.greater_expiry  %}
+			<tr id="{{ my_s.ref_number }}_gr_expiry_{{ i.lot_num }}_{{ i.dept }}" class="my_products_row">
+				<td>{{ my_s.ref_number }}</td>
+				<td>{{ my_s.name }}</td>
+				<td>{{ i.dept }}</td>
+				<td>{{ i.lot_num }}</td>
+				<td>{{ i.expiry.strftime('%d-%m-%Y') }}</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			</table>
+		</div>
+	</div>	
+	
 	<div class="row text-center">
-		
-			<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px; margin-left: 5%;">
-				<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
-				<h4>Undelivered reagents</h4>
-				<tr>
-					<th>Reference number</th>
-					<th>Reagent name</th>
-					<th>Purchase Order</th>
-					<th>Date purchased</th>
-					<th>Qty requested</th>
-					<th>Qty delivered</th>
-				</tr>
-				{% for dp in delivered_purchases %}
-				{% for pl in dp.purchase_list %}
-				{% if pl.delivered_qty < pl.qty %}
-				<tr class="my_products_row">
-					<td>{{ pl.ref_number }}</td>
-					<td>{{ pl.name }}</td>
-					<td>{{ pl.purchase_order_no }}</td>
-					<td>{{ pl.date_purchased.strftime('%d-%m-%Y') }}</td>
-					<td>{{ pl.qty }}</td>
-					<td>{{ pl.delivered_qty }}</td>
-					<td style="display:none;">{{ pl.dept_name }}</td>
-				</tr>
-				{% endif %}
-				{% endfor %}
-				{% endfor %}
-				</table>
-			</div>
-		
-		
+		<div class="col-md-12" style="border: 2px solid #dedede;border-radius: 8px; margin: 10px;">
+			<table class="text-center table-bordered table-hover table-striped overview_table" style=" border-collapse: separate !important;border-radius: 1em;overflow: hidden; margin-bottom:5px; width: 100%;">
+			<h4>Undelivered reagents</h4>
+			<tr>
+				<th>Reference number</th>
+				<th>Reagent name</th>
+				<th>Purchase Order</th>
+				<th style="display:none;">Department</th>
+				<th>Date purchased</th>
+				<th>Qty requested</th>
+				<th>Qty delivered</th>
+			</tr>
+			{% for dp in delivered_purchases %}
+			{% for pl in dp.purchase_list %}
+			{% if pl.delivered_qty < pl.qty %}
+			<tr class="my_products_row">
+				<td>{{ pl.ref_number }}</td>
+				<td>{{ pl.name }}</td>
+				<td>{{ company.company_abbrv}}-PO-{{ pl.purchase_order_no }}</td>
+				<td style="display:none;">pl.dept_name</td>
+				<td>{{ pl.date_purchased.strftime('%d-%m-%Y') }}</td>
+				<td>{{ pl.qty }}</td>
+				<td>{{ pl.delivered_qty }}</td>
+				<td style="display:none;">{{ pl.dept_name }}</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
+			{% endfor %}
+			</table>
+		</div>
     </div>
 	{% if is_inv_admin %}
 	<div class="row text-center">
 		<div class="col-md-12">
 			{% if pending_deliveries %}
-			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 5px;">
 				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4>Pending Deliveries</h4>
 				<tr>
@@ -117,31 +120,33 @@
 				</tr>
 				{% for p in pending_deliveries %}
 				<tr>
-					<td>{{ p.purchase_order_no }}</td>
+					<td>{{ company.company_abbrv}}-PO-{{ p.purchase_order_no }}</td>
 					<td>{{ p.date_purchased.strftime('%d-%m-%Y') }}</td>
 				</tr>
 				{% endfor %}
 				</table>
 			</div>
 			{% endif %}
-			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 5px;">
 				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4>Submitted orders</h4>
-				<tr>
-					<th>Order Id</th>
-					<th>Date submitted</th>
-				</tr>
+				<thead>
+					<tr>
+						<th>Order Id</th>
+						<th>Date submitted</th>
+					</tr>
+				</thead>
 				{% for ord in unsubmitted_orders %}
 				{% if ord.order_no %}
 				<tr>
-					<td>{{ ord.order_no }}</td>
+					<td>{{ company.company_abbrv}}-ORD-{{ ord.order_no }}</td>
 					<td>{{ ord.date_submitted.strftime('%d-%m-%Y') }}</td>
 				</tr>
 				{% endif %}
 				{% endfor %}
 				</table>
 			</div>
-			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 10px;">
+			<div class="col-md-4" style="border: 2px solid #dedede;border-radius: 8px; width:auto; margin: 5px;">
 				<table class="text-center table-bordered table-hover table-striped" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
 				<h4>Pending purchases</h4>
 				<tr>
@@ -151,7 +156,7 @@
 				{% for p in pending_purchases %}
 				{% if p.purchase_order_no %}
 				<tr>
-					<td>{{ p.purchase_order_no }}</td>
+					<td>{{ company.company_abbrv }}-PO-{{ p.purchase_order_no }}</td>
 					<td>{{ p.date_created.strftime('%d-%m-%Y') }}</td>
 				</tr>
 				{% endif %}
