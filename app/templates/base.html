@@ -6,7 +6,9 @@
 	{% else %}
 	labApp
 	{% endif %}
+	
 {% endblock %}
+
 {% macro nav_link(endpoint, name) %}
 {% if request.endpoint.endswith(endpoint) %}
   <li class="active"><a href="{{ url_for(endpoint) }}">{{name}}</a></li>
@@ -93,7 +95,8 @@
 
 	  gtag('config', 'UA-129673699-2');
 	</script>
-
+	<meta name="description" content="The one stop app for clinical laboratories.">
+	<meta name="keywords" content="medical, clinical, laboratory, laboratories, medtech, labtech, scientist, technologist, technician, labapp, inventory, lab, app, calculator, software, social, media">
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
