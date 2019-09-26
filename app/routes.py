@@ -1411,8 +1411,8 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 	superuser = User.query.filter_by(id=1).first_or_404()
 	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
 	section = DocumentSection.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, section_number=section_number, section_title=section_title).first()
-	#for sect in section.body:
-	#	sect.section_body = 
+	section_body = DocumentSectionBody.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id).first()
+	section_body_id = DocumentSectionBody.query.get(section_body.id)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -1420,16 +1420,15 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 	form2 = EditDocumentBodyForm()
 	if form2.validate_on_submit():
 		body = DocumentSectionBody(section_body=form2.body.data, change_log=form2.changelog.data, company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id, submitted_by=current_user.id)
-		db.session.add(body)
-		db.session.commit()
+		if section_body is None:
+			db.session.add(body)
+			db.session.commit()
+		else:
+			section_body.section_body = form2.body.data
+			db.session.commit()
 		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
 	elif request.method == 'GET':
 		for sect in section.body:
 			form2.body.data = sect.section_body 
 	return render_template('lab_document.html', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
 	
-@app.route('/document_control_sample')
-def document_control_sample():
-	user = User.query.filter_by(username=current_user.username).first_or_404()
-	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('document_control_sample.html', title='Document Control', user=user, superuser=superuser)
