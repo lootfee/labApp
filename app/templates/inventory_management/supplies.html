@@ -93,7 +93,9 @@
 					<th>Price</th>
 					<th>Supplier</th>
 					<th>Status</th>
+					{% if is_inv_admin %}
 					<th>Action</th>
+					{% endif %}
 				</tr>
 				</thead>
 				{% if products %}
