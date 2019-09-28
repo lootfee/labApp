@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+	<h2>Users following {{ this_user.username }}</h2>
+		{% for user in users %}
+		{% if this_user.is_following(user) %}
+		<div class="col-md-8">
+			<table class="table table-bordered" style=" border-collapse: separate !important;;border-radius: 1em;overflow: hidden; margin-bottom:5px;">
+				<tr>
+					<td width="60px">
+						<a href="{{ url_for('user', username=user.username) }}">
+							{% if user.profile_pic %}
+							<img src="{{ user.profile_pic }}" alt="user profile pic" style="width: 60px;">
+							{% else %}
+							<img src="{{ user.avatar(60) }}" />
+							{% endif %}
+						</a>
+						
+					</td>
+					<td>
+						<div><a href="{{ url_for('user', username=user.username) }}"><p>( {{ user.username }} ) {{ user.firstname}} {{ user.lastname }}</a></p>
+						<div>
+							{% for affiliate in user.my_affiliates %}
+							{% if affiliate.title != None %}{% if affiliate.end_date == None %}
+								<li style="list-style:none;"><span>{{ affiliate.title }} at <a href="{{ url_for('company', company_name=affiliate.company.company_name ) }}">{{ affiliate.company.company_name }}</a></span></li>
+							{% endif %}{% endif %}
+							{% endfor %}
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		{% endif %}
+		{% endfor %}
+{% endblock %}

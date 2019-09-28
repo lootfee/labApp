@@ -6,7 +6,9 @@
 	{% else %}
 	labApp
 	{% endif %}
+	
 {% endblock %}
+
 {% macro nav_link(endpoint, name) %}
 {% if request.endpoint.endswith(endpoint) %}
   <li class="active"><a href="{{ url_for(endpoint) }}">{{name}}</a></li>
@@ -33,11 +35,12 @@
 					{{ nav_link('explore', 'Explore') }}
 					{{ nav_link('calculators', 'Calculators') }}
 					{{ nav_link('quality_control_sample', 'Quality Control') }}
+					{{ nav_link('guides', 'Guides') }}
+					
+					{% if current_user.is_authenticated %}
 					{% if user == superuser %}
 					{{ nav_link('document_control_sample', 'Document Control') }}
 					{% endif %}
-					{{ nav_link('inventory_management_sample', 'Inventory Management') }}
-					{% if current_user.is_authenticated %}
 					{% if users %}
 					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
 					{% endif %}
@@ -93,7 +96,8 @@
 
 	  gtag('config', 'UA-129673699-2');
 	</script>
-
+	<meta name="description" content="The one stop app for clinical laboratories.">
+	<meta name="keywords" content="medical, clinical, laboratory, laboratories, medtech, labtech, scientist, technologist, technician, labapp, inventory, lab, app, calculator, software, social, media">
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
@@ -119,6 +123,7 @@
 	{% if current_user.is_authenticated %}
 	<script>
 		$(document).ready(function(){
+			{% if users %}
 			var search_tags = [
 				{% for comp in companies %}
 					{
@@ -146,6 +151,7 @@
 					.append('<div><a class="ac-item-a" href="' + item.url + '" target="_blank" style="display:block;"><span width="30px" style="margin:5px;"><img src="' + item.profile_pic + '" width="30px" height="30px"></span><span>' + item.label + '</span></a></div>')
 					.appendTo(ul);
 			};
+		{% endif %}
 	   });
 	</script>
 	{% endif %}
