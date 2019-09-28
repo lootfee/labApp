@@ -38,9 +38,6 @@
 					{{ nav_link('guides', 'Guides') }}
 					
 					{% if current_user.is_authenticated %}
-					{% if user == superuser %}
-					{{ nav_link('document_control_sample', 'Document Control') }}
-					{% endif %}
 					{% if users %}
 					<li><input type="text" class="form-control" id="search_bar" placeholder="Search" style="margin-top: 10px;"></li>
 					{% endif %}
