@@ -35,14 +35,14 @@
 				{% if my_supplies %}
 					{% for my_s in my_supplies %}
 					<tr class="my_products_row">
-						<td>{{ my_s.ref_number }}</td>
-						<td>{{ my_s.name }}</td>
-						<td>{{ my_s.description }}</td>
+						<td>{{ my_s.product.ref_number }}</td>
+						<td>{{ my_s.product.name }}</td>
+						<td>{{ my_s.product.description }}</td>
 						<td>{% for i in my_s.item_query %}
-						<div id="{{ my_s.ref_number }}_lot_qty_{{ i.lot_num }}_{{ i.dept }}"><span class="dept_name">{{ i.dept }}: </span><span style="font-weight: bold;color: blue;"> {{ i.lot_num }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity_dept }}</span></div>
+						<div id="{{ my_s.product.ref_number }}_lot_qty_{{ i.lot.lot_no }}_{{ i.department.name }}"><span class="dept_name">{{ i.department.name }}: </span><span style="font-weight: bold;color: blue;"> {{ i.lot.lot_no }}</span> / {% if i.greater_expiry %}<span style="font-style: italic;color: red;">{{ i.lot.expiry.strftime('%d-%m-%Y') }}</span>{% else %}<span style="font-style: italic;color: blue;">{{ i.lot.expiry.strftime('%d-%m-%Y') }}</span> {% endif %}: <span style="font-weight: bold;color: green;">{{ i.quantity_dept }}</span></div>
 						{% endfor %}</td>
-						<td>{% if my_s.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_s.ref_number, id=my_s.id)}}">Consume</a>
-						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_s.ref_number }}">Barcode</a>
+						<td>{% if my_s.item_query %}<a href="{{ url_for('consume_item', company_name=company.company_name, ref_number=my_s.product.ref_number, id=my_s.id)}}">Consume</a>
+						<a href="#" data-toggle="modal" data-target="#barcode_modal_{{ my_s.product.ref_number }}">Barcode</a>
 						{% endif %}</td>
 						
 					</tr>
@@ -53,32 +53,33 @@
 		</div>
 		{% if my_supplies %}
 		{% for my_s in my_supplies %}
-		<div class="modal fade" id="barcode_modal_{{ my_s.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="barcode_modal_{{ my_s.ref_number }}_label">
+		<div class="modal fade" id="barcode_modal_{{ my_s.product.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="barcode_modal_{{ my_s.product.ref_number }}_label">
 		  <div class="modal-dialog" role="document">
 			<div class="modal-content">
 			  <div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<span class="text-center"><h4>Ref No: <span style="color: blue;">{{ my_s.ref_number }}</span></h4> </span>
-				<span class="text-center"><h4>Name: <span style="color: blue;">{{ my_s.name }}</span></h4> </span>
+				<span class="text-center"><h4>Ref No: <span style="color: blue;">{{ my_s.product.ref_number }}</span></h4> </span>
+				<span class="text-center"><h4>Name: <span style="color: blue;">{{ my_s.product.name }}</span></h4> </span>
 			  </div>
 			  <div class="modal-body">
 				
-				<select class="form-control" id="select_{{ my_s.ref_number }}">
+				<select class="form-control" id="select_{{ my_s.product.ref_number }}">
 					{% for i in my_s.item_query %}
-					<option value="{{ i.lot_num }}{{ i.id }}">{{ i.lot_num }} - {{ i.id }} / {{ i.expiry.strftime('%d-%m-%Y') }}</option>
+					<option value="{{ i.lot_num }}{{ i.id }}">{{ i.lot.lot_no }} - {{ i.id }} / {{ i.lot.expiry.strftime('%d-%m-%Y') }}</option>
 					
 					{% endfor %}
 				</select>
 					<br>
 					{% for i in my_s.item_query %}
-					<div class="bcodes bcodes_{{ my_s.ref_number }} text-center" id="bc_container_{{ i.lot_num }}{{ i.id }}" style="text-align:center;margin:0 auto;">
-						<svg  id="bc_{{ i.lot_num }}{{ i.id }}" style="margin: 0;">
-						<p style="margin: 0;font-size:10px;">{{ i.lot_num }}-{{ i.id }} &nbsp&nbsp&nbsp Date received: {{ i.received_date.strftime('%d-%m-%Y') }}</p>
-						<p style="margin: 0;font-size:10px;">{{ my_s.name }}</p>
-						<!--p style="margin: 0;">Lot: {{ i.lot_num }} &nbsp&nbsp&nbsp Expiry: {{ i.expiry.strftime('%d-%m-%Y') }}</p-->
+					<div class="bcodes bcodes_{{  my_s.product.ref_number }} text-center" id="bc_container_{{ i.lot.lot_no }}{{ i.id }}" style="text-align:center;margin:0 auto;">
+						<img  id="bc_{{ i.lot.lot_no }}{{ i.id }}" style="margin: 0;">
+						<p style="margin: 0;font-size:10px;">{{ i.lot.lot_no }}-{{ i.id }} &nbsp&nbsp&nbsp Date received: {{ i.delivery.date_delivered.strftime('%d-%m-%Y') }}</p>
+						<p style="margin: 0;font-size:10px;">{{ my_s.product.name }}</p>
+						
 						<br>
-						<p><input type="button" class="btn btn-default" id="print_{{ i.lot_num }}{{ i.id }}" value="Print"></p>
+						<p><input type="button" class="btn btn-default" id="print_{{ i.lot.lot_no }}{{ i.id }}" value="Print"></p>
 					</div>
+					
 					{% endfor %}
 			  </div>
 			</div>
@@ -87,15 +88,38 @@
 		{% endfor %}
 		{% endif %}
 	</div>
+	<div id="div_canvas" style="display:none;">
+	
+	</div>
 {% endblock %}
-
+{% block styles %}
+	{{ super() }}
+	<!--for qz tray barcode printing-->
+	<meta charset="UTF-8">
+	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/dependencies/rsvp-3.1.0.min.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/dependencies/sha-256.min.js"></script>
+	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/qz-tray.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js" integrity="sha256-w6/1B0uwkpR3uX0YUw3k2zzHnq6xDNdVZHLIdz8xV6I=" crossorigin="anonymous"></script>
+	<!--script src="https://cdn.jsdelivr.net/npm/qz-tray@2.0.11/qz-tray.min.js"></script-->
+	
+{% endblock %}
 {% block scripts %}
 	{{ super() }}
-	<style id="print_barcode_media"></style>
+	
+	<!--style id="print_barcode_media"></style-->
 	<script>
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
+			
+			/*qz.websocket.connect().then(function() {
+			   alert("Connected!");
+			   qz.printers.find("zebra").then(function(found) {
+				   alert("Printer: " + found);
+				   
+				   
+				});
+			});*/
 			
 			
 			$('[id]').each(function () {
@@ -105,65 +129,72 @@
 			});
 			});
 			
+			
+			
+			
 			{% if my_supplies %}
 			{% for my_s in my_supplies %}
 			{% for i in my_s.item_query %}
-			$("#bc_{{ i.lot_num }}{{ i.id }}").JsBarcode("{{ i.lot_num }}-{{ i.id }}", {
-				width: 2,
+			$("#bc_{{ i.lot.lot_no }}{{ i.id }}").JsBarcode("{{ i.lot.lot_no }}-{{ i.id }}", {
+				width: 1,
 				height: 40,
 				fontSize: 12,
 				margin: 5,
 				displayValue: false,
 			});
 			
-			$('#select_{{ my_s.ref_number }}').change(function(){
-				$('.bcodes_{{ my_s.ref_number }}').hide();
+			$('#select_{{ my_s.product.ref_number }}').change(function(){
+				$('.bcodes_{{ my_s.product.ref_number }}').hide();
 				$('#bc_container_' + $(this).val()).show();
 			  });
-			  
-			$('#print_{{ i.lot_num }}{{ i.id }}').click(function(){
-				$('#print_barcode_media').text(
-					/*"@page {" +
-						"size: 3in 1in;" +
-						"margin: 0;" +
-						"padding: 0;" +
-					"}" +*/
-					".page {" +
-						"width: 3in;" +
-						"height: 2in;" +
-						"margin: 0;" +
-					"}" +
-					 ".bcodes_{{ my_s.ref_number }} {" +
-						"width: 100%;" +
-						"height: 100%;" +
-						 "}" +
-					"@media print {" + 
-						"html, body {" + 
-							"visibility: hidden;" +
-							"width: 100%;" +
-							"height: 100%;" +
-							"margin: 0;" +
-							"padding: 0;" +
-							"}" + 
-						"#bc_container_{{ i.lot_num }}{{ i.id }} {" +
-							"visibility: visible;" +
-							"margin-top: 0;" +
-							"margin-bottom: 5px;" +
-							"width: 100%;" +
-							"height: 100%;" +
-							"max-width: 100%;" +
-							"max-height: 100%;" +
-						"}" + 
-						"#print_{{ i.lot_num }}{{ i.id }} {" +
-							"visibility: hidden;" +
-						"}" +
-					"}"
-				);
-				/*$(document.html).css('visibility', 'hidden');
-				$(document.body).css('visibility', 'hidden');
-				$('#bc_container_{{ i.lot_num }}{{ i.id }}').css('visibility', 'visible', "width", "100%", "height", "100%", "max-width", "100%", "max-height", "100%");
-				$('#print_{{ i.lot_num }}{{ i.id }}').css('visibility', 'hidden');*/
-				window.print();
+			 
+			
+
+			 
+			$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
+				qz.websocket.connect().then(function() { 
+				   return qz.printers.find("zebra");              // Pass the printer name into the next Promise
+				}).then(function(printer) {
+				   var config = qz.configs.create(printer);       // Create a default config for the found printer
+				   var data = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO260,110^FB300,2,,^BY2,2.0^BCN,50,Y,N,N^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
+				   //var data = ['^XA^FO50,50^ADN,36,20^FDRAW ZPL Lot: {{ i.lot.lot_no }}-{{ i.id }}\&Date received: {{ i.delivery.date_delivered .strftime('%d-%m-%Y')}}\&{{ my_s.product.name }}^FS^XZ'];   // Raw ZPL
+				   return qz.print(config, data);
+				}).catch(function(e) { console.error(e); });	
+			
+				/*html2canvas convert div to png
+				var convertMeToImg = $('#bc_container_{{ i.lot_num }}{{ i.id }}');
+
+				html2canvas(convertMeToImg).then(function(canvas) {
+					$('#div_canvas').append(canvas);
+					
+					getCanvas = canvas;
+					
+					var imgageData = getCanvas.toDataURL("image/png");
+					// Now browser starts downloading it instead of just showing it
+					var newData = imgageData.replace(/^data:image\/png/, "data:application/octet-stream");
+					//$("#btn-Convert-Html2Image").attr("download", "{{ i.lot_num }}{{ i.id }}").attr("href", newData);
+				});*/
+				//$("#print_{{ i.lot.lot_no }}{{ i.id }}").attr("download", "{{ i.lot.lot_no }}{{ i.id }}.png").attr("href", "#bc_{{ i.lot.lot_no }}{{ i.id }}");
+				//for qz-print barcode
+				/*qz.websocket.connect().then(function() { 
+				   return qz.printers.find("zebra");              // Pass the printer name into the next Promise
+				}).then(function(printer) {
+				   var config = qz.configs.create(printer);       // Create a default config for the found printer
+				  var data = [
+					  '^XA\n',
+					  '^FO50,50^ADN,36,20^FDPRINTED USING QZ TRAY PLUGIN\n',
+					  { 
+					   type: 'raw', format: 'image', flavor: 'file', data: '#bc_{{ i.lot_num }}{{ i.id }}', 
+					   options: { language: "ZPL" }
+					  }, 
+					  '^FS\n',
+					  '^XZ\n'
+				   ];
+				   // Raw ZPL
+				   return qz.print(config, data);
+				}).catch(function(e) { console.error(e); });*/
+			
+				
 			});
 			{% endfor %}
 			{% endfor %}
@@ -247,6 +278,6 @@
 		});
 		
 		{% endfor %}*/
-	
+		
 	</script>
 {% endblock %}

@@ -811,24 +811,24 @@ def inventory(company_name):
 	products = Product.query.order_by(Product.name.asc())
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:
-		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
-		my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
-		my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
+		#my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
+		#my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
+		#my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
 		#my_s.dept = Department.query.filter_by(id=my_s.department_id).first().name
 		#my_s.stocks = Item.query.filter_by(product_id=my_s.product_id, date_used=None).count()
-		my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_quantity
-		my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_expiry
+		#my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_quantity
+		#my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_expiry
 		my_s.item_query = Item.query.filter_by(my_supplies_id=my_s.id, company_id=company.id, date_used=None).all()
 		#my_s.lot_list = []
 		for i in my_s.item_query:
-			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
-			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			i.dept = Department.query.filter_by(id=i.department_id).first().name
+			#i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+			#i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+			#i.dept = Department.query.filter_by(id=i.department_id).first().name
 			#i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
-			i.greater_expiry =  (i.expiry < i.min_expiry)
-			i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
+			i.greater_expiry =  (i.lot.expiry < i.min_expiry)
+			#i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
 	return render_template('inventory_management/inventory.html', title='Inventory', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, orders=orders, dept=dept)
 
 @app.route('/<company_name>/consume_item/<ref_number>/<id>', methods=['GET', 'POST'])
