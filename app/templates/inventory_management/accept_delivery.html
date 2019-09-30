@@ -24,9 +24,9 @@
 						<td>{{ list.quantity }}</td>
 						<td><a href="#" id="delivery_popup_{{ list.ref_number }}">{{ list.delivered_qty }}</a></td>
 						{% if list.complete_delivery %}
-						<td>Complete</td>
+						<td><div>Complete</div>{% for l in list.item %}{% if l.delivery_id==delivery.id %}<div><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div>{% endif %}{% endfor %}</td>
 						{% else %}
-						<td><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></td>
+						<td><div><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></div><div ><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
 						{% endif %}
 					</tr>
 				{% endfor %}
@@ -38,6 +38,7 @@
 {% block scripts%}
 {{ super() }}
 <script>
+
 $(document).ready(function(){
 	{% for list in purchase_list %}
 	  $('#delivery_popup_{{ list.ref_number }}').popover({
@@ -47,8 +48,31 @@ $(document).ready(function(){
 		placement: "left"
 	  }); 
 	{% endfor %}
+	
+	
+	
 });
+var printer;
+if (!qz.websocket.isActive() ){
+	qz.websocket.connect().then(function() { 
+   return qz.printers.find("zebra").then(function(found) {
+   alert("Printer: " + found);
+   printer = found
+	});
+});
+}
 
+{% for list in purchase_list %}
+{% for i in list.item %}
+$('#print_bc_{{ list.ref_number }}').click(function(){
+	var config_{{ list.ref_number }} = qz.configs.create(printer);       // Create a default config for the found printer
+	var data_{{ list.ref_number }} = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ list.name }} ^FS ^FO300,110^FB320,2,,C^BY1,2.0^A0N,40,20^BCN,50,Y,N,A^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
+	  
+	   return qz.print(config_{{ list.ref_number }}, data_{{ list.ref_number }});
+	return false;
+});
+{% endfor %}
+{% endfor %}
 </script>
 
 {% endblock %}

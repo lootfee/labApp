@@ -92,192 +92,71 @@
 	
 	</div>
 {% endblock %}
-{% block styles %}
-	{{ super() }}
-	<!--for qz tray barcode printing-->
-	<meta charset="UTF-8">
-	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/dependencies/rsvp-3.1.0.min.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/dependencies/sha-256.min.js"></script>
-	<script type="text/javascript" charset="UTF-8" src="/static/js/qz_tray/qz-tray.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js" integrity="sha256-w6/1B0uwkpR3uX0YUw3k2zzHnq6xDNdVZHLIdz8xV6I=" crossorigin="anonymous"></script>
-	<!--script src="https://cdn.jsdelivr.net/npm/qz-tray@2.0.11/qz-tray.min.js"></script-->
-	
-{% endblock %}
+
 {% block scripts %}
-	{{ super() }}
-	
-	<!--style id="print_barcode_media"></style-->
-	<script>
-		$(document).ready(function() {
-			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
-			$('select#department').quicksearch('table#create_order_table .my_products_row');
-			
-			/*qz.websocket.connect().then(function() {
-			   alert("Connected!");
-			   qz.printers.find("zebra").then(function(found) {
-				   alert("Printer: " + found);
-				   
-				   
-				});
-			});*/
-			
-			
-			$('[id]').each(function () {
-				{% for my_s in my_supplies %}{% for i in my_s.item_query %}
-				$('[id="' + this.id + '"]:gt(0)').remove();
-				{% endfor %}{% endfor %}
-			});
-			});
-			
-			
-			
-			
-			{% if my_supplies %}
-			{% for my_s in my_supplies %}
-			{% for i in my_s.item_query %}
-			$("#bc_{{ i.lot.lot_no }}{{ i.id }}").JsBarcode("{{ i.lot.lot_no }}-{{ i.id }}", {
-				width: 1,
-				height: 40,
-				fontSize: 12,
-				margin: 5,
-				displayValue: false,
-			});
-			
-			$('#select_{{ my_s.product.ref_number }}').change(function(){
-				$('.bcodes_{{ my_s.product.ref_number }}').hide();
-				$('#bc_container_' + $(this).val()).show();
-			  });
-			 
-			
+{{ super() }}
 
-			 
-			$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
-				qz.websocket.connect().then(function() { 
-				   return qz.printers.find("zebra");              // Pass the printer name into the next Promise
-				}).then(function(printer) {
-				   var config = qz.configs.create(printer);       // Create a default config for the found printer
-				   var data = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO260,110^FB300,2,,^BY2,2.0^BCN,50,Y,N,N^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
-				   //var data = ['^XA^FO50,50^ADN,36,20^FDRAW ZPL Lot: {{ i.lot.lot_no }}-{{ i.id }}\&Date received: {{ i.delivery.date_delivered .strftime('%d-%m-%Y')}}\&{{ my_s.product.name }}^FS^XZ'];   // Raw ZPL
-				   return qz.print(config, data);
-				}).catch(function(e) { console.error(e); });	
-			
-				/*html2canvas convert div to png
-				var convertMeToImg = $('#bc_container_{{ i.lot_num }}{{ i.id }}');
-
-				html2canvas(convertMeToImg).then(function(canvas) {
-					$('#div_canvas').append(canvas);
-					
-					getCanvas = canvas;
-					
-					var imgageData = getCanvas.toDataURL("image/png");
-					// Now browser starts downloading it instead of just showing it
-					var newData = imgageData.replace(/^data:image\/png/, "data:application/octet-stream");
-					//$("#btn-Convert-Html2Image").attr("download", "{{ i.lot_num }}{{ i.id }}").attr("href", newData);
-				});*/
-				//$("#print_{{ i.lot.lot_no }}{{ i.id }}").attr("download", "{{ i.lot.lot_no }}{{ i.id }}.png").attr("href", "#bc_{{ i.lot.lot_no }}{{ i.id }}");
-				//for qz-print barcode
-				/*qz.websocket.connect().then(function() { 
-				   return qz.printers.find("zebra");              // Pass the printer name into the next Promise
-				}).then(function(printer) {
-				   var config = qz.configs.create(printer);       // Create a default config for the found printer
-				  var data = [
-					  '^XA\n',
-					  '^FO50,50^ADN,36,20^FDPRINTED USING QZ TRAY PLUGIN\n',
-					  { 
-					   type: 'raw', format: 'image', flavor: 'file', data: '#bc_{{ i.lot_num }}{{ i.id }}', 
-					   options: { language: "ZPL" }
-					  }, 
-					  '^FS\n',
-					  '^XZ\n'
-				   ];
-				   // Raw ZPL
-				   return qz.print(config, data);
-				}).catch(function(e) { console.error(e); });*/
-			
-				
-			});
-			{% endfor %}
-			{% endfor %}
-			{% endif %}
-			
-			/*{% for my_s in my_supplies %}
-				
-				$("#request_{{ my_s.ref_number }}").click(function() {
-					var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
-					
-					var total = {{ my_s.price }} * qty_req;
-					$("#total_price_{{ my_s.ref_number}}").html(total);
-					$('input[name=qty]').val(qty_req);
-					$('input[name=tot_price]').val(total);
-					console.log(qty_req)
-					console.log(total)
-				});
-				
-				$("#submit").click(function() {
-				$('#request_reagent_modal_{{ my_s.ref_number }}').modal('hide')		
-			});
-			{% endfor %}
-			
-			
-		});*/
-			
-			/*{% for my_s in my_supplies %}
-			
-				$("#add_{{ my_s.ref_number }}").click(function() {
-					var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
-					
-					$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_s.ref_number}}</td><td>{{ my_s.name }}</td><td id='price_{{ my_s.ref_number}}'>{{ my_s.price }}</td><td id='qty_{{ my_s.ref_number}}'contenteditable></td><td class='individual_total' id='total_price_{{ my_s.ref_number}}'></td></tr>");
-					
-					
-					$("#orders_list_form").append("<div><input type='hidden' name='refnum' value='{{ my_s.ref_number}}'><input type='hidden' name='name' value='{{ my_s.name }}'><input type='hidden' name='price' value='{{ my_s.price }}'><input type='hidden' name='qty' value=''><input type='hidden' name='tot_price' value=''></div>");
-					
-					var total = {{ my_s.price }} * qty_req;
-					$("#qty_{{ my_s.ref_number}}").html(qty_req);
-					$("#total_price_{{ my_s.ref_number}}").html(total);
-					$('input[name=qty]').val(qty_req);
-					$('input[name=tot_price]').val(total);
-					
-					var sum = 0;
-					$(".individual_total").each(function() {
-						sum += parseFloat($(this).text());
-						$("#subtotal_price").html(sum);
-					});
-					if ($(".individual_total").length > 0) {
-					$("#subtotal_container").css("display", "block");
-					}
-				});
-				
-			{% endfor %}*/
+<script>
+$(document).ready(function() {
+	$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
+	$('select#department').quicksearch('table#create_order_table .my_products_row');
 	
+	$('[id]').each(function () {
+		{% for my_s in my_supplies %}{% for i in my_s.item_query %}
+		$('[id="' + this.id + '"]:gt(0)').remove();
+		{% endfor %}{% endfor %}
+	});
+});
 		
-		/*{% for my_s in my_supplies %}
-		$(document).on( 'keyup', '#quantity_request_{{ my_s.ref_number }}', function() {
+{% if my_supplies %}
+{% for my_s in my_supplies %}
+{% for i in my_s.item_query %}
+$("#bc_{{ i.lot.lot_no }}{{ i.id }}").JsBarcode("{{ i.lot.lot_no }}-{{ i.id }}", {
+	width: 1,
+	height: 40,
+	fontSize: 12,
+	margin: 5,
+	displayValue: false,
+});
+
+$('#select_{{ my_s.product.ref_number }}').change(function(){
+	$('.bcodes_{{ my_s.product.ref_number }}').hide();
+	$('#bc_container_' + $(this).val()).show();
+  });
+
+var printer;
+if (!qz.websocket.isActive() ){
+	qz.websocket.connect().then(function() { 
+   return qz.printers.find("zebra").then(function(found) {
+   alert("Printer: " + found);
+   printer = found
+	});
+});
+}
+
+$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
+	var config_{{ i.lot.lot_no }}_{{ i.id }} = qz.configs.create(printer);       // Create a default config for the found printer
+	var data_{{ i.lot.lot_no }}_{{ i.id }} = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO300,110^FB320,2,,C^BY1,2.0^A0N,40,20^BCN,50,Y,N,A^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
+	  
+	   return qz.print(config_{{ i.lot.lot_no }}_{{ i.id }}, data_{{ i.lot.lot_no }}_{{ i.id }});
+	return false;
+});
+
+/*$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
+	qz.websocket.connect().then(function() { 
+	   return qz.printers.find("zebra");  // Pass the printer name into the next Promise
+	}).then(function(printer) {
+	   var config = qz.configs.create(printer);       // Create a default config for the found printer
+	   var data = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO260,110^FB300,2,,^BY2,2.0^BCN,50,Y,N,N^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
+	   //var data = ['^XA^FO50,50^ADN,36,20^FDRAW ZPL Lot: {{ i.lot.lot_no }}-{{ i.id }}\&Date received: {{ i.delivery.date_delivered .strftime('%d-%m-%Y')}}\&{{ my_s.product.name }}^FS^XZ'];   // Raw ZPL
+	   return qz.print(config, data);
+	}).catch(function(e) { console.error(e); });					
+});*/
+{% endfor %}
+{% endfor %}
+{% endif %}
 		
-			var edit_qty = $("#quantity_request_{{ my_s.ref_number }}").html();
-			var edit_total = {{ my_s.price }} * edit_qty;
-			
-			$('input[name=qty]').val(edit_qty);
-			$('input[name=tot_price]').val(edit_total);
-		});
-		{% endfor %}*/
-		/*{% for my_s in my_supplies %}
-		$(document).on( 'keyup', '#qty_{{ my_s.ref_number}}', function() {
-			var edit_qty = $("#qty_{{ my_s.ref_number}}").html();
-			var edit_total = {{ my_s.price }} * edit_qty;
-			$("#total_price_{{ my_s.ref_number}}").html(edit_total);
-			$('input[name=qty]').val(edit_qty);
-			$('input[name=tot_price]').val(edit_total);
-			var sum = 0;
-			$(".individual_total").each(function() {
-				sum += parseFloat($(this).text());
-				$("#subtotal_price").html(sum);
-			});
-			if ($(".individual_total").length > 0) {
-			$("#subtotal_container").css("display", "block");
-			}
-		});
 		
-		{% endfor %}*/
-		
-	</script>
+	
+</script>
 {% endblock %}

@@ -1089,16 +1089,17 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
 	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	for list in purchase_list:
 		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
+		list.delivery_delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id, delivery_id=delivery.id).count()
 		list.complete_delivery = list.delivered_qty >= list.quantity
-		list.purchase_list_id = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).all()
+		list.item = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).all()
 		list.delivery_no_list = []
-		for l in list.purchase_list_id:
+		for l in list.item:
 			l.delivery_no = Delivery.query.filter_by(id=l.delivery_id, company_id=company.id).first().delivery_no
 			list.delivery_no_list.append(l.delivery_no)
 		list.count_delivery_no_list = dict((x,list.delivery_no_list.count(x)) for x in set(list.delivery_no_list))	
-	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
