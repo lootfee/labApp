@@ -27,7 +27,8 @@
 						  <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></div>
 						{% endif %}
 					</div>
-					<span style="font-size: 11px;font-style:italic;color:blue;">{% if post.upvoters %}{{ post.upvoters.count() }}{% else %}0 {% endif %} </span><span style="font-size: 11px;font-style:italic;color:red;">{% if post.downvoters %}{{ post.downvoters.count() }}{% else %}0{% endif %}</span>
+					<span style="font-size: 11px;font-style:italic;color:blue;">{% if post.upvoters %}{{ post.upvoters.count() }}{% else %}0 {% endif %} </span>
+					<span style="font-size: 11px;font-style:italic;color:red;">{% if post.downvoters %}{{ post.downvoters.count() }}{% else %}0{% endif %}</span>
 				</td>
 			</div>
 				<td>

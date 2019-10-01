@@ -26,14 +26,14 @@
 							{% endif %}
 							{% if downvoted %}
 							<button type="button" class="btn btn-danger" aria-label="Left Align" style="padding:2px 8px;">
-							  <a href="{{ url_for('downvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"style="color:white;"></a></span></button>
+							  <a href="{{ url_for('downvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"style="color:white;"></span></a></button>
 							  {% else %}
 							  <button type="button" class="btn btn-default" aria-label="Left Align" style="padding:2px 8px;">
-							  <a href="{{ url_for('downvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></a></span></button>
+							  <a href="{{ url_for('downvote', id=post.id) }}"><span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span></a></button>
 							  {% endif %}
-							
-							<span style="font-size: 11px;font-style:italic;color:blue;">{% if upvotes %}{{ upvotes }}{% else %}0 {% endif %} </span><span style="font-size: 11px;font-style:italic;color:red;">{% if downvotes %}{{ downvotes }}{% else %}0{% endif %}</span>
 						</div>
+						<span style="font-size: 11px;font-style:italic;color:blue;">{% if upvotes %}{{ upvotes }}{% else %}0 {% endif %} </span>
+						<span style="font-size: 11px;font-style:italic;color:red;">{% if downvotes %}{{ downvotes }}{% else %}0{% endif %}</span>
 					</td>
 				</div>
 					<td>
