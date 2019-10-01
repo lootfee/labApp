@@ -24,7 +24,7 @@
 						<td>{{ list.quantity }}</td>
 						<td><a href="#" id="delivery_popup_{{ list.ref_number }}">{{ list.delivered_qty }}</a></td>
 						{% if list.complete_delivery %}
-						<td><div>Complete</div>{% for l in list.item %}{% if l.delivery_id==delivery.id %}<div><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div>{% endif %}{% endfor %}</td>
+						<td><div>Complete</div><div><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
 						{% else %}
 						<td><div><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></div><div ><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
 						{% endif %}

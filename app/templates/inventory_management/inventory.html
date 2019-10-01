@@ -65,19 +65,19 @@
 				
 				<select class="form-control" id="select_{{ my_s.product.ref_number }}">
 					{% for i in my_s.item_query %}
-					<option value="{{ i.lot_num }}{{ i.id }}">{{ i.lot.lot_no }} - {{ i.id }} / {{ i.lot.expiry.strftime('%d-%m-%Y') }}</option>
+					<option value="{{ i.lot.lot_no }}{{ i.seq_no }}">{{ i.lot.lot_no }} - {{ i.seq_no }} / {{ i.lot.expiry.strftime('%d-%m-%Y') }}</option>
 					
 					{% endfor %}
 				</select>
 					<br>
 					{% for i in my_s.item_query %}
 					<div class="bcodes bcodes_{{  my_s.product.ref_number }} text-center" id="bc_container_{{ i.lot.lot_no }}{{ i.id }}" style="text-align:center;margin:0 auto;">
-						<img  id="bc_{{ i.lot.lot_no }}{{ i.id }}" style="margin: 0;">
-						<p style="margin: 0;font-size:10px;">{{ i.lot.lot_no }}-{{ i.id }} &nbsp&nbsp&nbsp Date received: {{ i.delivery.date_delivered.strftime('%d-%m-%Y') }}</p>
+						<img  id="bc_{{ i.lot.lot_no }}{{ i.seq_no }}" style="margin: 0;">
+						<p style="margin: 0;font-size:10px;">{{ i.lot.lot_no }}-{{ i.seq_no }} &nbsp&nbsp&nbsp Date received: {{ i.delivery.date_delivered.strftime('%d-%m-%Y') }}</p>
 						<p style="margin: 0;font-size:10px;">{{ my_s.product.name }}</p>
 						
 						<br>
-						<p><input type="button" class="btn btn-default" id="print_{{ i.lot.lot_no }}{{ i.id }}" value="Print"></p>
+						<p><input type="button" class="btn btn-default" id="print_{{ i.lot.lot_no }}{{ i.seq_no }}" value="Print"></p>
 					</div>
 					
 					{% endfor %}
@@ -100,18 +100,19 @@
 $(document).ready(function() {
 	$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 	$('select#department').quicksearch('table#create_order_table .my_products_row');
-	
+	//remove duplicate
 	$('[id]').each(function () {
 		{% for my_s in my_supplies %}{% for i in my_s.item_query %}
 		$('[id="' + this.id + '"]:gt(0)').remove();
 		{% endfor %}{% endfor %}
 	});
 });
-		
+
+//set barcode size		
 {% if my_supplies %}
 {% for my_s in my_supplies %}
 {% for i in my_s.item_query %}
-$("#bc_{{ i.lot.lot_no }}{{ i.id }}").JsBarcode("{{ i.lot.lot_no }}-{{ i.id }}", {
+$("#bc_{{ i.lot.lot_no }}{{ i.seq_no }}").JsBarcode("{{ i.lot.lot_no }}-{{ i.seq_no }}", {
 	width: 1,
 	height: 40,
 	fontSize: 12,
@@ -134,11 +135,11 @@ if (!qz.websocket.isActive() ){
 });
 }
 
-$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
-	var config_{{ i.lot.lot_no }}_{{ i.id }} = qz.configs.create(printer);       // Create a default config for the found printer
-	var data_{{ i.lot.lot_no }}_{{ i.id }} = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO300,110^FB320,2,,C^BY1,2.0^A0N,40,20^BCN,50,Y,N,A^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
+$('#print_{{ i.lot.lot_no }}{{ i.seq_no }}').click(function(){
+	var config_{{ i.lot.lot_no }}_{{ i.seq_no }} = qz.configs.create(printer);       // Create a default config for the found printer
+	var data_{{ i.lot.lot_no }}_{{ i.seq_no }} = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO300,110^FB320,2,,C^BY1,2.0^A0N,40,20^BCN,50,Y,N,A^FD {{ i.lot.lot_no }}-{{ i.seq_no }} ^FS^XZ'];
 	  
-	   return qz.print(config_{{ i.lot.lot_no }}_{{ i.id }}, data_{{ i.lot.lot_no }}_{{ i.id }});
+	   return qz.print(config_{{ i.lot.lot_no }}_{{ i.seq_no }}, data_{{ i.lot.lot_no }}_{{ i.seq_no }});
 	return false;
 });
 

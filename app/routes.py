@@ -472,6 +472,7 @@ def manage_affiliate(user_id, comp_id):
 	if form.submit.data:
 		if form.validate_on_submit():
 			affiliate.title = form.title.data
+			affiliate.start_date = form.start_date.data
 			#affiliate.qc_supervisor = form.qc_supervisor.data
 			affiliate.inv_supervisor = form.inv_supervisor.data
 			affiliate.doc_supervisor = form.doc_supervisor.data
@@ -497,6 +498,7 @@ def manage_affiliate(user_id, comp_id):
 			return redirect(url_for('admin', company_name=company.company_name))
 	elif request.method == 'GET':
 		form.title.data = affiliate.title
+		form.start_date.data = affiliate.start_date
 		#form.qc_supervisor.data = affiliate.qc_supervisor
 		form.inv_supervisor.data = affiliate.inv_supervisor
 		form.doc_supervisor.data = affiliate.doc_supervisor
@@ -1139,15 +1141,19 @@ def receive_delivery_item(company_name, purchase_order_no, delivery_order_no, id
 			db.session.add(lot)
 			db.session.commit()
 			for i in range(0, qty):
-				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, delivery_id=delivery.id, my_supplies_id=purchased_item.my_supplies_id)
+				seq = Item.query.filter_by(lot_id=lot.id, company_id=company.id).count()
+				seq += 1
+				item = Item(lot_id=lot.id, seq_no=seq, company_id=company.id, product_id=product.id, purchase_list_id=id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, delivery_id=delivery.id, my_supplies_id=purchased_item.my_supplies_id)
 				db.session.add(item)
 				#purchased_item.deliveries.append(delivery)
 				db.session.commit()
 			return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no))
 		if lot_query is not None:
 			lot = Lot.query.filter_by(lot_no=alnum_lotno).first()
+			seq = Item.query.filter_by(lot_id=lot.id, company_id=company.id).count()
+			seq += 1
 			for i in range(0, qty):
-				item = Item(lot_id=lot.id, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, my_supplies_id=purchased_item.my_supplies_id)
+				item = Item(lot_id=lot.id, seq_no=seq, company_id=company.id, product_id=product.id, purchase_list_id=id, delivery_id=delivery.id, department_id=order.department_id, supplier_id=purchased_item.supplier_id, my_supplies_id=purchased_item.my_supplies_id)
 				db.session.add(item)
 				#purchased_item.deliveries.append(delivery)
 				db.session.commit()

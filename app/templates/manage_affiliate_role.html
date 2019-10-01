@@ -14,6 +14,7 @@
 			<tr>
 				<th class="col-md-2 admin-table">Affiliate</th>
 				<th class="col-md-2 admin-table">{{ form.title.label}}</th>
+				<th class="col-md-2 admin-table">{{ form.start_date.label}}</th>
 				{% if user == superuser %}
 				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
 				{% endif %}
@@ -27,6 +28,7 @@
 			<tr>
 				<td class="col-md-2 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ({{ affiliate.users.username }})</a></td>
 				<th class="col-md-2 admin-table">{{ form.title (class_="form-control") }}</th>
+				<th class="col-md-2 admin-table">{{ form.start_date (class_="form-control", type="date") }}</th>
 				{% if user == superuser %}
 				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
 				{% endif %}

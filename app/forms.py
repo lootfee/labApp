@@ -97,6 +97,7 @@ class UserRoleForm(FlaskForm):
 	doc_admin = BooleanField('Document Admin')
 	inv_admin = BooleanField('Inventory Admin')
 	super_admin = BooleanField('Super Admin')
+	start_date = DateField('Start date:', validators=[DataRequired()], format='%Y-%m-%d')
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
 

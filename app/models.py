@@ -583,6 +583,7 @@ class Delivery(db.Model):
 class Item(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_id = db.Column(db.Integer, db.ForeignKey('lot.id'))
+	seq_no = db.Column(db.Integer)
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
 	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
