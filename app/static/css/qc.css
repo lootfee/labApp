@@ -13,6 +13,25 @@
 	padding-bottom: 12px;
 	display: none;
 }
+#givenLevel1 {
+	display: none;
+}
+#givenLevel2 {
+	display: none;
+}
+#givenLevel3 {
+	display: none;
+}
+#level2Data {
+	display: none;
+}
+#level3Data {
+	display: none;
+}
+
+.print_data {
+	display: none;
+}
 
 #calculate{
 	display: none;

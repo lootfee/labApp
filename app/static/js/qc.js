@@ -361,19 +361,6 @@ function inputQC() {
 	document.getElementById("qcEntry").focus();
 }
 
-function dataInput(inputType, containerType) {
-	var entryType = document.getElementsByClassName("entryType");
-	var resultContainer = document.getElementsByClassName("resultContainer");
-	for (i = 0; i < entryType.length, i < resultContainer.length; i++) {
-		entryType[i].style.display = "none"; 
-		resultContainer[i].style.display = "none";
-	}
-	
-	document.getElementById(inputType).style.display = "block";
-	document.getElementById(containerType).style.display = "block";
-}
-
-
 document.getElementById('qcEntry').addEventListener('keyup', function(event) {
 	if (event.keyCode === 13){
 		event.preventDefault();
@@ -416,11 +403,12 @@ function clearData(){
 function drawChart() {
 	// Create the data table.
 	let ctx = document.getElementById('chartContainer');
+	var ctxp = document.getElementById('chartContainer_print');
 	let datas = document.getElementsByClassName('qc-data');
 	let cmn = document.getElementById("cmean").value;
 	let csd = document.getElementById("cstndev").value;
-	let gmn = document.getElementById("gmean").value;
-	let gsd = document.getElementById("gstndev").value;
+	let gmn = document.getElementById("gmean1").value;
+	let gsd = document.getElementById("gstndev1").value;
 	let gbtn = document.getElementById("gbtn").checked;
 	let arr = [];
 	
@@ -439,8 +427,8 @@ function drawChart() {
 		if (gbtn == false) {
 			var options = {
 				//title: "LJ Chart",
-				width: 1200,
-				height: 500,
+				width: 1000,
+				height: 400,
 				series: {
 					0: {targetAxisIndex: 0}
 				},
@@ -464,9 +452,6 @@ function drawChart() {
 						},
 				},									
 				pointSize: 10,
-				legend: {
-					position: 'none',
-				 },
 				logScale: false
 			};
 		}
@@ -474,8 +459,8 @@ function drawChart() {
 		if (gbtn == true){
 			var options = {
 				//title: "LJ Chart",
-				width: 1200,
-				height: 500,
+				width: 1000,
+				height: 400,
 				series: {
 					0: {targetAxisIndex: 0}
 				},
@@ -499,17 +484,16 @@ function drawChart() {
 						},
 				},								
 				pointSize: 10,
-				legend: {
-					position: 'none',
-				 },
 				logScale: false
 			};
 		}
 	}
 	
 	var chart = new google.visualization.LineChart(ctx);
+	//var chart_print = new google.visualization.LineChart(ctxp);
 
     chart.draw(data, options);
+	//chart_print.draw(data, options);
 	
 }
 
@@ -527,6 +511,12 @@ function drawChart2() {
 	var qcImportData3 = document.getElementsByClassName('qcImportData3');
 	var cDate = document.getElementsByClassName('cDate');
 	var gbtn = document.getElementById("gbtn").checked;
+	var gmean1 = document.getElementById("gmean1").value;
+	var gmean2 = document.getElementById("gmean2").value;
+	var gmean3 = document.getElementById("gmean3").value;
+	var gstndev1 = document.getElementById("gstndev1").value;
+	var gstndev2 = document.getElementById("gstndev2").value;
+	var gstndev3 = document.getElementById("gstndev3").value;
 	var arr1 = [];
 	var arr12 = [];
 	var arr2 = [];
@@ -587,8 +577,8 @@ function drawChart2() {
 		if (gbtn == false) {
 			var options = {
 				title: '',
-				width: 1200,
-				height: 500,
+				width: 1000,
+				height: 400,
 				interpolateNulls: true,
 				series: {
 					0: {targetAxisIndex: 0},
@@ -628,19 +618,9 @@ function drawChart2() {
 					},
 				},			
 				vAxis: {
-					/*gridlines: {
-						count: 7,
-						color: 'blue'
-					},
-					minorGridlines: {
-						count: 0
-					},*/
 					viewWindowMode: 'maximized'		
 				},									
 				pointSize: 5,
-				legend: {
-					position: 'none',
-				 },
 				annotations: {
 					textStyle: {
 					  fontSize: 9,
@@ -654,36 +634,59 @@ function drawChart2() {
 		
 		if (gbtn == true){
 			var options = {
-				//title: "LJ Chart",
-				width: 1200,
-				height: 500,
+				title: '',
+				width: 1000,
+				height: 400,
+				interpolateNulls: true,
 				series: {
-					0: {targetAxisIndex: 0}
+					0: {targetAxisIndex: 0},
+					1: {targetAxisIndex: 1},
+					2: {targetAxisIndex: 2}
 				},
 				vAxes: {
 					0: {title: '',
-						baseline: gmn}
+						baseline: gmean1,
+						ticks: [{v: (+gmean1 + +(gstndev1*3)), f: '+3sd'}, {v: (+gmean1 + +(gstndev1*2)), f: '+2sd'}, {v: (+gmean1 + +(gstndev1)), f: '+1sd'}, {v: gmean1 , f: 'mean'}, {v: (gmean1 - (gstndev1)), f: '-1sd'}, {v: (gmean1 - (gstndev1*2)), f: '-2sd'}, {v: (gmean1 - (gstndev1*3)), f: '-3sd'}],
+						viewWindow: {
+							max: +(gmean1 + (+gstndev1*3)),
+							min: (gmean1 - (gstndev1*3))
+						}
+					},
+					1: {title: '',
+						baseline: gmean2,
+						ticks: [{v: (+gmean2 + +(gstndev2*3)), f: ''}, {v: (+gmean2 + +(gstndev2*2)), f: ''}, {v: (+gmean2 + +(gstndev2)), f: ''}, {v: gmean2 , f: ''}, {v: (gmean2 - (gstndev2)), f: ''}, {v: (gmean2 - (gstndev2*2)), f: ''}, {v: (gmean2 - (gstndev2*3)), f: ''}],
+						viewWindow: {
+							max: (+gmean2 + +(gstndev2*3)),
+							min: (gmean2 - (gstndev2*3))
+						}
+					},
+					2: {title: '',
+						baseline: gmean3,
+						ticks: [{v: (+gmean3 + +(gstndev3*3)), f: ''}, {v: (+gmean3 + +(gstndev3*2)), f: ''}, {v: (+gmean3 + +(gstndev3)), f: ''}, {v: gmean3 , f: ''}, {v: (gmean3 - (gstndev3)), f: ''}, {v: (gmean3 - (gstndev3*2)), f: ''}, {v: (gmean3 - (gstndev3*3)), f: ''}],
+						viewWindow: {
+							max: (+gmean3 + +(gstndev3*3)),
+							min: (gmean3 - (gstndev3*3))
+						}
+					}
 				},
 				hAxis: {
 					ticks: arrD[i],
-					/*title: '',
-					gridlines: {
-						count: null,
-						color: 'blue'
-					},*/
-				},
+					textStyle: {
+						fontSize: 9
+					},
+				},			
 				vAxis: {
-					ticks: [{v: +gmn + +(gsd*3), f: '+3sd'}, {v: +gmn + +(gsd*2), f: '+2sd'}, {v: +gmn + +gsd, f: '+1sd'}, {v: gmn, f: 'mean'}, {v: gmn-gsd, f: '-1sd'}, {v: gmn - (gsd*2), f: '-2sd'}, {v: gmn - (gsd*3), f: '-3sd'} ],
-					/*gridlines: {
-						count: 7,
-						color: 'blue'
-					}*/
-				},								
-				pointSize: 10,
-				legend: {
-					position: 'none',
-				 },
-				//logScale: false
+					viewWindowMode: 'maximized'		
+				},									
+				pointSize: 5,
+				annotations: {
+					textStyle: {
+					  fontSize: 9,
+					  bold: false
+					  
+					}
+				},
+				logScale: false,
 			};
 		}
 		
@@ -691,22 +694,200 @@ function drawChart2() {
 	
 	
 	var chart = new google.visualization.LineChart(ctx);
-
     chart.draw(data, options);
-	
 }
 
-function showGivenData(){
+/*function showGivenData(){
 	var givenDataContainer = document.getElementById('givenDataContainer');
 	var gbtn = document.getElementById('gbtn');
+	var level = document.getElementById('levelSelect');
 	
 	if (gbtn.checked){
+
 		givenDataContainer.style.display= "block";
 	}
 	else{
 		givenDataContainer.style.display= "none";
 	}
-}
+}*/
+/*function dataInput(inputType, containerType) {
+	var entryType = document.getElementsByClassName("entryType");
+	var resultContainer = document.getElementsByClassName("resultContainer");
+	for (i = 0; i < entryType.length, i < resultContainer.length; i++) {
+		entryType[i].style.display = "none"; 
+		resultContainer[i].style.display = "none";
+	}
+	
+	document.getElementById(inputType).style.display = "block";
+	document.getElementById(containerType).style.display = "block";
+}*/
+
+$("#importExcelQC").click(function() {
+	var entryType = document.getElementsByClassName("entryType");
+	var resultContainer = document.getElementsByClassName("resultContainer");
+	for (i = 0; i < entryType.length, i < resultContainer.length; i++) {
+		entryType[i].style.display = "none"; 
+		resultContainer[i].style.display = "none";
+	}
+	$("#excelImportContainer").css("display", "block");
+	$("#givenResultContainer").css("display", "none");
+	clearData();
+	return false;
+});
+
+$("#manualInputQC").click(function() {
+	var entryType = document.getElementsByClassName("entryType");
+	var resultContainer = document.getElementsByClassName("resultContainer");
+	for (i = 0; i < entryType.length, i < resultContainer.length; i++) {
+		entryType[i].style.display = "none"; 
+		resultContainer[i].style.display = "none";
+	}
+	$("#qcEnryContainer").css("display", "block");
+	$("#givenResultContainer").css("display", "block");
+	clearData();
+	return false;
+});
 
 
+$("#gbtn").click(function() {
+	if($("#gbtn").is(":checked")){
+		if ($("#levelSelect").val() == 1) {
+			$("#givenDataContainer").css("display", "block");
+			$("#givenLevel1").css("display", "block");
+		}
+		else if ($("#levelSelect").val() == 2) {
+			$("#givenDataContainer").css("display", "block");
+			$("#givenLevel1").css("display", "block");
+			$("#givenLevel2").css("display", "block");
+			
+		}
+		else if ($("#levelSelect").val()== 3) {
+			$("#givenDataContainer").css("display", "block");
+			$("#givenLevel1").css("display", "block");
+			$("#givenLevel2").css("display", "block");
+			$("#givenLevel3").css("display", "block");
+		}
+	}
+	else {
+		$("#givenDataContainer").css("display", "none");
+	}
+	
+	
+});
 
+$("#levelSelect").change(function() {
+	if ($("#levelSelect").val() == 1){
+		$("#level2Data").css("display", "none");
+		$("#level3Data").css("display", "none");
+	}
+	else if ($("#levelSelect").val() == 2){
+		$("#level2Data").css("display", "block");
+		$("#level3Data").css("display", "none");
+	}
+	else if ($("#levelSelect").val() == 3){
+		$("#level2Data").css("display", "block");
+		$("#level3Data").css("display", "block");
+	}
+});
+
+$('#printButton').click(function() {
+	/*$("#analyte_print").html($("#analyte").val());
+	$("#unit_print").html($("#unit").val());
+	$("#machine_name_print").html($("#machine_name").val());
+	$("#chartjs_print").html($("#chartjs").html());
+	
+	if ($("#qcEntry").is(':visible')){
+		$("#level1_print").html('Level ' + $("#level1").val() + '- ');
+		$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+		$("#mean1_print").html($("#cmean").val());
+		$("#sd1_print").html($("#cstndev").val());
+		$("#expiry1_print").html($("#expiry1").val());
+		$("#lvl2_data").css("display", "none");
+		$("#lvl3_data").css("display", "none");
+	}
+	else if ($("#qcEntry").css('display') == 'none'){
+		if($("#gbtn").is(":checked")== true){
+			if ($("#levelSelect").val() == 2){
+				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#gmean1").val());
+				$("#sd1_print").html($("#gstndev1").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#level2_print").html('Level ' + $("#level2").val() + '- ');
+				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
+				$("#mean2_print").html($("#gmean2").val());
+				$("#sd2_print").html($("#gstndev2").val());
+				$("#expiry2_print").html($("#expiry2").val());
+				$("#lvl3_data").css("display", "none");
+			}
+			else if ($("#levelSelect").val() == 3){
+				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#gmean1").val());
+				$("#sd1_print").html($("#gstndev1").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#level2_print").html('Level ' + $("#level2").val() + '- ');
+				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
+				$("#mean2_print").html($("#gmean2").val());
+				$("#sd2_print").html($("#gstndev2").val());
+				$("#expiry2_print").html($("#expiry2").val());
+				$("#level3_print").html('Level ' + $("#level3").val() + '- ');
+				$("#lot_no3_print").html('Lot: ' + $("#lot_no3").val());
+				$("#mean3_print").html($("#gmean3").val());
+				$("#sd3_print").html($("#gstndev3").val());
+				$("#expiry3_print").html($("#expiry3").val());
+			}
+			else {
+				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#gmean1").val());
+				$("#sd1_print").html($("#gstndev1").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#lvl2_data").css("display", "none");
+				$("#lvl3_data").css("display", "none");
+			}
+		}
+		if($("#gbtn").is(":checked") == false ) {
+			if ($("#levelSelect").val() == 2){
+				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#lvl1Mean").val());
+				$("#sd1_print").html($("#lvl1Stndev").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#level2_print").html('Level: ' + $("#level2").val() + '- ');
+				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
+				$("#mean2_print").html($("#lvl2Mean").val());
+				$("#sd2_print").html($("#lvl2Stndev").val());
+				$("#expiry2_print").html($("#expiry2").val());
+				$("#lvl3_data").css("display", "none");
+			}
+			else if ($("#levelSelect").val() == 3){
+				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#lvl1Mean").val());
+				$("#sd1_print").html($("#lvl1Stndev").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#level2_print").html('Level: ' + $("#level2").val() + '- ');
+				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
+				$("#mean2_print").html($("#lvl2Mean").val());
+				$("#sd2_print").html($("#lvl2Stndev").val());
+				$("#expiry2_print").html($("#expiry2").val());
+				$("#level3_print").html('Level: ' + $("#level3").val() + '- ');
+				$("#lot_no3_print").html('Lot: ' + $("#lot_no3").val());
+				$("#mean3_print").html($("#lvl3Mean").val());
+				$("#sd3_print").html($("#lvl3Stndev").val());
+				$("#expiry3_print").html($("#expiry3").val());
+			}
+			else {
+				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
+				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
+				$("#mean1_print").html($("#lvl1Mean").val());
+				$("#sd1_print").html($("#lvl1Stndev").val());
+				$("#expiry1_print").html($("#expiry1").val());
+				$("#lvl2_data").css("display", "none");
+				$("#lvl3_data").css("display", "none");
+			}
+		}
+	}*/
+ print() 
+});

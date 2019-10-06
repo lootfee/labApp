@@ -1439,3 +1439,7 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 			form2.body.data = sect.section_body 
 	return render_template('lab_document.html', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
 	
+@app.route('/stream', methods=['GET', 'POST'])
+@login_required
+def stream():
+	return render_template('stream.html', user=user, superuser=superuser)
