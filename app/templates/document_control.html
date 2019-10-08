@@ -30,15 +30,15 @@
 		<br>
 		<ul class="nav nav-pills nav-stacked" role="tablist">
 			{% for dept in departments %}
-			<li role="presentation"><a href="#documentation_deptname_{{ dept.department_name }}" aria-controls="documentation_deptname_{{ dept.department_name }}" role="tab" data-toggle="tab">{{ dept.department_name }}</a></li>
+			<li role="presentation"><a href="#documentation_deptname_{{ dept.id }}" aria-controls="documentation_deptname_{{ dept.id }}" role="tab" data-toggle="tab">{{ dept.department_name }}</a></li>
 			{% endfor %}
 		</ul>
 	</div>
 	<div class="col-md-6">
 		<div class="tab-content" >
 			{% for dept in departments %}
-			<div role="tabpanel" class="tab-pane" id="documentation_deptname_{{ dept.department_name }}">
-				<p><a href="#" data-toggle="modal" data-target="#create_sop_modal_{{ dept.department_name }}" style="float:right;">Create SOP for {{ dept.department_name }}</a></p>
+			<div role="tabpanel" class="tab-pane" id="documentation_deptname_{{ dept.id }}">
+				<p><a href="#" data-toggle="modal" data-target="#create_sop_modal_{{ dept.id }}" style="float:right;">Create SOP for {{ dept.department_name }}</a></p>
 				<br>
 				<ul class="nav nav-pills nav-stacked" role="tablist" >
 				{% for doc in dept.document %}
@@ -67,7 +67,7 @@
   </div>
 </div>
 {% for dept in departments %}
-<div class="modal fade" id="create_sop_modal_{{ dept.department_name }}" tabindex="-1" role="dialog" aria-labelledby="create_sop_modalLabel">
+<div class="modal fade" id="create_sop_modal_{{ dept.id }}" tabindex="-1" role="dialog" aria-labelledby="create_sop_modalLabel">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-body">

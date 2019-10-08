@@ -615,7 +615,7 @@ class Lot(db.Model):
 
 class DocumentationDepartment(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	department_name = db.Column(db.String(50), index=True, unique=True)
+	department_name = db.Column(db.String(50), index=True)
 	department_abbrv = db.Column(db.String(5))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
