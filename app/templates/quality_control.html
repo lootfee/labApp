@@ -2,48 +2,109 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 
-
 {% block app_content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="analyte" placeholder="Name of analyte">
+<div class="row">
+	<div class="col-md-12">
+		<div class="col-md-3">
+			{% if company.logo %}
+			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+			{% else %}
+			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+			{% endif %}
 		</div>
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="unit" placeholder="Unit">
+		<div class="col-md-6 text-center" >
+			<h1>{{ company.company_name }}</h1>
 		</div>
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="machine_name" placeholder="Machine used">
-		</div>
-	</div>
-	<br>
-	<div class="row">
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="level" placeholder="Level">
-		</div>
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="lot_no" placeholder="Lot Number">
-		</div>
-		<div class="col-md-4">
-			<input type="text" class="form-control qc-info" id="expiry" placeholder="Expiry">
+		<div class="col-md-3" style="height:150px;">
+			<div style="bottom:0;">
+				<p>Address: {{ company.address }}</p>
+				<p>Email: {{ company.email }}</p>
+				<p>Contact: {{ company.contact_info }}</p>
+			</div>
 		</div>
 	</div>
 </div>
 <br>
 <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12" id="qc_title">
+			<input type="text" class="form-control qc-info text-center" style="font-size: 15px; font-weight: bold;" placeholder="Title">
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-4">
+			<label for="analyte" class="control-label">Analyte:</label>
+			<input type="text" class="form-control qc-info" id="analyte">
+		</div>
+		<div class="col-md-4">
+			<label for="unit" class="control-label">Unit:</label>
+			<input type="text" class="form-control qc-info" id="unit">
+		</div>
+		<div class="col-md-4">
+			<label for="machine_name" class="control-label">Machine used:</label>
+			<input type="text" class="form-control qc-info" id="machine_name">
+		</div>
+	</div>
+	<br>
+	<div class="row" id="level1Data">
+		<div class="col-md-4">
+			<label for="level1" class="control-label">Level:</label>
+			<input type="text" class="form-control qc-info" id="level1">
+		</div>
+		<div class="col-md-4">
+			<label for="lot_no1" class="control-label">Lot no:</label>
+			<input type="text" class="form-control qc-info" id="lot_no1">
+		</div>
+		<div class="col-md-4">
+			<label for="expiry1" class="control-label">Expiry:</label>
+			<input type="date" class="form-control qc-info" id="expiry1">
+		</div>
+	</div>
+	<div class="row" id="level2Data">
+		<div class="col-md-4">
+			<label for="level2" class="control-label">Level:</label>
+			<input type="text" class="form-control qc-info" id="level2">
+		</div>
+		<div class="col-md-4">
+			<label for="lot_no2" class="control-label">Lot no:</label>
+			<input type="text" class="form-control qc-info" id="lot_no2">
+		</div>
+		<div class="col-md-4">
+			<label for="expiry2" class="control-label">Expiry:</label>
+			<input type="date" class="form-control qc-info" id="expiry2">
+		</div>
+	</div>
+	<div class="row" id="level3Data">
+		<div class="col-md-4">
+			<label for="level3" class="control-label">Level:</label>
+			<input type="text" class="form-control qc-info" id="level3">
+		</div>
+		<div class="col-md-4">
+			<label for="lot_no3" class="control-label">Lot no:</label>
+			<input type="text" class="form-control qc-info" id="lot_no3">
+		</div>
+		<div class="col-md-4">
+			<label for="expiry3" class="control-label">Expiry:</label>
+			<input type="date" class="form-control qc-info" id="expiry3">
+		</div>
+	</div>
+</div>
+<br>
+<div class="container-fluid no_print">
 	<div class="col-md-4 entryType" id="qcEnryContainer">
 		<input type="text" class="form-control qc-entry" id="qcEntry" placeholder="Enter QC results">
 		<button class="btn btn-default" id="submitQC" onclick="inputQC()" type="submit">Submit</button>	
-		<p><a onclick="dataInput('excelImportContainer');clearData()" href="#">Import from excel instead?</a></p>
+		<p><a href="#" id="importExcelQC">Import from excel instead?</a></p>
 	</div>
 	<div class="entryType" id="excelImportContainer">
 		<div class="row">
 			<div class="col-md-4">
 				<span>Choose number of QC levels:</span>
-				<select>
-					<option id="lvl1" onclick="showQcLevel()">1 level</option>
-					<option id="lvl2" onclick="showQcLevel()">2 levels</option>
-					<option id="lvl3" onclick="showQcLevel()">3 levels</option>
+				<select id="levelSelect">
+					<option id="lvl1" value='1'>1 level</option>
+					<option id="lvl2" value='2'>2 levels</option>
+					<option id="lvl3" value='3'>3 levels</option>
 				</select>
 				<p><input type="checkbox" id="includeDate">Include date?
 				<input type="checkbox" id="includeTime">Include time?</p>
@@ -53,7 +114,7 @@
 					<label for="inputFile">Choose excel file</label>
 					<input type="file" id="my_file_input">
 				</form>
-				<p><a onclick="dataInput('qcEnryContainer', 'givenResultContainer');clearData()" href="#">Input QC Data Manually?</a></p>
+				<p><a href="#" id="manualInputQC">Input QC Data Manually?</a></p>
 			</div>
 		</div>
 		
@@ -63,19 +124,25 @@
 <div class="container-fluid" id="my_file_output">
 </div>
 <div class="container-fluid">
-	<div class="row" id="qcDataContainer">	
-		
+	<div class="row" id="qcDataContainer">
+	<div>
+		<h5>Given data: </h5>
 	</div>
+</div>
+</div>
+
+<div class="container-fluid no_print">
 	<br>
 	<button class="btn btn-default" onclick="calcStdev()" id="calculate">Calculate</button>
-	<input type="checkbox" id="gbtn" onclick="showGivenData()"></input>
+	<input type="checkbox" id="gbtn"></input>
 	<label for="gbtn" class="btn btn-default">Use Given Mean/SD's</label>
 	<button class="btn btn-default" onclick="drawChart()" id="createChart">Create Chart</button>
 	<button class="btn btn-default" onclick="drawChart2()" id="createImportChart">Create Chart</button>		
-	<button class="btn btn-default" onclick="clearData()">Clear</button>	
+	<button class="btn btn-default" onclick="clearData()">Clear</button>
+	<button class="btn btn-default" id="printButton">Print</button>
 </div>
 <br>
-<div class="container resultContainer" id="givenResultContainer" >
+<div class="container" id="givenResultContainer" >
 	<div class="row">
 		<p><h5 style="padding-left: 15px">Calculated:</h5></p>
 		<div class="col-md-3">
@@ -98,7 +165,7 @@
 </div>
 <div class="container resultContainer" id="importResultContainer">
 	<p><h5 style="padding-left: 15px">Calculated:</h5></p>
-	<div class="row levelContainer" id="level1Container">
+	<div class="row levelContainer " id="level1Container">
 		<div class="col-md-3">
 			<label for="lvl1Mean">Level 1 Mean</label>
 			<input type="text" class="form-control qc-result" id="lvl1Mean" readonly>
@@ -108,7 +175,7 @@
 			<input type="text" class="form-control qc-result" id="lvl1Variance" readonly>
 		</div>
 		<div class="col-md-3">
-			<label for="lvl1Stndev">Level 1 Standard Deviation</label>
+			<label for="lvl1Stndev">Level 1 SD</label>
 			<input type="text" class="form-control qc-result" id="lvl1Stndev" readonly>
 		</div>
 		<div class="col-md-3">
@@ -126,7 +193,7 @@
 			<input type="text" class="form-control qc-result" id="lvl2Variance" readonly>
 		</div>
 		<div class="col-md-3">
-			<label for="lvl2Stndev">Level 2 Standard Deviation</label>
+			<label for="lvl2Stndev">Level 2 SD</label>
 			<input type="text" class="form-control qc-result" id="lvl2Stndev" readonly>
 		</div>
 		<div class="col-md-3">
@@ -144,7 +211,7 @@
 			<input type="text" class="form-control qc-result" id="lvl3Variance" readonly>
 		</div>
 		<div class="col-md-3">
-			<label for="lvl3Stndev">Level 3 Standard Deviation</label>
+			<label for="lvl3Stndev">Level 3 SD</label>
 			<input type="text" class="form-control qc-result" id="lvl3Stndev" readonly>
 		</div>
 		<div class="col-md-3">
@@ -156,29 +223,150 @@
 
 <br>
 
-<div class="container-fluid" id="givenDataContainer" >
-	<div class="row">
-		<h5 style="padding-left: 15px">Given:</h5>
+<div class="container-fluid resultContainer" id="givenDataContainer" >
+	<h4 style="padding-left: 15px">Given</h4>
+	<div class="row" id="givenLevel1">
 		<div class="col-md-3">
-			<label for="gmean">Mean</label>
-			<input type="text" class="form-control qc-result" id="gmean">
+			<label for="gmean1">Level 1 Mean </label>
+			<input type="text" class="form-control qc-result" id="gmean1">
 		</div>
 		<div class="col-md-3">
-			<label for="gstndev">Standard Deviation</label>
-			<input type="text" class="form-control qc-result" id="gstndev">
+			<label for="gstndev1">Level 1 SD </label>
+			<input type="text" class="form-control qc-result" id="gstndev1">
+		</div>
+	</div>
+	<br>
+	<div class="row" id="givenLevel2">
+		<div class="col-md-3">
+			<label for="gmean2">Level 2 Mean </label>
+			<input type="text" class="form-control qc-result" id="gmean2">
+		</div>
+		<div class="col-md-3">
+			<label for="gstndev2">Level 2 SD</label>
+			<input type="text" class="form-control qc-result" id="gstndev2">
+		</div>
+	</div>
+	<br>
+	<div class="row" id="givenLevel3">
+		<div class="col-md-3">
+			<label for="gmean3">Level 3 Mean </label>
+			<input type="text" class="form-control qc-result" id="gmean3">
+		</div>
+		<div class="col-md-3">
+			<label for="gstndev3">Level 3 SD</label>
+			<input type="text" class="form-control qc-result" id="gstndev3">
 		</div>
 	</div>
 </div>
-<div class="col-md-5" style="padding-top: 24px;">
-	
-</div>
-
-<br>
 <div class="container-fluid">
-	<div class="chart-container" id="chartContainer">
-		<canvas id="chartjs" width="770" height="385" style="display: block; width: 770px; height: 385px;"></canvas>
+	<div class="row text-center">
+		<div class="col-md-12 chart-container text-center" id="chartContainer">
+			<canvas id="chartjs" ></canvas>
+		</div>
+	</div>
+</div>
+<div class="container-fluid visible-print-block">
+	<div class="row">
+		<div class="col-md-6">
+			<p>Generated by: {{ user.firstname }} {{ user.lastname }}</p>
+			<p>Date: {{ moment().format('LLLL') }}. </p>
+		</div>
 	</div>
 </div>
 
+{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<style>
+#chartContainer {
+	position: relative;
+	--border: 2px solid #ddd;
+	margin-left: 1em;
+	margin-right: auto;
+	display: block;
+	width: 100%;
+	border-radius: 8px;
+}
+@media print {
+	body {
+		font-size: 10px;
+	}
+
+	.no_print {
+		display: none;
+	}
+	#qc_title {
+		margin-top: 40px;
+	}
+	
+	.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+        float: left;
+   }
+   .col-md-12 {
+        width: 100%;
+   }
+   .col-md-11 {
+        width: 91.66666667%;
+   }
+   .col-md-10 {
+        width: 83.33333333%;
+   }
+   .col-md-9 {
+        width: 75%;
+   }
+   .col-md-8 {
+        width: 66.66666667%;
+   }
+   .col-md-7 {
+        width: 58.33333333%;
+   }
+   .col-md-6 {
+        width: 50%;
+   }
+   .col-md-5 {
+        width: 41.66666667%;
+   }
+   .col-md-4 {
+        width: 33.33333333%;
+   }
+   .col-md-3 {
+        width: 25%;
+   }
+   .col-md-2 {
+        width: 16.66666667%;
+   }
+   .col-md-1 {
+        width: 8.33333333%;
+   }
+   
+   #chartContainer {
+		position: relative;
+		width: 90%;
+		margin-left: 5vw;
+		margin-right: auto;
+	}
+	
+	#chartjs {
+		padding-left: 0;
+		padding-right: 0;
+		margin-left: auto;
+		margin-right: auto;
+		display: block;
+		width: 80%;
+	}
+	
+	.qcImportData1 {
+		color: blue;
+	}
+
+	.qcImportData2 {
+		color: red;
+	}
+
+	.qcImportData3 {
+		color: #cccc0e;
+	}
+}
+</style>
 {% endblock %}

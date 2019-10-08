@@ -70,10 +70,10 @@ function handleFile(e) {
 						$("#my_file_output").append(rows);
 					}
 				});		
-			importResultContainer.style.display = 'block';
+			/*importResultContainer.style.display = 'block';
 			level1Container.style.display = 'block';
 			level2Container.style.display = 'block';
-			level3Container.style.display = 'block';
+			level3Container.style.display = 'block';*/
 			}
 		else if ( lvl2.selected === true){
 				if (incDate.checked === true){
@@ -95,9 +95,9 @@ function handleFile(e) {
 						$("#my_file_output").append(rows);
 					}
 				});
-			importResultContainer.style.display = 'block';
+			/*importResultContainer.style.display = 'block';
 			level1Container.style.display = 'block';
-			level2Container.style.display = 'block';
+			level2Container.style.display = 'block';*/
 			}
 		else if ( lvl1.selected === true ){
 				if (incDate.checked === true){
@@ -119,8 +119,8 @@ function handleFile(e) {
 						$("#my_file_output").append(rows);
 					}				
 				});
-			importResultContainer.style.display = 'block';
-			level1Container.style.display = 'block';
+			/*importResultContainer.style.display = 'block';
+			level1Container.style.display = 'block';*/
 			}
 	});
   };
@@ -216,6 +216,8 @@ function calcStdev() {
 		sd = Math.sqrt(variance);
 		cv = parseFloat(sd / mn) * 100;
 
+		givenResultContainer.style.display = 'block';
+		
 		mn = N(mn, dp)
 		document.getElementById("cmean").value = mn;
 		variance = N(variance, dp+4);
@@ -251,6 +253,9 @@ function calcStdev() {
 		lvl1Stndev = Math.sqrt(lvl1Variance);
 		lvl1Cv = parseFloat(lvl1Stndev / lvl1Mean) * 100;
 
+		importResultContainer.style.display = 'block';
+		level1Container.style.display = 'block';
+
 		lvl1Mean = N(lvl1Mean, dp1)
 		document.getElementById("lvl1Mean").value = lvl1Mean;
 		lvl1Variance = N(lvl1Variance, dp1+4);
@@ -284,6 +289,10 @@ function calcStdev() {
 		lvl2Variance = totSqrd2 / (dataLength2 - 1);
 		lvl2Stndev = Math.sqrt(lvl2Variance);
 		lvl2Cv = parseFloat(lvl2Stndev / lvl2Mean) * 100;
+
+		importResultContainer.style.display = 'block';
+		level1Container.style.display = 'block';
+		level2Container.style.display = 'block';
 
 		lvl2Mean = N(lvl2Mean, dp2)
 		document.getElementById("lvl2Mean").value = lvl2Mean;
@@ -319,6 +328,11 @@ function calcStdev() {
 		lvl3Variance = totSqrd3 / (dataLength3 - 1);
 		lvl3Stndev = Math.sqrt(lvl3Variance);
 		lvl3Cv = parseFloat(lvl3Stndev / lvl3Mean) * 100;
+
+		importResultContainer.style.display = 'block';
+		level1Container.style.display = 'block';
+		level2Container.style.display = 'block';
+		level3Container.style.display = 'block';
 
 		lvl3Mean = N(lvl3Mean, dp3)
 		document.getElementById("lvl3Mean").value = lvl3Mean;
@@ -791,103 +805,5 @@ $("#levelSelect").change(function() {
 });
 
 $('#printButton').click(function() {
-	/*$("#analyte_print").html($("#analyte").val());
-	$("#unit_print").html($("#unit").val());
-	$("#machine_name_print").html($("#machine_name").val());
-	$("#chartjs_print").html($("#chartjs").html());
-	
-	if ($("#qcEntry").is(':visible')){
-		$("#level1_print").html('Level ' + $("#level1").val() + '- ');
-		$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-		$("#mean1_print").html($("#cmean").val());
-		$("#sd1_print").html($("#cstndev").val());
-		$("#expiry1_print").html($("#expiry1").val());
-		$("#lvl2_data").css("display", "none");
-		$("#lvl3_data").css("display", "none");
-	}
-	else if ($("#qcEntry").css('display') == 'none'){
-		if($("#gbtn").is(":checked")== true){
-			if ($("#levelSelect").val() == 2){
-				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#gmean1").val());
-				$("#sd1_print").html($("#gstndev1").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#level2_print").html('Level ' + $("#level2").val() + '- ');
-				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
-				$("#mean2_print").html($("#gmean2").val());
-				$("#sd2_print").html($("#gstndev2").val());
-				$("#expiry2_print").html($("#expiry2").val());
-				$("#lvl3_data").css("display", "none");
-			}
-			else if ($("#levelSelect").val() == 3){
-				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#gmean1").val());
-				$("#sd1_print").html($("#gstndev1").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#level2_print").html('Level ' + $("#level2").val() + '- ');
-				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
-				$("#mean2_print").html($("#gmean2").val());
-				$("#sd2_print").html($("#gstndev2").val());
-				$("#expiry2_print").html($("#expiry2").val());
-				$("#level3_print").html('Level ' + $("#level3").val() + '- ');
-				$("#lot_no3_print").html('Lot: ' + $("#lot_no3").val());
-				$("#mean3_print").html($("#gmean3").val());
-				$("#sd3_print").html($("#gstndev3").val());
-				$("#expiry3_print").html($("#expiry3").val());
-			}
-			else {
-				$("#level1_print").html('Level ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#gmean1").val());
-				$("#sd1_print").html($("#gstndev1").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#lvl2_data").css("display", "none");
-				$("#lvl3_data").css("display", "none");
-			}
-		}
-		if($("#gbtn").is(":checked") == false ) {
-			if ($("#levelSelect").val() == 2){
-				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#lvl1Mean").val());
-				$("#sd1_print").html($("#lvl1Stndev").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#level2_print").html('Level: ' + $("#level2").val() + '- ');
-				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
-				$("#mean2_print").html($("#lvl2Mean").val());
-				$("#sd2_print").html($("#lvl2Stndev").val());
-				$("#expiry2_print").html($("#expiry2").val());
-				$("#lvl3_data").css("display", "none");
-			}
-			else if ($("#levelSelect").val() == 3){
-				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#lvl1Mean").val());
-				$("#sd1_print").html($("#lvl1Stndev").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#level2_print").html('Level: ' + $("#level2").val() + '- ');
-				$("#lot_no2_print").html('Lot: ' + $("#lot_no2").val());
-				$("#mean2_print").html($("#lvl2Mean").val());
-				$("#sd2_print").html($("#lvl2Stndev").val());
-				$("#expiry2_print").html($("#expiry2").val());
-				$("#level3_print").html('Level: ' + $("#level3").val() + '- ');
-				$("#lot_no3_print").html('Lot: ' + $("#lot_no3").val());
-				$("#mean3_print").html($("#lvl3Mean").val());
-				$("#sd3_print").html($("#lvl3Stndev").val());
-				$("#expiry3_print").html($("#expiry3").val());
-			}
-			else {
-				$("#level1_print").html('Level: ' + $("#level1").val() + '- ');
-				$("#lot_no1_print").html('Lot: ' + $("#lot_no1").val());
-				$("#mean1_print").html($("#lvl1Mean").val());
-				$("#sd1_print").html($("#lvl1Stndev").val());
-				$("#expiry1_print").html($("#expiry1").val());
-				$("#lvl2_data").css("display", "none");
-				$("#lvl3_data").css("display", "none");
-			}
-		}
-	}*/
- print() 
+	print() 
 });

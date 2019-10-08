@@ -1371,7 +1371,7 @@ def document_control(company_name):
 	form1 = DepartmentRegistrationForm()
 	if form1.submit.data:
 		if form1.validate_on_submit():
-			dept = DocumentationDepartment(department_name=form1.department_name.data, dept_abbrv=form.dept_abbrv.data, company_id=company.id, user_id=current_user.id)
+			dept = DocumentationDepartment(department_name=form1.dept_name.data, department_abbrv=form1.dept_abbrv.data, company_id=company.id, user_id=current_user.id)
 			db.session.add(dept)
 			db.session.commit()
 			return redirect(url_for('document_control', company_name=company.company_name))

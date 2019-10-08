@@ -41,7 +41,7 @@
 				<p><a href="#" data-toggle="modal" data-target="#create_sop_modal_{{ dept.department_name }}" style="float:right;">Create SOP for {{ dept.department_name }}</a></p>
 				<br>
 				<ul class="nav nav-pills nav-stacked" role="tablist" >
-				{% for doc in dept.documents %}
+				{% for doc in dept.document %}
 					<li role="presentation"><a href="{{ url_for('documents', company_name=company.company_name, department_name=dept.department_name, document_no=doc.document_no, document_name=doc.document_name ) }}" target="_blank">{{ doc.document_no }}-{{ doc.document_name}}</a></li>
 				{% endfor %}
 				</ul>
@@ -56,7 +56,7 @@
 
 
 	
-<div class="modal fade" id="create_dept_modal" tabindex="-1" role="dialog" aria-labelledby="create_dept_modal_label">
+<div class="modal fade" id="create_dept_modal" tabindex="-1" role="dialog" aria-labelledby="create_dept_modalLabel">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-body">
@@ -67,7 +67,7 @@
   </div>
 </div>
 {% for dept in departments %}
-<div class="modal fade" id="create_sop_modal_{{ dept.department_name }}" tabindex="-1" role="dialog" aria-labelledby="create_sop_modal_label">
+<div class="modal fade" id="create_sop_modal_{{ dept.department_name }}" tabindex="-1" role="dialog" aria-labelledby="create_sop_modalLabel">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-body">

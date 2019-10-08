@@ -65,6 +65,7 @@
 	border: 2px solid #ddd;
 	border-radius: 8px;
 	padding-bottom: 12px;
+	display: none;
 }
 
 .qcImportData1 {
