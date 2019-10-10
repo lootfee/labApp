@@ -1,15 +1,18 @@
 <nav class="navbar" id="inventoryNav">
 	<ul class="nav nav-pills">
-		<!--li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Overview</a></li-->{{ nav_link('inventory_management', 'Overview') }}
-		<!--li><a href="{{ url_for('inventory', company_name=company.company_name)}}">Inventory</a></li-->{{ nav_link('inventory', 'Inventory') }}
-		<!--li><a href="{{ url_for('orders', company_name=company.company_name)}}">Orders</a></li-->{{ nav_link('orders', 'Orders') }}
-		{% if is_inv_admin %}
-		<!--li><a href="{{ url_for('purchases', company_name=company.company_name)}}">Purchases</a></li-->{{ nav_link('purchases', 'Purchases') }}
+		{{ nav_link('inventory_management', 'Overview') }}
+		{{ nav_link('inventory', 'Inventory') }}
+		{{ nav_link('orders', 'Orders') }}
+		{% if is_inv_admin or company.id == 1 %}
+		{{ nav_link('purchases', 'Purchases') }}
 		{% endif %}
-		<!--li><a href="{{ url_for('deliveries', company_name=company.company_name)}}">Deliveries</a></li-->{{ nav_link('deliveries', 'Deliveries') }}
-		<!--li><a href="{{ url_for('supplies', company_name=company.company_name)}}">Supplies</a></li-->{{ nav_link('supplies', 'Supplies') }}
-		<!--li><a href="{{ url_for('suppliers', company_name=company.company_name)}}">Suppliers</a></li-->{{ nav_link('suppliers', 'Suppliers') }}
-		<!--li><a href="{{ url_for('departments', company_name=company.company_name)}}">Departments</a></li-->{{ nav_link('departments', 'Departments') }}
+		{{ nav_link('deliveries', 'Deliveries') }}
+		{{ nav_link('supplies', 'Supplies') }}
+		{{ nav_link('suppliers', 'Suppliers') }}
+		{{ nav_link('departments', 'Departments') }}
+		{% if user == superuser %}
+		{{ nav_link('inventory_accounts', 'Accounts') }}
+		{% endif %}
 	</ul>	
 </nav>
 <hr style="margin: 0;">

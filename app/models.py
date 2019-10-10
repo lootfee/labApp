@@ -535,6 +535,7 @@ class Purchase(db.Model):
 	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 	#purchased_by = db.Column(db.Integer, db.ForeignKey('user.id'))
 	date_purchased = db.Column(db.DateTime, index=True)
+	total = db.Column(db.Numeric(10,2))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	

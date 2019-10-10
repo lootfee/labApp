@@ -93,6 +93,7 @@
 			{{ form.csrf_token() }}
 			<div style="width: 200px;float: right; margin-bottom: 20px;">
 				<div id="subtotal_container">Total: <span id="subtotal_price" style="color: blue;"></span></div>
+				{{ form.subtotal }}
 				{% if not purchase.date_purchased %}
 				<div>
 					{{ form.save(class_="btn btn-default")}}
@@ -113,7 +114,7 @@
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
-			
+					
 			{% for list in purchase_list %}
 				$("#{{ list.ref_number }}_total").html({{list.price }} * {{ list.quantity }})
 			{% endfor %}
@@ -159,9 +160,7 @@
 				
 			{% endfor %}
 			
-			/*$("#save_edit_btn").click(function() {
-			$("#form_save_edit").click();
-			});*/
+			$('#subtotal').val($("#subtotal_price").html());
 		} );
 		
 		{% for my_s in my_supplies %}

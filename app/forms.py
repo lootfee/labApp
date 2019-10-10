@@ -162,6 +162,7 @@ class ProductRegistrationForm(FlaskForm):
 	submit = SubmitField('Register')
 	
 class EditProductForm(FlaskForm):
+	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
 	price = DecimalField('Price', places=2, rounding=None)
 	min_quantity = IntegerField('Minimum Quantity')
 	min_expiry = IntegerField('Minimum Expiry(Days)')
@@ -243,6 +244,7 @@ class OrderListForm(FlaskForm):
 	qty = HiddenField('Quantity')
 	price = HiddenField('Price')
 	tot_price = HiddenField('Total Price')
+	subtotal = HiddenField('Sub Total')
 	save = SubmitField('Save')
 	submit = SubmitField('Submit')
 
@@ -272,6 +274,13 @@ class ItemReceiveForm(FlaskForm):
 class ConsumeItemForm(FlaskForm):
 	lot_numbers = SelectField('Lot Number-Item id / Expiry', coerce=int, validators=[InputRequired()])
 	submit = SubmitField('Submit')
+	
+class AccountsQueryForm(FlaskForm):
+	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d')
+	end_date = DateField('To:', validators=[DataRequired()], format='%Y-%m-%d')
+	supplier = SelectField('Supplier', coerce=int, validators=[InputRequired()])
+	department = SelectField('Department', coerce=int, validators=[InputRequired()])
+	submit = SubmitField('Generate')
 	
 #class CreateDepartmentForm(FlaskForm):
 #	department_name = StringField('Deparment name:', validators=[DataRequired()])

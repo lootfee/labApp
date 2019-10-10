@@ -539,26 +539,26 @@ function drawChart2() {
 	var arr32 = [];
 	var arrD = [];
 		
-	var p3sd1 = +lvl1Mean + +(lvl1Stndev*3);
-	var p2sd1= +lvl1Mean + +(lvl1Stndev*2);
-	var p1sd1 = +lvl1Mean + +lvl1Stndev;
-	var n1sd1 = lvl1Mean - lvl1Stndev;
-	var n2sd1 = lvl1Mean - lvl1Stndev*2;
-	var n3sd1 = lvl1Mean - lvl1Stndev*3;
+	var p3sd1 = parseFloat(+lvl1Mean + +(lvl1Stndev*3));
+	var p2sd1= parseFloat(+lvl1Mean + +(lvl1Stndev*2));
+	var p1sd1 = parseFloat(+lvl1Mean + +lvl1Stndev);
+	var n1sd1 = parseFloat(lvl1Mean - lvl1Stndev);
+	var n2sd1 = parseFloat(lvl1Mean - lvl1Stndev*2);
+	var n3sd1 = parseFloat(lvl1Mean - lvl1Stndev*3);
 	
-	var p3sd2 = +lvl2Mean + +(lvl2Stndev*3);
-	var p2sd2 = +lvl2Mean + +(lvl2Stndev*2);
-	var p1sd2 = +lvl2Mean + +lvl2Stndev;
-	var n1sd2 = lvl2Mean - lvl2Stndev;
-	var n2sd2 = lvl2Mean - lvl2Stndev*2;
-	var n3sd2 = lvl2Mean - lvl2Stndev*3;
+	var p3sd2 = parseFloat(+lvl2Mean + +(lvl2Stndev*3));
+	var p2sd2 = parseFloat(+lvl2Mean + +(lvl2Stndev*2));
+	var p1sd2 = parseFloat(+lvl2Mean + +lvl2Stndev);
+	var n1sd2 = parseFloat(lvl2Mean - lvl2Stndev);
+	var n2sd2 = parseFloat(lvl2Mean - lvl2Stndev*2);
+	var n3sd2 = parseFloat(lvl2Mean - lvl2Stndev*3);
 	
-	var p3sd3 = +lvl3Mean + +(lvl3Stndev*3);
-	var p2sd3 = +lvl3Mean + +(lvl3Stndev*2);
-	var p1sd3 = +lvl3Mean + +lvl3Stndev;
-	var n1sd3 = lvl3Mean - lvl3Stndev;
-	var n2sd3 = lvl3Mean - lvl3Stndev*2;
-	var n3sd3 = lvl3Mean - lvl3Stndev*3;
+	var p3sd3 = parseFloat(+lvl3Mean + +(lvl3Stndev*3));
+	var p2sd3 = parseFloat(+lvl3Mean + +(lvl3Stndev*2));
+	var p1sd3 = parseFloat(+lvl3Mean + +lvl3Stndev);
+	var n1sd3 = parseFloat(lvl3Mean - lvl3Stndev);
+	var n2sd3 = parseFloat(lvl3Mean - lvl3Stndev*2);
+	var n3sd3 = parseFloat(lvl3Mean - lvl3Stndev*3);
 	
 	var data = new google.visualization.DataTable();
 	data.addColumn('string', "Run Date");
@@ -603,6 +603,9 @@ function drawChart2() {
 					0: {title: '',
 						baseline: lvl1Mean,
 						ticks: [{v: p3sd1, f: '+3sd'}, {v: p2sd1, f: '+2sd'}, {v: p1sd1, f: '+1sd'}, {v: lvl1Mean, f: 'mean'}, {v: n1sd1, f: '-1sd'}, {v: n2sd1, f: '-2sd'}, {v: n3sd1, f: '-3sd'}],
+						/*minValue: n3sd1,
+						maxValue: p3sd1,*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: p3sd1,
 							min: n3sd1
@@ -611,6 +614,9 @@ function drawChart2() {
 					1: {title: '',
 						baseline: lvl2Mean,
 						ticks: [{v: p3sd2, f: ''}, {v: p2sd2, f: ''}, {v: p1sd2, f: ''}, {v: lvl2Mean, f: ''}, {v: n1sd2, f: ''}, {v: n2sd2, f: ''}, {v: n3sd2, f: ''}],
+						/*minValue: n3sd2,
+						maxValue: p3sd2,*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: p3sd2,
 							min: n3sd2,
@@ -619,11 +625,19 @@ function drawChart2() {
 					2: {title: '',
 						baseline: lvl3Mean,
 						ticks: [{v: p3sd3, f: ''}, {v: p2sd3, f: ''}, {v: p1sd3, f: ''}, {v: lvl3Mean, f: ''}, {v: n1sd3, f: ''}, {v: n2sd3, f: ''}, {v: n3sd3, f: ''}],
+						/*minValue: n3sd3,
+						maxValue: p3sd3,*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: p3sd3,
 							min: n3sd3,
 						}
 					}
+				},
+				chartArea:{
+					top: '10%',
+					width:'80%',
+					height:'75%'
 				},
 				hAxis: {
 					ticks: arrD[i],
@@ -631,15 +645,18 @@ function drawChart2() {
 						fontSize: 9
 					},
 				},			
-				vAxis: {
-					viewWindowMode: 'maximized'		
-				},									
+				/*vAxis: {
+					viewWindowMode: 'maximized',
+				},	*/					
 				pointSize: 5,
 				annotations: {
 					textStyle: {
-					  fontSize: 9,
-					  bold: false
-					  
+					  fontSize: 7,
+					  bold: false,
+					  opacity: 0.0,
+					},
+					stem : {
+						color: "white",
 					}
 				},
 				logScale: false,
@@ -661,14 +678,20 @@ function drawChart2() {
 					0: {title: '',
 						baseline: gmean1,
 						ticks: [{v: (+gmean1 + +(gstndev1*3)), f: '+3sd'}, {v: (+gmean1 + +(gstndev1*2)), f: '+2sd'}, {v: (+gmean1 + +(gstndev1)), f: '+1sd'}, {v: gmean1 , f: 'mean'}, {v: (gmean1 - (gstndev1)), f: '-1sd'}, {v: (gmean1 - (gstndev1*2)), f: '-2sd'}, {v: (gmean1 - (gstndev1*3)), f: '-3sd'}],
+						/*minValue: (gmean1 - (gstndev1*3)),
+						maxValue: (+gmean1 + (+gstndev1*3)),*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
-							max: +(gmean1 + (+gstndev1*3)),
+							max: (+gmean1 + (+gstndev1*3)),
 							min: (gmean1 - (gstndev1*3))
 						}
 					},
 					1: {title: '',
 						baseline: gmean2,
 						ticks: [{v: (+gmean2 + +(gstndev2*3)), f: ''}, {v: (+gmean2 + +(gstndev2*2)), f: ''}, {v: (+gmean2 + +(gstndev2)), f: ''}, {v: gmean2 , f: ''}, {v: (gmean2 - (gstndev2)), f: ''}, {v: (gmean2 - (gstndev2*2)), f: ''}, {v: (gmean2 - (gstndev2*3)), f: ''}],
+						/*minValue: (gmean2 - (gstndev2*3)),
+						maxValue: (+gmean2 + (+gstndev2*3)),*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: (+gmean2 + +(gstndev2*3)),
 							min: (gmean2 - (gstndev2*3))
@@ -677,11 +700,19 @@ function drawChart2() {
 					2: {title: '',
 						baseline: gmean3,
 						ticks: [{v: (+gmean3 + +(gstndev3*3)), f: ''}, {v: (+gmean3 + +(gstndev3*2)), f: ''}, {v: (+gmean3 + +(gstndev3)), f: ''}, {v: gmean3 , f: ''}, {v: (gmean3 - (gstndev3)), f: ''}, {v: (gmean3 - (gstndev3*2)), f: ''}, {v: (gmean3 - (gstndev3*3)), f: ''}],
+						/*minValue: (gmean3 - (gstndev3*3)),
+						maxValue: (+gmean3 + (+gstndev3*3)),*/
+						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: (+gmean3 + +(gstndev3*3)),
 							min: (gmean3 - (gstndev3*3))
 						}
 					}
+				},
+				chartArea:{
+					top: '10%',
+					width:'80%',
+					height:'75%'
 				},
 				hAxis: {
 					ticks: arrD[i],
@@ -689,15 +720,18 @@ function drawChart2() {
 						fontSize: 9
 					},
 				},			
-				vAxis: {
-					viewWindowMode: 'maximized'		
-				},									
+				/*vAxis: {
+					viewWindowMode: 'maximized',
+				},		*/						
 				pointSize: 5,
 				annotations: {
 					textStyle: {
-					  fontSize: 9,
-					  bold: false
-					  
+					  fontSize: 7,
+					  bold: false,
+					  opacity: 0.0,
+					},
+					stem : {
+						color: "white",
 					}
 				},
 				logScale: false,
