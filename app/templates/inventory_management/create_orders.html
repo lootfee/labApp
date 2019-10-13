@@ -32,8 +32,8 @@
 			<tr>
 				<th style="width:150px;">Ref No</th>
 				<th style="width:500px;">Name</th>
-				<th style="width:150px;">Supplier</th>
-				<th style="width:100px;">Qty Remaining </th>
+				<th style="width:120px;">Supplier</th>
+				<th style="width:130px;">Qty Remaining </th>
 				<th style="width:40px;">Quantity Request </th>
 			</tr>
 			{% if my_supplies %}
@@ -42,7 +42,7 @@
 					<td>{{ my_s.ref_number }}</td>
 					<td>{{ my_s.name }}</td>
 					<td>{{ my_s.supplier.name }}</td>
-					<td >{% for my_ds in my_s.dept_id %}<div>{{ my_ds.department.abbrv }}: {{ my_ds.item_count }}</div>{% endfor %} </td>
+					<td >{% for my_ds in my_s.dept_id %}<div>{{ my_ds.department.name }}: {{ my_ds.item_count }}</div>{% endfor %} </td>
 					<td class="text-center" id="quantity_request_{{ my_s.ref_number }}" contenteditable></td>
 					<td><a href="#" class="add_item_to_order" id="add_{{ my_s.ref_number }}">Add</a></td>
 				</tr>
@@ -73,7 +73,7 @@
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.quantity }}</td>
-						<td>{{ list.supplier }}</td>
+						<td>{{ list.supplier.name }}</td>
 						<td>{{ list.user.username }}</td>
 						{% if not order.date_submitted %}
 						<td><a href="{{url_for('remove_order_item', company_name=company.company_name, order_no=order.order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></a></td>
@@ -113,7 +113,7 @@
 			
 				$("#add_{{ my_s.ref_number }}").click(function() {
 					
-					var exists=$('#orders_list_table tr td:contains('+{{ my_s.ref_number }}+')').length;
+					var exists=$('#orders_list_table tr td:contains('+'{{ my_s.ref_number }}'+')').length;
 					  if (!exists ){
 						var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 						

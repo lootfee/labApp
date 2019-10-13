@@ -525,6 +525,9 @@ class OrdersList(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
+	user = db.relationship('User', backref=db.backref('orders_list', lazy=True))
+	supplier = db.relationship('Supplier', backref=db.backref('orders_list', lazy=True))
+	
 	def __repr__(self):
 		return '<OrdersList {}>'.format(self.id)
 		
@@ -541,6 +544,7 @@ class Purchase(db.Model):
 	
 	purchase_list = db.relationship('PurchaseList', backref=db.backref('purchase', lazy=True))
 	purchase_to_delivery = db.relationship('Delivery', backref=db.backref('purchase_to_delivery', lazy=True))
+	order = db.relationship('Order', backref=db.backref('purchase', lazy=True))
 
 	def __repr__(self):
 		return '<Purchase {}>'.format(self.purchase_order_no, self.date_purchased)
@@ -561,6 +565,8 @@ class PurchaseList(db.Model):
 	
 	item = db.relationship('Item', backref=db.backref('purchase_list_to_item', lazy=True))
 	my_supplies = db.relationship('MySupplies', backref=db.backref('purchase_list', lazy=True))
+	supplier = db.relationship('Supplier', backref=db.backref('purchase_list', lazy=True))
+	user = db.relationship('User', backref=db.backref('purchase_list', lazy=True))
 	
 	def __repr__(self):
 		return '<PurchaseList {}>'.format(self.id)

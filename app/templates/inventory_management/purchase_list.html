@@ -43,7 +43,7 @@
 					<td style="width:150px;">{{ my_s.ref_number }}</td>
 					<td style="width:500px;">{{ my_s.name }}</td>
 					<td style="width:150px;">{{ my_s.supplier.name }}</td>
-					<td style="width:100px;">{% for my_ds in my_s.dept_id %}<div>{{ my_ds.department.abbrv }}: {{ my_ds.item_count }}</div>{% endfor %} </td>
+					<td style="width:100px;">{% for my_ds in my_s.dept_id %}<div>{{ my_ds.department.name }}: {{ my_ds.item_count }}</div>{% endfor %} </td>
 					<td class="text-center" id="quantity_request_{{ my_s.ref_number }}" style="width:40px;" contenteditable></td>
 					<td style="width:40px;"><a href="#" class="add_item_to_order" id="add_{{ my_s.ref_number }}">{{ ('Add') }}</a></td>
 				</tr>
@@ -61,6 +61,17 @@
 		</button>
 		{% endif %}
 		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</span></h4> </span>
+			<div class="col-md-9"></div>
+			<div class="col-md-3">
+				<label class="control-label" for="department">Department</label>
+				<select class="form-control" id="supplier">
+					<option value=''>All</option>
+					{% for s in supplier %}
+					<option value='{{ s.name }}'>{{ s.name }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="col-md-12">
 			<table class="table table-bordered table-hover text-center" id="orders_list_table">
 				<tr>
 					<th>Reference No</th>
@@ -72,7 +83,7 @@
 					<th>Added by</th>
 				</tr>
 				{% for list in purchase_list %}
-					<tr>
+					<tr class="orders_list_row">
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.price }}</td>
@@ -89,10 +100,12 @@
 					
 				{% endfor %}
 			</table>
+			</div>
 			<form action method="post" class="form" role="form" name="orders_list_form" id="orders_list_form">
 			{{ form.csrf_token() }}
 			<div style="width: 200px;float: right; margin-bottom: 20px;">
-				<div id="subtotal_container">Total: <span id="subtotal_price" style="color: blue;"></span></div>
+				<div id="subtotal_container">Total: <span id="subtotal_price_" style="color: blue;"></span></div>
+				<span id="subtotal_price" style="display: none;"></span>
 				{{ form.subtotal }}
 				{% if not purchase.date_purchased %}
 				<div>
@@ -114,16 +127,33 @@
 		$(document).ready(function() {
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
+			//$('select#supplier').quicksearch('table#orders_list_table .orders_list_row');---Transfered-->
 					
 			{% for list in purchase_list %}
 				$("#{{ list.ref_number }}_total").html({{list.price }} * {{ list.quantity }})
 			{% endfor %}
 			
-			var sum = 0;
+			var sum1 = 0;
 			$(".individual_total").each(function() {
-				sum += parseFloat($(this).text());
-				$("#subtotal_price").html(sum);
+				sum1 += parseFloat($(this).text());
+				$("#subtotal_price").html(sum1);
 			});
+			var sum2 = 0
+			$(".individual_total").each(function() {
+					sum2 += parseFloat($(this).text());
+				$("#subtotal_price_").html(sum2);
+			});
+			
+			$("select#supplier").change(function() {
+				var sum3 = 0;
+				$('select#supplier').quicksearch('table#orders_list_table .orders_list_row');//<-------------
+				$("table#orders_list_table .individual_total:visible").each(function() {
+						sum3 += parseFloat($(this).text());
+						$("#subtotal_price_").html(sum3);
+				});
+			});
+			
+									
 			if ($(".individual_total").length > 0) {
 			$("#subtotal_container").css("display", "block");
 			}
@@ -131,7 +161,7 @@
 			
 				$("#add_{{ my_s.ref_number }}").click(function() {
 					
-					var exists=$('#orders_list_table tr td:contains('+{{ my_s.ref_number }}+')').length;
+					var exists=$('#orders_list_table tr td:contains('+'{{ my_s.ref_number }}'+')').length;
 					  if (!exists ){
 						var qty_req = $("#quantity_request_{{ my_s.ref_number }}").html();
 						
@@ -186,8 +216,6 @@
 				$(".append_data").remove();
 			});
 		{% endfor %}
-		
-		
 		
 	</script>
 {% endblock %}

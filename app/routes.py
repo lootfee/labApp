@@ -937,7 +937,8 @@ def orders(company_name):
 		purchase_list = OrdersList.query.filter_by(order_id=order.id, company_id=company.id).all()
 		for i in purchase_list:
 			i.my_supply = MySupplies.query.filter_by(id=i.my_supplies_id).first()
-			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.my_supply.price, quantity=i.quantity, supplier_id=i.supplier_id, total=i.total, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id, department_id=order.department_id, my_supplies_id=i.my_supplies_id)
+			i.total = i.my_supply.price*i.quantity
+			list = PurchaseList(ref_number=i.ref_number, name=i.name, price=i.my_supply.price, quantity=i.quantity, total=i.total, supplier_id=i.supplier_id, purchase_id=purchase.id, user_id=i.user_id, company_id=company.id, department_id=order.department_id, my_supplies_id=i.my_supplies_id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
@@ -951,9 +952,9 @@ def create_orders(company_name, order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	order = Order.query.filter_by(order_no=order_no, company_id=company.id).first_or_404()
 	order_list = OrdersList.query.filter_by(order_id=order.id, company_id=company.id).all()
-	for list in order_list:
-		list.user = User.query.filter_by(id=list.user_id).first()
-		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first().name
+	#for list in order_list:
+		#list.user = User.query.filter_by(id=list.user_id).first()
+		#list.supplier = Supplier.query.filter_by(id=list.supplier_id).first().name
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -1063,10 +1064,12 @@ def purchase_list(company_name, purchase_order_no):
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
 	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	for list in purchase_list:
-		list.user = User.query.filter_by(id=list.user_id).first()
+		#list.user = User.query.filter_by(id=list.user_id).first()
 		list.product_id = Product.query.filter_by(ref_number=list.ref_number).first().id
-		list.supplier = Supplier.query.filter_by(id=list.supplier_id).first()
+		#list.supplier = Supplier.query.filter_by(id=list.supplier_id).first()
 		#list.price = MySupplies.query.filter_by(id=list.my_supplies_id ,active=True).first().price
+		#for s in list.supplier:
+			#s.supplier_total_price += PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).total()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -1077,6 +1080,7 @@ def purchase_list(company_name, purchase_order_no):
 		if not is_my_affiliate:
 			return redirect(url_for('company', company_name=company.company_name))
 	dept = company.departments.order_by(Department.name.asc())
+	supplier = company.suppliers.order_by(Supplier.name.asc())
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:
 		my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
@@ -1097,11 +1101,12 @@ def purchase_list(company_name, purchase_order_no):
 		price_list = request.form.getlist('price')
 		qty_list = request.form.getlist('qty')
 		tot_list = request.form.getlist('tot_price')
+		supplier_list = request.form.getlist('supplier')
 		#for i in refnum_list, price_list in range(0, len(refnum_list) ):
 		for i in range(0, len(refnum_list) ):
 			#print(refnum_list[i], name_list[i])
 		#for refnum_list, name_list, price_list, qty_list, tot_list in range(0, len(refnum_list)):
-			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], my_supplies_id=supply_id_list[i], purchase_id=purchase.id, user_id=user.id, company_id=company.id)
+			list = PurchaseList(ref_number=refnum_list[i], name=name_list[i], price=price_list[i], quantity=qty_list[i], total=tot_list[i], my_supplies_id=supply_id_list[i], supplier_id=supplier_list[i], department_id=purchase.order.department_id, purchase_id=purchase.id, user_id=user.id, company_id=company.id)
 			db.session.add(list)
 			db.session.commit()
 		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
@@ -1114,7 +1119,7 @@ def purchase_list(company_name, purchase_order_no):
 		return redirect (url_for('purchases', company_name=company.company_name))
 	subtotal = form.subtotal.data
 	print(subtotal)
-	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies)		
+	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies, supplier=supplier)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/remove_purchase_item/<int:id>')
@@ -1435,8 +1440,10 @@ def total_purchases_accounts(company_name):
 	form = AccountsQueryForm()
 	form.department.choices = dept_list
 	form.supplier.choices = supplier_list
-	#if form.validate_on_submit():
-	#	tp = 
+	if form.validate_on_submit():
+		tp = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+		for t in tp:
+			print(t)
 	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form)
 
 
