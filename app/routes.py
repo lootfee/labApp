@@ -1440,11 +1440,32 @@ def total_purchases_accounts(company_name):
 	form = AccountsQueryForm()
 	form.department.choices = dept_list
 	form.supplier.choices = supplier_list
+	purchases = ''
 	if form.validate_on_submit():
-		tp = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
-		for t in tp:
-			print(t)
-	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form)
+		if form.department.data == 0 and form.supplier.data == 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+		elif form.department.data == 0 and form.supplier.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+		elif form.supplier.data == 0 and form.department.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+		elif form.supplier.data is not 0 and form.department.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
 
 
 @app.route('/<company_name>/document_control/', methods=['GET', 'POST'])
