@@ -5,7 +5,7 @@ from werkzeug.urls import url_parse
 from app import app, db, photos
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from app.email import send_password_reset_email
 from link_preview import link_preview
 import requests
@@ -358,6 +358,7 @@ def register_company():
 	form = CompanyRegistrationForm()
 	if form.validate_on_submit():
 		company = Company(company_name=form.company_name.data, company_abbrv=form.company_abbrv.data, about_me=form.about_me.data, email=form.email.data,  address=form.address.data, contact_info=form.contact_info.data, user_id=current_user.id)
+		company.company_created = datetime.utcnow()
 		if form.logo.data:
 			logo_filename = photos.save(form.logo.data)
 			company.logo = photos.url(logo_filename)
@@ -387,15 +388,15 @@ def edit_company_profile(company_name):
 	is_super_admin = company.is_super_admin(user)
 	form = CompanyProfileForm(company.company_name, company.email)
 	if form.validate_on_submit():
-		company = Company(company_name=form.company_name.data, company_abbrv=form.company_abbrv.data, about_me=form.about_me.data, email=form.email.data,  address=form.address.data, contact_info=form.contact_info.data, user_id=current_user.id)
+		company.company_name = form.company_name.data
+		company.company_abbrv = form.company_abbrv.data
+		company.about_me = form.about_me.data
+		company.email = form.email.data
+		company.address = form.address.data
+		company.contact_info = form.contact_info.data
 		if form.logo.data:
 			logo_filename = photos.save(form.logo.data)
 			company.logo = photos.url(logo_filename)
-		db.session.add(company)
-		db.session.commit()
-		accept = Affiliates(super_admin=True, start_date=datetime.utcnow())
-		accept.user_id = current_user.id
-		company.affiliate.append(accept)
 		db.session.commit()
 		flash('Your changes has been saved!')
 		return redirect(url_for('company', company_name=company.company_name))
@@ -1467,6 +1468,194 @@ def total_purchases_accounts(company_name):
 					purchase.total += p.total
 	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
 
+
+@app.route('/<company_name>/inventory_management/accounts/total_deliveries',  methods=['GET', 'POST'])
+@login_required
+def total_deliveries_accounts(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments
+	dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
+	supplier = company.suppliers
+	supplier_list = [(0, 'All')] + [(s.id, s.name) for s in supplier]
+	form = AccountsQueryForm()
+	form.department.choices = dept_list
+	form.supplier.choices = supplier_list
+	deliveries = Delivery.query.filter_by(company_id=company.id).all()
+	purchases = ''
+	if form.validate_on_submit():
+		if form.department.data == 0 and form.supplier.data == 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				for p in purchase.delivery:
+					p.delivery_list = Item.query.filter_by(delivery_id=p.id).all()
+					p.delivery_total = 0
+					for item in p.delivery_list:
+						p.delivery_total += item.my_supplies.price
+		elif form.department.data == 0 and form.supplier.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+				for p in purchase.delivery:
+					p.delivery_list = Item.query.filter_by(delivery_id=p.id, supplier_id=form.supplier.data).all()
+					p.delivery_total = 0
+					for item in p.delivery_list:
+						p.delivery_total += item.my_supplies.price
+		elif form.supplier.data == 0 and form.department.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+				for p in purchase.delivery:
+					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data).all()
+					p.delivery_total = 0
+					for item in p.delivery_list:
+						p.delivery_total += item.my_supplies.price
+		elif form.supplier.data is not 0 and form.department.data is not 0:
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				purchase.total = 0
+				for p in purchase.purchase_list:
+					purchase.total += p.total
+				for p in purchase.delivery:
+					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+					p.delivery_total = 0
+					for item in p.delivery_list:
+						p.delivery_total += item.my_supplies.price
+	return render_template('inventory_management/total_deliveries.html', title='Total Deliveries', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
+	
+
+@app.route('/<company_name>/inventory_management/accounts/total_inventory',  methods=['GET', 'POST'])
+@login_required
+def total_inventory_accounts(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments
+	dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
+	supplier = company.suppliers
+	supplier_list = [(0, 'All')] + [(s.id, s.name) for s in supplier]
+	form = AccountsQueryForm()
+	form.department.choices = dept_list
+	form.supplier.choices = supplier_list
+	my_supplies = ''
+	if form.validate_on_submit():
+		my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+		if form.department.data == 0 and form.supplier.data == 0:
+			for my_s in my_supplies:
+				#removed_item = []
+				for my_item in my_s.item:
+					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
+					if my_item.delivery_date.date() > form.end_date.data:
+						#removed_item.append(my_item)
+						my_s.item.remove(my_item)
+					if my_item.date_used is not None:
+						if my_item.date_used.date() <= form.end_date.data:
+							#removed_item.append(my_item)
+							my_s.item.remove(my_item)
+					my_s.count = len(my_s.item)
+					#print(my_s.id, my_item.my_supplies_id, my_item.delivery_date.date(), my_item.date_used, form.end_date.data, my_s.count)
+					#print("removed_item:", removed_item)
+		elif form.department.data == 0 and form.supplier.data is not 0:
+			for my_s in my_supplies:
+				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, supplier_id=form.supplier.data).all()
+				for my_item in my_s.item:
+					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
+					if my_item.delivery_date.date() > form.end_date.data:
+						my_s.item.remove(my_item)
+					if my_item.date_used is not None:
+						if my_item.date_used.date() <= form.end_date.data:
+							my_s.item.remove(my_item)
+					my_s.count = len(my_s.item)
+		elif form.supplier.data == 0 and form.department.data is not 0:
+			for my_s in my_supplies:
+				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, department_id=form.department.data).all()
+				for my_item in my_s.item:
+					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
+					if my_item.delivery_date.date() > form.end_date.data:
+						my_s.item.remove(my_item)
+					if my_item.date_used is not None:
+						if my_item.date_used.date() <= form.end_date.data:
+							my_s.item.remove(my_item)
+					my_s.count = len(my_s.item)
+		elif form.supplier.data is not 0 and form.department.data is not 0:
+			for my_s in my_supplies:
+				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				for my_item in my_s.item:
+					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
+					if my_item.delivery_date.date() > form.end_date.data:
+						my_s.item.remove(my_item)
+					if my_item.date_used is not None:
+						if my_item.date_used.date() <= form.end_date.data:
+							my_s.item.remove(my_item)
+					my_s.count = len(my_s.item)
+	return render_template('inventory_management/total_inventory_remaining.html', title='Total Deliveries', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, my_supplies=my_supplies)
+
+@app.route('/<company_name>/inventory_management/accounts/total_consumed',  methods=['GET', 'POST'])
+@login_required
+def total_consumed_accounts(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments
+	dept_list = [(0, 'All')] + [(d.id, d.name) for d in dept]
+	supplier = company.suppliers
+	supplier_list = [(0, 'All')] + [(s.id, s.name) for s in supplier]
+	form = AccountsQueryForm()
+	form.department.choices = dept_list
+	form.supplier.choices = supplier_list
+	my_supplies = ''
+	if form.validate_on_submit():
+		my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
+		if form.department.data == 0 and form.supplier.data == 0:
+			for my_s in my_supplies:
+				my_s.used_item = Item.query.filter(Item.date_used.between(form.start_date.data, end_date)).filter_by(my_supplies_id=my_s.id).all()
+				my_s.count = len(my_s.used_item)
+				#print(my_s.used_item, len(my_s.used_item))
+		elif form.department.data == 0 and form.supplier.data is not 0:
+			for my_s in my_supplies:
+				my_s.used_item = Item.query.filter(Item.date_used.between(form.start_date.data, end_date)).filter_by(my_supplies_id=my_s.id, supplier_id=form.supplier.data).all()
+				my_s.count = len(my_s.used_item)
+		elif form.supplier.data == 0 and form.department.data is not 0:
+			for my_s in my_supplies:
+				my_s.used_item = Item.query.filter(Item.date_used.between(form.start_date.data, end_date)).filter_by(my_supplies_id=my_s.id, department_id=form.department.data).all()
+				my_s.count = len(my_s.used_item)
+		elif form.supplier.data is not 0 and form.department.data is not 0:
+			for my_s in my_supplies:
+				my_s.used_item = Item.query.filter(Item.date_used.between(form.start_date.data, end_date)).filter_by(my_supplies_id=my_s.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				my_s.count = len(my_s.used_item)
+	return render_template('inventory_management/total_inventory_consumed.html', title='Inventory Consumed ', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, my_supplies=my_supplies)
+
+	
 
 @app.route('/<company_name>/document_control/', methods=['GET', 'POST'])
 @login_required

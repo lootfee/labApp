@@ -3,7 +3,7 @@
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}	
-    <h3 class="inventory_headers">Total Purchases</h3>
+    <h3 class="inventory_headers">Total Deliveries</h3>
 	<hr class="inventory_hr">
 	<div class="container">
 		<div class="row">
@@ -33,25 +33,25 @@
 					<thead>
 						<tr>
 							<th class="col-md-2">PO Number</th>
-							<th class="col-md-1">Date Purchased</th>
-							<th class="col-md-1">Purchased by</th>
-							<th class="col-md-1">Cost</th>
+							<th class="col-md-1">Purchase Cost</th>
+							<th class="col-md-2">Delivery No.</th>
+							<th class="col-md-1">Delivery Cost</th>
 							
 						</tr>
 					</thead>
 					{% for purchase in purchases %}
 					<tr>
 						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
-						<td>{{ purchase.date_purchased }}</td>
-						<td>{% for p in purchase.purchased_by %}{{ p.username }}{% endfor %}</td>
-						<td class="individual_total">{{ purchase.total }}</td>
+						<td class="individual_purchase">{{ purchase.total }}</td>
+						<td>{% for p in purchase.delivery %}<div>{{ p.delivery_no }}</div>{% endfor %}</td>
+						<td>{% for p in purchase.delivery %}<div class="individual_delivery">{{ p.delivery_total }}</div>{% endfor %}</td>
 					</tr>
 					{% endfor %}
 					<tr>
 						<td></td>
+						<td style="font-size:16px; font-weight:bold;">Total: <span id="purchase_total" style="color: blue;"></span></td>
 						<td></td>
-						<td></td>
-						<td style="font-size:16px; font-weight:bold;">Total: <span id="total_price" style="color: blue;"></span></td>
+						<td style="font-size:16px; font-weight:bold;">Total: <span id="delivery_total" style="color: blue;"></span></td>
 					</tr>
 				</table>
 				<button class="btn btn-default hidden-print" id="print_button" style="float:right;">Print</button>
@@ -75,14 +75,20 @@
 {{ super()}}
 <script>
 $(document).ready(function() {
-	if ($(".individual_total").length > 0) {
+	/*if ($(".individual_total").length > 0) {
 	$("#subtotal_container").css("display", "block");
-	}
+	}*/
 	
 	var sum = 0;
-	$(".individual_total").each(function() {
+	$(".individual_purchase").each(function() {
 		sum += parseFloat($(this).text());
-		$("#total_price").html(sum);
+		$("#purchase_total").html( sum);
+	});
+	
+	var sum1 = 0;
+	$(".individual_delivery").each(function() {
+		sum1 += parseFloat($(this).text());
+		$("#delivery_total").html( sum1)
 	});
 });
 

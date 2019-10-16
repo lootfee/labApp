@@ -7,11 +7,12 @@
 	<hr class="inventory_hr">
 	<div class="container">
 		<div class="row">
-			<div class="col-md-6">
-				<ul class="nav nav-pills nav-stacked">
-				  <li role="presentation"><a href="{{url_for('total_purchases_accounts', company_name=company.company_name)}}">Total Purchases</a></li>
-				  <li role="presentation"><a href="#">Total Deliveries</a></li>
-				  <li role="presentation"><a href="#">Current Inventory Total</a></li>
+			<div class="col-md-12">
+				<ul class="nav nav-pills">
+				  <li role="presentation"><a href="{{url_for('total_purchases_accounts', company_name=company.company_name)}}">Purchases</a></li>
+				  <li role="presentation"><a href="{{url_for('total_deliveries_accounts', company_name=company.company_name)}}">Deliveries</a></li>
+				  <li role="presentation"><a href="{{url_for('total_inventory_accounts', company_name=company.company_name)}}">Inventory Remaining</a></li>
+				  <li role="presentation"><a href="{{url_for('total_consumed_accounts', company_name=company.company_name)}}">Inventory Consumed</a></li>
 				</ul>
 			</div>
 		</div>

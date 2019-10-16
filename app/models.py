@@ -82,7 +82,7 @@ class Company(db.Model):
 	logo = db.Column(db.String(1000))
 	about_me = db.Column(db.String(400))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-	company_created = db.Column(db.DateTime, default=datetime.utcnow)
+	company_created = db.Column(db.DateTime)
 	
 	order = db.relationship('Order', backref=db.backref('company', lazy=True))
 	employees = db.relationship("User", secondary="affiliates")
@@ -582,10 +582,11 @@ class Delivery(db.Model):
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'))
 	
-	delivery_to_item = db.relationship('Item', backref=db.backref('delivery', lazy=True))
+	#item = db.relationship('Item', backref=db.backref('delivery', lazy=True))
+	purchase = db.relationship('Purchase', backref=db.backref('delivery', lazy=True))
 	
 	def __repr__(self):
-		return '<Delivery {}>'.format(self.delivery_no, self.date_delivered)
+		return '<Delivery {}>'.format(self.delivery_no)
 		
 class Item(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -602,7 +603,9 @@ class Item(db.Model):
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
 	department = db.relationship('Department', backref=db.backref('item', lazy='dynamic'))
-	#delivery = db.relationship('Delivery', backref=db.backref('item', lazy='dynamic'))
+	delivery = db.relationship('Delivery', backref=db.backref('item', lazy='dynamic'))
+	product = db.relationship('Product', backref=db.backref('item', lazy='dynamic'))
+	#my_supplies = db.relationship('MySupplies', backref=db.backref('item', lazy='dynamic'))--in my supplies
 	
 	def __repr__(self):
 		return '<Item {}>'.format(self.id)

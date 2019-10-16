@@ -129,10 +129,10 @@ class CompanyProfileForm(FlaskForm):
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
 	
-	def __init__(self, original_company_name, original_company_email, *args, **kwargs):
+	def __init__(self, original_company_name, original_email, *args, **kwargs):
 		super(CompanyProfileForm, self).__init__(*args, **kwargs)
 		self.original_company_name = original_company_name
-		self.original_company_email = original_company_email
+		self.original_email = original_email
 			
 	def validate_companyname(self, company_name):
 		if company_name.data != self.original_company_name:
@@ -141,9 +141,9 @@ class CompanyProfileForm(FlaskForm):
 				raise ValidationError('Company Name already taken! Please be more specific in creating your company name.(e.g. Include branch name or location.)')
 				
 	def validate_email(self, email):
-		if email.data != self.original_company_email:
-			email = Company.query.filter_by(email=self.email.data).first()
-			if email is not None:
+		if email.data != self.original_email:
+			company = Company.query.filter_by(email=self.email.data).first()
+			if company is not None:
 				raise ValidationError('Email is already registered!')
 	
 class ProductRegistrationForm(FlaskForm):
