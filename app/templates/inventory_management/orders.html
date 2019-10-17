@@ -27,13 +27,13 @@
 						<td>{{ c.username }}</td>
 						{% endfor %}
 						{% if order.date_created %}
-						<td>{{ order.date_created.strftime('%Y-%m-%d %H:%M') }}</td>
+						<td>{{ moment(order.date_created).format('lll') }}</td>
 						{% endif %}
 						{% for s in order.order_submitted_by %}
 						<td>{{ s.username }}</td>
 						{% endfor %}
 						{% if order.date_submitted %}
-						<td>{{ order.date_submitted.strftime('%Y-%m-%d %H:%M') }}</td>
+						<td>{{ moment(order.date_submitted).format('lll') }}</td>
 						{% endif %}
 						{% if is_inv_admin %}
 						{% if order.purchase_order %}

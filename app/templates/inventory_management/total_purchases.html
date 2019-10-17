@@ -42,7 +42,7 @@
 					{% for purchase in purchases %}
 					<tr>
 						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
-						<td>{{ purchase.date_purchased }}</td>
+						<td>{{ moment(purchase.date_purchased).format('lll') }}</td>
 						<td>{% for p in purchase.purchased_by %}{{ p.username }}{% endfor %}</td>
 						<td class="individual_total">{{ purchase.total }}</td>
 					</tr>

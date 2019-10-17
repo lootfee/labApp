@@ -16,7 +16,7 @@
 				
 				{% for affiliate in my_affiliates %}
 				{% if affiliate.title != None %}{% if affiliate.end_date == None %}
-				<li style="list-style:none;"><span>{{ affiliate.title }}</span> at <a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank">{{ affiliate.company.company_name}}</a><span> {% if affiliate.start_date %}since {{ affiliate.start_date.strftime('%d-%m-%Y')}} {% endif %}</span></li>
+				<li style="list-style:none;"><span>{{ affiliate.title }}</span> at <a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank">{{ affiliate.company.company_name}}</a><span> {% if affiliate.start_date %}since {{ moment(affiliate.start_date).format('LL')}} {% endif %}</span></li>
 				{% endif %}{% endif %}
 				{% endfor %}
 				{% endif %}
@@ -29,7 +29,7 @@
 				<ul>
 				{% for affiliate in past_affiliates %}
 				{% if affiliate.end_date %}
-				<li><span>{% if affiliate.title %} {{ affiliate.title}} {% endif %} at</span><a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank"> {{ affiliate.company.company_name}} </a>from <span>{% if affiliate.start_date %}{{ affiliate.start_date.strftime('%d-%m-%Y') }} {% endif %}</span> - <span>{% if affiliate.end_date %}{{ affiliate.end_date.strftime('%d-%m-%Y') }} {% endif %}</span></li>
+				<li><span>{% if affiliate.title %} {{ affiliate.title}} {% endif %} at</span><a href="{{ url_for('company', company_name=affiliate.company.company_name) }}"  target="_blank"> {{ affiliate.company.company_name}} </a>from <span>{% if affiliate.start_date %}{{ affiliate.start_date.strftime('%d-%m-%Y') }} {% endif %}</span> - <span>{% if affiliate.end_date %}{{ moment(affiliate.end_date).format('LL') }} {% endif %}</span></li>
 				{% endif %}
 				{% endfor %}
 				{% endif %}
