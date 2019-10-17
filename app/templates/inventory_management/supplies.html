@@ -183,7 +183,12 @@
 			  $("#storage_req").val(ui.item.storage_req);
 			  $("#type").val(ui.item.type);
 			  }
-			});
+			})
+			.autocomplete( "instance" )._renderItem = function( ul, item ) {
+			  return $( "<li>" )
+				.append( "<span>" + item.label + " - " + item.name + "</span>" )
+				.appendTo( ul );
+			};
 			
 			var temp_tags = [
 				{label: "2 - 8 °C"},
