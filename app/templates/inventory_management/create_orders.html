@@ -66,13 +66,13 @@
 			<table class="sort_table table table-bordered table-hover text-center" id="orders_list_table">
 				<thead>
 					<tr>
-						<th>Reference No</th>
-						<th>Name</th>
-						<th>Quantity</th>
-						<th>Supplier</th>
-						<th>Added by</th>
+						<th style="width:150px;">Reference No</th>
+						<th style="width:500px;">Name</th>
+						<th style="width:40px;">Quantity</th>
+						<th style="width:120px;">Supplier</th>
+						<th style="width:80px;">Added by</th>
 						{% if not order.date_submitted %}
-						<th>Action</th>
+						<th style="width:50px;">Action</th>
 						{% endif %}
 					</tr>
 				</thead>
