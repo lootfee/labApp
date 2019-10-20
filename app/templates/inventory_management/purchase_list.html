@@ -135,9 +135,13 @@
 			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
 			$('select#department').quicksearch('table#create_order_table .my_products_row');
 			//$('select#supplier').quicksearch('table#orders_list_table .orders_list_row');---Transfered-->
+			
+			function N(id, places) { 
+				return +(Math.round(id + "e+" + places)  + "e-" + places);
+			}
 					
 			{% for list in purchase_list %}
-				$("#{{ list.ref_number }}_total").html({{list.price }} * {{ list.quantity }})
+				$("#{{ list.ref_number }}_total").html(parseFloat({{list.price }}) * parseFloat({{ list.quantity }}))
 			{% endfor %}
 			
 			var sum1 = 0;

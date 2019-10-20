@@ -1,20 +1,22 @@
-{% extends "document_base.html" %}
+{% extends "documentation_page/document_base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-	<div class="row">
+	<div class="row" style="margin-top: 70px;">
 		<div class="col-md-3 col-sm-12 col-xs-12" style="border-right:solid 2px #808080; position:fixed; height:100%;">
 			<div id="doc_header">
-				<h4><a href="#company_logo" rel="internal">{{ document.document_name }}</a></h4>
-				<ul class="versions" style="list-style-type: circle;font-size:12px">
-					<li>{{ document.document_no }}</li>
-					<li>Issued date: 15-03-2019</li>
-					<li>Effective date: 19-03-2019</li>
+				<h4 style="font-family: serif;font-weight:bold;"><a href="#company_logo" rel="internal">{{ document.document_name }}</a></h4>
+				<ul class="versions" style="list-style-type: circle; font-family: serif; font-size:14px">
+					<li>{{ company.company_abbrv }}-{{ document.document_no }}</li>
+					<li>Document issue date: </li>
+					<li>Version effective date: </li>
 				</ul>
 			</div>
 			{% if form1 %}
 			<div class="col-md-12">
-				<p><a href="#" data-toggle="modal" data-target="#create_section_modal" style="float:right;font-size:10px;">Create section</a></p>
+				<input type="checkbox" id="edit_checkbox" style="display:none;">
+				<p><button id="edit_status_button" style="float:left;font-size:10px;"></button></p>
+				<p class="edit_mode"><a href="#" data-toggle="modal" data-target="#create_section_modal" style="float:right;font-size:10px;">Create section</a></p>
 			</div>
 			{% endif %}
 			<br>
@@ -22,7 +24,7 @@
 				<ul class="list-group" style="list-style-type:none;">
 				{% if sections %}
 				{% for sect in sections %}
-					<li><a href="#{{ sect.section_title }}" rel="internal">{{ sect.section_number }}. {{ sect.section_title }}</a><a href="{{ url_for('edit_section_body', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_number=sect.section_number, section_title=sect.section_title ) }}" style="float:right;"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a></li>
+					<li><a href="#{{ sect.section_title }}" rel="internal">{{ sect.section_number }}. {{ sect.section_title }}</a><a class="edit_mode" href="{{ url_for('edit_section_body', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_number=sect.section_number, section_title=sect.section_title ) }}" style="float:right;"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a></li>
 				{% endfor %}
 				{% endif %}
 				{% if section %}
@@ -32,12 +34,12 @@
 			</div>
 			
 		</div>
-		<div class="col-md-9 col-sm-12 col-xs-12 main_body" style="position:absolute; margin-left: 25%;">
+		<div class="col-md-9 col-sm-12 col-xs-12 main_body" style="position:absolute; margin-left: 25%; z-index: -1;">
 			<div class="row col-md-12 text-center">
 				<div class="col-md-2">
 				</div>
 				<div class="col-md-6">
-					<h2>{{ document.document_name }}</h2>
+					<h2 style="font-family: serif;font-weight: bold;">{{ document.document_name }}</h2>
 				</div>
 				<div class="col-md-2" style="float:right;">
 					{% if company.logo %}
@@ -51,7 +53,9 @@
 				<ol class="list-group">
 					{% if sections %}
 					{% for sect in sections %}
-					<section id="{{ sect.section_title }}">
+					<!--to make href="#id" of section not on top of page-->
+					<span class="anchor" id="{{ sect.section_title }}"></span>
+					<section >
 						<header class="section_header"><li>{{ sect.section_title }}</header>
 							<article>
 								{% if sect.body %}
@@ -121,7 +125,7 @@
 	{% endif %}
 {% endblock %}
 
-{% block scripts %}
+{% block styles %}
 {{ super() }}
 <style>
 	.main_body .list-group {
@@ -153,6 +157,10 @@
 	article ol {
 		padding-left: 5px;
 	}
+	
+	ol ol, ol ul, ul ol, ul ul {
+		margin-bottom: 10px;
+	}
 
 	article ol li ol li::before {
 		padding-left: 0px;
@@ -178,6 +186,69 @@
 		margin: 15px;
 		margin-left: 25px;
 	}
+	/*to make href="#id" of section not on top of page*/
+	.anchor {
+	  display: block;
+	  height: 100px; /*same height as header*/
+	  margin-top: -100px; /*same height as header*/
+	  visibility: hidden;
+	}
 
 </style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+	$(document).ready(function(){
+		if (sessionStorage.getItem("status")) {
+		  // Restore the status of checkbox
+		  var status = sessionStorage.getItem("status");
+		  $("#edit_checkbox").prop("checked", status);
+		}
+				
+		if ($("#edit_checkbox").is(":checked")){
+			$("#edit_status_button").attr('class', 'btn btn-xs btn-success')
+			$("#edit_status_button").html('EDIT MODE: ON');
+			$(".edit_mode").css('display', 'block');
+		  }
+		else {
+			$("#edit_status_button").attr('class', 'btn btn-xs btn-warning');
+			$("#edit_status_button").html('EDIT MODE: OFF');
+			$(".edit_mode").css('display', 'none');
+		  }
+				
+		
+		$("#edit_status_button").click(function() {
+			if ($("#edit_checkbox").is(":checked")){
+				$("#edit_checkbox").prop("checked", false);
+				sessionStorage.setItem("status", false);
+				$("#edit_status_button").attr('class', 'btn btn-xs btn-warning');
+				$("#edit_status_button").html('EDIT MODE: OFF');
+				$(".edit_mode").css('display', 'none');
+				//session storage of edit_status_button
+				/*if (typeof(Storage) !== "undefined") {
+				  sessionStorage.setItem("status", false);
+				} else {
+				  // Sorry! No Web Storage support..
+				}*/
+			}
+			else {
+				$("#edit_checkbox").prop("checked", true);
+				sessionStorage.setItem("status", true);
+				$("#edit_status_button").attr('class', 'btn btn-xs btn-success')
+				$("#edit_status_button").html('EDIT MODE: ON');
+				$(".edit_mode").css('display', 'block');
+				/*if (typeof(Storage) !== "undefined") {
+				  sessionStorage.setItem("status", true);
+				} else {
+				  // Sorry! No Web Storage support..
+				}*/
+			}
+		return false;
+		});
+		
+		
+   });
+</script>
 {% endblock %}

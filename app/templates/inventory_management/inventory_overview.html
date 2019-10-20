@@ -106,7 +106,7 @@
 			</table>
 		</div>
     </div>
-	{% if is_inv_admin %}
+	{% if is_inv_admin or company.id == 1 %}
 	<div class="row text-center">
 		<div class="col-md-12">
 			{% if pending_deliveries %}

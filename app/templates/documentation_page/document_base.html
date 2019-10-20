@@ -13,7 +13,7 @@
 
 {% block navbar %}
 	
-	<nav class="navbar navbar-default">
+	<nav class="navbar navbar-default" style="position: fixed;">
 		<div class="container-fluid">
 			<div class="collapse navbar-collapse col-md-12" id="bs-example-navbar-collapse-1">
 				<div class="col-md-6">
@@ -27,11 +27,11 @@
 						<a class="navbar-brand" href="{{ url_for('index')}}"><span><img src="/static/logo.jpg" alt="labApp logo" style="width: 22px; height: 22px;"></span><span> labApp</span></a>
 					</div>
 					<ul class="nav navbar-nav">
-						<!--li><a href="{{ url_for('quality_control', company_name=company.company_name)}}">Quality Control</a></li-->{{ nav_link('quality_control', 'Quality Control') }}
-						<!--li><a href="{{ url_for('document_control', company_name=company.company_name) }}">Document Control</a></li-->{{ nav_link('document_control', 'Document Control') }}
-						<!--li><a href="{{ url_for('inventory_management', company_name=company.company_name)}}">Inventory Management</a></li-->{{ nav_link('inventory_management', 'Inventory Management') }}
+						{{ nav_link('quality_control', 'Quality Control') }}
+						{{ nav_link('document_control', 'Document Control') }}
+						{{ nav_link('inventory_management', 'Inventory Management') }}
 						{% if is_super_admin %}
-						<!--li><a href="{{ url_for('admin', company_name=company.company_name)}}">Admin</a></li-->{{ nav_link('admin', 'Admin') }}
+						{{ nav_link('admin', 'Admin') }}
 						{% endif %}
 					</ul>
 				</div>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<h1>Products Wiki</h1>
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<table class="sort_table table table-bordered table-hover">
+				<thead>
+					<tr>
+						<th>Ref Number</th>
+						<th>Name</th>
+						<th>Description</th>
+						<th>Storage req</th>
+						<th>Type</th>
+					</tr>
+				</thead>
+				{% for product in products %}
+				<tr>
+					<td>{{ product.ref_number }}</td>
+					<td>{{ product.name }}</td>
+					<td>{{ product.description }}</td>
+					<td>{{ product.storage_req }}</td>
+					<td>{{ product.type }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+body {
+	font-size: 12px;
+}
+</style>
+<link src="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css">
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+<script>
+	$(document).ready(function() {
+		$('.sort_table').DataTable({
+			"paging":   false,
+			"ordering": true,
+			"info":     false,
+			"searching": false,
+			"order": [[ 1, "asc" ]]
+		});
+	} );
+</script>
+{% endblock %}

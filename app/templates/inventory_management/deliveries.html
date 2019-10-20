@@ -17,7 +17,7 @@
 					{% for purchase in purchases %}
 					{% if purchase.date_purchased %}
 					<tr>
-						{% if is_inv_admin %}
+						{% if is_inv_admin or company.id == 1 %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</a></td>
 						{% else %}
 						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>

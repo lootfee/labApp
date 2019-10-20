@@ -624,40 +624,20 @@ def inventory_management(company_name):
 			return redirect(url_for('company', company_name=company.company_name))
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:
-		#my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
-		#my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
-		#my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
-		#my_s.storage_req = Product.query.filter_by(id=my_s.product_id).first().storage_req
-		#my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id).first().min_quantity
 		my_s.current_quantity = Item.query.filter_by(company_id=company.id, product_id=my_s.product_id, date_used=None).count()
 		my_s.less_quantity = my_s.min_quantity >= my_s.current_quantity
-		#my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id).first().min_expiry
-		#my_s.dept_name = Department.query.filter_by(id=my_s.department_id).first().name
-		#my_s.type_name = Type.query.filter_by(id=my_s.type_id).first().name
-		#my_s.supplier_name = Supplier.query.filter_by(id=my_s.supplier_id).first().name
 		my_s.item_query = Item.query.filter_by(company_id=company.id, product_id=my_s.product_id, date_used=None).all()
 		for i in my_s.item_query:
-			#i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
-			#i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.lot.expiry < i.min_expiry)
-			#i.dept = Department.query.filter_by(id=i.department_id).first().name
 			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
 	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
 	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
 	for dp in delivered_purchases:
 		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id).all()
 		for pl in dp.purchase_list:
-			#pl.name = PurchaseList.query.filter_by(id=pl.id).first().name
-			#pl.ref_number = PurchaseList.query.filter_by(id=pl.id).first().ref_number
-			#pl.purchase_order_no = Purchase.query.filter_by(company_id=company.id, id=pl.purchase_id).first().purchase_order_no
-			#pl.date_purchased = Purchase.query.filter_by(company_id=company.id, id=pl.purchase_id).first().date_purchased
-			#pl.qty = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, id=pl.id).first().quantity
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
-			#pl.product_id = Product.query.filter_by(ref_number=pl.ref_number).first().id
-			#pl.dept = MyDepartmentSupplies.query.filter_by(company_id=company.id, my_supplies_id=pl.my_supplies_id).first()
 			pl.dept_name = Department.query.filter_by(id=pl.department_id).first().name
-	
 	unsubmitted_orders = Order.query.filter(Order.date_submitted.isnot(None)).filter_by(puchase_no=None, company_id=company.id).all()
 	pending_purchases = Purchase.query.filter_by(company_id=company.id, date_purchased=None).all()
 	return render_template('inventory_management/inventory_overview.html', title='Inventory Overview', company=company, user=user, superuser=superuser, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, unsubmitted_orders=unsubmitted_orders, pending_purchases=pending_purchases, purchases=purchases, pending_deliveries=pending_deliveries, delivered_purchases=delivered_purchases, select_dept=select_dept)	
@@ -848,24 +828,11 @@ def inventory(company_name):
 	products = Product.query.order_by(Product.name.asc())
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:
-		#my_s.name = Product.query.filter_by(id=my_s.product_id).first().name
-		#my_s.ref_number = Product.query.filter_by(id=my_s.product_id).first().ref_number
-		#my_s.description = Product.query.filter_by(id=my_s.product_id).first().description
-		#my_s.dept = Department.query.filter_by(id=my_s.department_id).first().name
-		#my_s.stocks = Item.query.filter_by(product_id=my_s.product_id, date_used=None).count()
-		#my_s.min_quantity = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_quantity
-		#my_s.min_expiry = MySupplies.query.filter_by(id=my_s.id, company_id=company.id).first().min_expiry
 		my_s.item_query = Item.query.filter_by(my_supplies_id=my_s.id, company_id=company.id, date_used=None).all()
-		#my_s.lot_list = []
 		for i in my_s.item_query:
-			#i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
-			#i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-			#i.dept = Department.query.filter_by(id=i.department_id).first().name
-			#i.quantity = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, date_used=None).count()
 			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.lot.expiry < i.min_expiry)
-			#i.received_date = Delivery.query.filter_by(id=i.delivery_id).first().date_delivered
 	return render_template('inventory_management/inventory.html', title='Inventory', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin,  is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, my_supplies=my_supplies, orders=orders, dept=dept)
 
 @app.route('/<company_name>/consume_item/<ref_number>/<id>', methods=['GET', 'POST'])
@@ -1443,24 +1410,25 @@ def total_purchases_accounts(company_name):
 	form.supplier.choices = supplier_list
 	purchases = ''
 	if form.validate_on_submit():
+		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.department.data == 0 and form.supplier.data == 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 		elif form.department.data == 0 and form.supplier.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
 				purchase.total = 0
 				for p in purchase.purchase_list:
 					purchase.total += p.total
 		elif form.supplier.data == 0 and form.department.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
 				purchase.total = 0
 				for p in purchase.purchase_list:
 					purchase.total += p.total
 		elif form.supplier.data is not 0 and form.department.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
 				purchase.total = 0
@@ -1492,8 +1460,9 @@ def total_deliveries_accounts(company_name):
 	deliveries = Delivery.query.filter_by(company_id=company.id).all()
 	purchases = ''
 	if form.validate_on_submit():
+		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.department.data == 0 and form.supplier.data == 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id).all()
@@ -1501,7 +1470,7 @@ def total_deliveries_accounts(company_name):
 					for item in p.delivery_list:
 						p.delivery_total += item.my_supplies.price
 		elif form.department.data == 0 and form.supplier.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
 				purchase.total = 0
@@ -1513,7 +1482,7 @@ def total_deliveries_accounts(company_name):
 					for item in p.delivery_list:
 						p.delivery_total += item.my_supplies.price
 		elif form.supplier.data == 0 and form.department.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
 				purchase.total = 0
@@ -1525,7 +1494,7 @@ def total_deliveries_accounts(company_name):
 					for item in p.delivery_list:
 						p.delivery_total += item.my_supplies.price
 		elif form.supplier.data is not 0 and form.department.data is not 0:
-			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, form.end_date.data)).filter_by(company_id=company.id).all()
+			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
 				purchase.total = 0
@@ -1562,52 +1531,55 @@ def total_inventory_accounts(company_name):
 	my_supplies = ''
 	if form.validate_on_submit():
 		my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.department.data == 0 and form.supplier.data == 0:
 			for my_s in my_supplies:
-				#removed_item = []
-				for my_item in my_s.item:
-					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
-					if my_item.delivery_date.date() > form.end_date.data:
-						#removed_item.append(my_item)
+				removed_item = []
+				for my_item in reversed(my_s.item):
+					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first()
+					if my_item.delivery_date.date_delivered > end_date:
 						my_s.item.remove(my_item)
+						removed_item.append(my_item)
 					if my_item.date_used is not None:
-						if my_item.date_used.date() <= form.end_date.data:
-							#removed_item.append(my_item)
+						if my_item.date_used <= end_date:
+							removed_item.append(my_item)
 							my_s.item.remove(my_item)
 					my_s.count = len(my_s.item)
-					#print(my_s.id, my_item.my_supplies_id, my_item.delivery_date.date(), my_item.date_used, form.end_date.data, my_s.count)
-					#print("removed_item:", removed_item)
+					print(my_s.item)
+					print(my_item)
+					#print(my_s.id, my_item, my_item.delivery_date, my_item.date_used)
+					print("removed_item:", removed_item)
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			for my_s in my_supplies:
 				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, supplier_id=form.supplier.data).all()
-				for my_item in my_s.item:
+				for my_item in reversed(my_s.item):
 					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
-					if my_item.delivery_date.date() > form.end_date.data:
+					if my_item.delivery_date > end_date:
 						my_s.item.remove(my_item)
 					if my_item.date_used is not None:
-						if my_item.date_used.date() <= form.end_date.data:
+						if my_item.date_used <= end_date:
 							my_s.item.remove(my_item)
 					my_s.count = len(my_s.item)
 		elif form.supplier.data == 0 and form.department.data is not 0:
 			for my_s in my_supplies:
 				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, department_id=form.department.data).all()
-				for my_item in my_s.item:
+				for my_item in reversed(my_s.item):
 					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
-					if my_item.delivery_date.date() > form.end_date.data:
+					if my_item.delivery_date > end_date:
 						my_s.item.remove(my_item)
 					if my_item.date_used is not None:
-						if my_item.date_used.date() <= form.end_date.data:
+						if my_item.date_used <= end_date:
 							my_s.item.remove(my_item)
 					my_s.count = len(my_s.item)
 		elif form.supplier.data is not 0 and form.department.data is not 0:
 			for my_s in my_supplies:
 				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
-				for my_item in my_s.item:
+				for my_item in reversed(my_s.item):
 					my_item.delivery_date = Delivery.query.filter_by(id = my_item.delivery_id).first().date_delivered
-					if my_item.delivery_date.date() > form.end_date.data:
+					if my_item.delivery_date > end_date:
 						my_s.item.remove(my_item)
 					if my_item.date_used is not None:
-						if my_item.date_used.date() <= form.end_date.data:
+						if my_item.date_used <= end_date:
 							my_s.item.remove(my_item)
 					my_s.count = len(my_s.item)
 	return render_template('inventory_management/total_inventory_remaining.html', title='Total Deliveries', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, my_supplies=my_supplies)
@@ -1655,7 +1627,13 @@ def total_consumed_accounts(company_name):
 				my_s.count = len(my_s.used_item)
 	return render_template('inventory_management/total_inventory_consumed.html', title='Inventory Consumed ', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, my_supplies=my_supplies)
 
-	
+@app.route('/products_wiki',  methods=['GET', 'POST'])
+def products_wiki():
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	products = Product.query.all()
+	return render_template('products_wiki.html', title='Products Wiki', user=user, superuser=superuser, products=products)
+
 
 @app.route('/<company_name>/document_control/', methods=['GET', 'POST'])
 @login_required
@@ -1687,7 +1665,7 @@ def document_control(company_name):
 			db.session.add(doc)
 			db.session.commit()
 			return redirect(url_for('document_control', company_name=company.company_name))
-	return render_template('document_control.html', title='Document Control', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_doc_supervisor=is_doc_supervisor, is_doc_admin=is_doc_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments)
+	return render_template('documentation_page/document_control.html', title='Document Control', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_doc_supervisor=is_doc_supervisor, is_doc_admin=is_doc_admin, is_my_affiliate=is_my_affiliate, form1=form1, form2=form2, departments=departments)
 
 @app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>', methods=['GET', 'POST'])
 @login_required
@@ -1711,7 +1689,7 @@ def documents(company_name, department_name, document_no, document_name):
 		db.session.add(section)
 		db.session.commit()
 		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
-	return render_template('lab_document.html', user=user, company=company, superuser=superuser, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, sections=sections, form1=form1)
+	return render_template('documentation_page/lab_document.html', user=user, company=company, superuser=superuser, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, sections=sections, form1=form1)
 	
 @app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>/<section_number>/<section_title>/edit', methods=['GET', 'POST'])
 @login_required
@@ -1723,7 +1701,7 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
 	section = DocumentSection.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, section_number=section_number, section_title=section_title).first()
 	section_body = DocumentSectionBody.query.filter_by(company_id=company.id, department_id=department.id, document_name_id=document.id, document_section_id=section.id).first()
-	section_body_id = DocumentSectionBody.query.get(section_body.id)
+	#section_body_id = DocumentSectionBody.query.get(section_body.id)
 	is_super_admin = company.is_super_admin(user)
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
@@ -1741,7 +1719,7 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 	elif request.method == 'GET':
 		for sect in section.body:
 			form2.body.data = sect.section_body 
-	return render_template('lab_document.html', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
+	return render_template('documentation_page/lab_document.html', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
 	
 @app.route('/stream', methods=['GET', 'POST'])
 @login_required
