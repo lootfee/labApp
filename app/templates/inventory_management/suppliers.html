@@ -44,7 +44,8 @@
 					<td>{{ supplier.contact }}</td>
 					<td>{{ supplier.address }}</td>
 					{% if is_inv_admin %}
-					<td class="del-edit-btn"><a href="{{ url_for('remove_supplier', supp_id=supplier.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true" ></span></a></td>
+					<td class="del-edit-btn"><span title="Remove supplier"><a data-toggle="modal" href="#" data-target="#delete_{{ supplier.id }}">
+						<span class="glyphicon glyphicon-trash" aria-hidden="true"></span></span></a></td>
 					{% endif %}
 				</tr>
 				{% endfor %}
@@ -52,7 +53,27 @@
 		</table>
 		</div>
     </div>
-	
+	{% for supplier in company.suppliers %}
+	<div class="modal fade" id="delete_{{ supplier.id }}" tabindex="-1" role="dialog" aria-labelledby="delete_{{ supplier.id }}Label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<p><h4>Remove supplier: </h4></p>
+		  </div>
+		  <div class="modal-body">
+			<p><h4>Supplier name: {{ supplier.name }}</h4></p>
+			<p><h4>Email: {{ supplier.email }} </h4></p>
+			<p><h4>Contact: {{ supplier.contact }}</h4></p>
+			<p><h4>Address: {{ supplier.address }}</h4></p>
+		  </div>
+		  <div class="modal-footer">
+			<a class="btn btn-default" href="{{ url_for('remove_supplier', supp_id=supplier.id, comp_id=company.id) }}"" role="button">Remove</a>
+		  </div>
+		</div>
+	  </div>
+	</div>	
+	{% endfor %}
 {% endblock %}
 {% block scripts %}
 	{{ super() }}

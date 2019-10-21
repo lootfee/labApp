@@ -29,31 +29,32 @@
 						<td>{{ depts.name }} ({{ depts.abbrv }})</td>
 						<td><a href="{{ url_for('link_supplies', company_name=company.company_name, dept_id=depts.id) }}">Link supplies</a></td>
 						{% if is_inv_admin %}
-						<td class="del-edit-btn"><a href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
+						<td class="del-edit-btn"><a data-toggle="modal" href="#" data-target="#remove_{{ depts.id }}"><span class="glyphicon glyphicon-trash" aria-hidden="true" title="Remove department"></span></a></td>
 						{% endif %}
 					</tr>
 					{% endfor %}
 			
 			</table>
 		</div>
-		<!--div class="col-md-4">
-			<table class="table table-hover">
-				<tr>
-					<th>Types</th>
-				</tr>
-				{% if types %}
-					{% for type in company.types %}
-					<tr>
-						<td>{{ type.name }}</td>
-						{% if is_inv_admin %}
-						<td class="del-edit-btn"><a href="{{ url_for('remove_type', type_id=type.id, comp_id=company.id) }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a></td>
-						{% endif %}
-					</tr>
-					{% endfor %}
-				{% endif %}
-			</table>
-		</div-->
     </div>
+	{% for depts in company.departments %}
+	<div class="modal fade" id="remove_{{ depts.id }}" tabindex="-1" role="dialog" aria-labelledby="remove_{{ depts.id }}Label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<p><h4>Remove Department: </h4></p>
+		  </div>
+		  <div class="modal-body">
+			<p><h4>Deaprtment: {{ depts.name }} ({{ depts.abbrv }})</h4></p>
+		  </div>
+		  <div class="modal-footer">
+			<a class="btn btn-default" href="{{ url_for('remove_dept', dept_id=depts.id, comp_id=company.id) }}" role="button">Remove</a>
+		  </div>
+		</div>
+	  </div>
+	</div>	
+	{% endfor %}
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
