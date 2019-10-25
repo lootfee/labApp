@@ -1,0 +1,99 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{% include 'quality_control/qc_nav.html' %}
+<div class="row">
+	<h3 class="text-center">Register QC Variables</h3>
+	<div class="col-md-12">
+		<div class="col-md-6">
+			<h4>Register Machine</h4>
+			{{ wtf.quick_form(form1)}}
+			<h4>Register Control</h4>
+			{{ wtf.quick_form(form3)}}
+		</div>
+		<div class="col-md-6">
+			<h4>Register Analyte</h4>
+			{{ wtf.quick_form(form2)}}
+		</div>
+	</div>
+</div>
+<br>
+<div class="row">
+	<div class="col-md-12">
+		<div class="col-md-6">
+			<h4>Register Reagent Lot</h4>
+			{{ wtf.quick_form(form4)}}
+		</div>
+		<div class="col-md-6">
+			<h4>Register Control Lot</h4>
+			{{ wtf.quick_form(form5)}}
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+	var control_tags = [
+		{% for control in control_lots %}
+			{
+				label: "{{ control.lot_no}}",
+				expiry: "{{ control.expiry }}",
+			},
+		{% endfor %}
+	  ]
+	  
+	$( "#control_lot_no" ).autocomplete({
+	  source: control_tags,
+	  focus: function(event, ui) {
+	  event.preventDefault();
+	  $(this).val(ui.item.label);
+	  },
+	  select: function(event, ui) {
+	  event.preventDefault();
+	  $(this).val(ui.item.label);
+	  $("#control_expiry").val(ui.item.expiry);
+	  }
+	});
+	
+	var reagent_lot_tags = [
+		{% for reagent_lot in reagent_lots %}
+			{
+				label: "{{ reagent_lot.lot_no}}",
+				expiry: "{{ reagent_lot.expiry }}",
+			},
+		{% endfor %}
+	  ]
+	  
+	$( "#reagent_lot_no" ).autocomplete({
+	  source: reagent_lot_tags,
+	  focus: function(event, ui) {
+	  event.preventDefault();
+	  $(this).val(ui.item.label);
+	  },
+	  select: function(event, ui) {
+	  event.preventDefault();
+	  $(this).val(ui.item.label);
+	  $("#reagent_expiry").val(ui.item.expiry);
+	  }
+	});
+	
+	var machine_tags = [
+		{% for machine in machines %}
+			{
+				label: "{{ machine.machine_name}}",
+			},
+		{% endfor %}
+	  ]
+	  
+	 $( "#machine_name" ).autocomplete({
+		  source: machine_tags
+		});
+});
+</script>
+{% endblock %}

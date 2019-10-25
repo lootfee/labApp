@@ -297,7 +297,64 @@ class CreateDocumentSectionForm(FlaskForm):
 	section_title = StringField('Section title:', validators=[DataRequired()])
 	submit = SubmitField('Submit')
 	
+class EditDocumentSectionForm(FlaskForm):
+	section_id = HiddenField('Section id:', validators=[DataRequired()])
+	edit_section_number = IntegerField('Section Number', validators=[DataRequired()])
+	edit_section_title = StringField('Section title:', validators=[DataRequired()])
+	edit_submit = SubmitField('Submit')
+	
 class EditDocumentBodyForm(FlaskForm):
 	body = PageDownField('Edit Document', validators=[DataRequired()])
 	changelog = StringField('Changelog:')
+	submit = SubmitField('Submit')
+	
+class DocumentSubmitForm(FlaskForm):
+	submit_section_id = HiddenField('Section id:', validators=[DataRequired()])
+	submit_section_body_id = HiddenField('Section body id:', validators=[DataRequired()])
+	submit_company_id = HiddenField('Company id:', validators=[DataRequired()])
+	submit_department_id = HiddenField('Department id:', validators=[DataRequired()])
+	submit_document_name_id = HiddenField('Document id:', validators=[DataRequired()])
+	submit = SubmitField('Submit for review')
+	
+class RegisterMachineForm(FlaskForm):
+	machine_name = StringField('Machine name', validators=[DataRequired()])
+	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
+	submit = SubmitField('Submit')
+	
+class RegisterAnalyteForm(FlaskForm):
+	analyte = StringField('Analyte', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUC3, ALB2, etc."})
+	unit = StringField('Unit', validators=[DataRequired()])
+	#machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
+	submit = SubmitField('Submit')
+	
+class RegisterReagentLotForm(FlaskForm):
+	analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	reagent_lot_no = StringField('Lot No', validators=[DataRequired()])
+	reagent_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	submit = SubmitField('Submit')
+	
+class RegisterControlForm(FlaskForm):
+	control_name = StringField('Control name', validators=[DataRequired()])
+	submit = SubmitField('Submit')
+	
+class RegisterQCLotForm(FlaskForm):
+	control = SelectField('Control', coerce=int, validators=[InputRequired()])
+	control_lot_no = StringField('Lot No', validators=[DataRequired()])
+	control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	submit = SubmitField('Submit')
+	
+class QCResultForm(FlaskForm):
+	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	end_date = DateField('To:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
+	machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	control1 = SelectField('Control 1', coerce=int, validators=[InputRequired()])
+	control2 = SelectField('Control 2', coerce=int, validators=[InputRequired()])
+	control3 = SelectField('Control 3', coerce=int, validators=[InputRequired()])
+	run_date = DateField('Date:', validators=[DataRequired()], format='%Y-%m-%d')
+	control1_result = IntegerField('Level 1')
+	control1_result = IntegerField('Level 2')
+	control1_result = IntegerField('Level 3')
 	submit = SubmitField('Submit')

@@ -3,8 +3,9 @@
 
 
 {% block app_content %}
+{% include 'quality_control/qc_nav.html' %}	
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-12 visible-print-block">
 		<div class="col-md-3">
 			{% if company.logo %}
 			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
@@ -93,9 +94,9 @@
 <br>
 <div class="container-fluid no_print">
 	<div class="col-md-4 entryType" id="qcEnryContainer">
-		<input type="text" class="form-control qc-entry" id="qcEntry" placeholder="Enter QC results">
-		<button class="btn btn-default" id="submitQC" onclick="inputQC()" type="submit">Submit</button>	
-		<p><a href="#" id="importExcelQC">Import from excel instead?</a></p>
+		<span class="col-md-9"><input type="text" class="form-control qc-entry" id="qcEntry" placeholder="Enter QC results"></span>
+		<span><button class="btn btn-default" id="submitQC" onclick="inputQC()" type="submit">Submit</button></span>	
+		<span><a href="#" id="importExcelQC">Import from excel instead?</a></span>
 	</div>
 	<div class="entryType" id="excelImportContainer">
 		<div class="row">
@@ -111,7 +112,7 @@
 			</div>
 			<div class="col-md-4">
 				<form id="fileInputForm">
-					<label for="inputFile">Choose excel file</label>
+					<label for="my_file_input">Choose excel file</label>
 					<input type="file" id="my_file_input">
 				</form>
 				<p><a href="#" id="manualInputQC">Input QC Data Manually?</a></p>
@@ -375,4 +376,8 @@
 	}
 }
 </style>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script src="{{url_for('static', filename='js/qc.js')}}"></script>
 {% endblock %}

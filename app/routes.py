@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit
 from datetime import datetime, timedelta, time
 from app.email import send_password_reset_email
 from link_preview import link_preview
@@ -544,13 +544,22 @@ def admin(company_name):
 		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, past_affiliates=past_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser)
 	else:
 		return redirect(url_for('company', company_name=company.company_name))
-				
+	
+@app.route('/guides')
+def guides():
+	superuser = User.query.filter_by(id=1).first_or_404()
+	return render_template('guides.html', title='Guides', superuser=superuser)
 				
 @app.route('/calculators')
 def calculators():
 	superuser = User.query.filter_by(id=1).first_or_404()
 	return render_template('calculators.html', title='Calculators', superuser=superuser)
 	
+@app.route('/quality_control_')
+def quality_control_sample():
+	superuser = User.query.filter_by(id=1).first_or_404()
+	return render_template('quality_control_basic.html', title='Quality Control', superuser=superuser)
+		
 
 @app.route('/<company_name>/quality_control', methods=['GET', 'POST'])
 @login_required
@@ -563,19 +572,161 @@ def quality_control(company_name):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
-	return render_template('quality_control.html', title='Quality Control', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser)
+	return render_template('quality_control/quality_control_company.html', title='Quality Control', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser)
 
-@app.route('/guides')
-def guides():
+@app.route('/<company_name>/quality_control/variables', methods=['GET', 'POST'])
+@login_required
+def qc_variables(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('guides.html', title='Guides', superuser=superuser)
+	affiliate = Affiliates.query.filter_by(user_id=user.id, company_id=company.id, accepted=True).first()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	control_lots = ControlLot.query.all()
+	reagent_lots = ReagentLot.query.all()
+	machines = Machine.query.all()
+	#dept = company.documentation_department
+	#dept_list = [(d.id, d.department_name) for d in dept]
+	#machine = company.machine.order_by(Machine.machine_name.asc())
+	#machine_list = [(m.id, m.machine_name) for m in machine]
+	comp_analyte = company.analyte.order_by(Analyte.analyte.asc())
+	analyte_list = [(a.id, a.analyte) for a in comp_analyte]
+	comp_controls = company.control.order_by(Control.control_name.asc())
+	control_list = [(c.id, c.control_name) for c in comp_controls]
+	form1 = RegisterMachineForm()
+	if form1.validate_on_submit():
+		machine_query = Machine.query.filter_by(machine_name=form1.machine_name.data).first()
+		if machine_query is None:
+			machine = Machine(machine_name=form1.machine_name.data)
+			db.session.add(machine)
+			company.machine.append(machine)
+			db.session.commit()
+			return redirect(url_for('qc_variables', company_name=company.company_name))
+		else:
+			company.machine.append(machine_query)
+			db.session.commit()
+			return redirect(url_for('qc_variables', company_name=company.company_name))
+	form2 = RegisterAnalyteForm()
+	#form2.machine.choices = machine_list
+	if form2.validate_on_submit():
+		analyte_query = Analyte.query.filter_by(analyte=form2.analyte.data).first()
+		unit_query = Unit.query.filter_by(unit=form2.unit.data).first()
+		if analyte_query is None:
+			analyte = Analyte(analyte=form2.analyte.data)
+			db.session.add(analyte)
+			company.analyte.append(analyte)
+			db.session.commit()
+			if unit_query is None:
+				unit = Unit(unit=form2.unit.data)
+				db.session.add(unit)
+				analyte.unit.append(unit)
+				db.session.commit()
+			else:
+				analyte.unit.append(unit_query)
+				db.session.commit()
+		else:
+			company.analyte.append(analyte_query)
+			db.session.commit()
+			if unit_query is None:
+				unit = Unit(unit=form2.unit.data)
+				db.session.add(unit)
+				analyte.unit.append(unit)
+				db.session.commit()
+			else:
+				analyte.unit.append(unit_query)
+				db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+	form3 = RegisterControlForm()
+	if form3.validate_on_submit():
+		control_query = Control.query.filter_by(control_name=form3.control_name.data).first()
+		if control_query is None:
+			control = Control(control_name=form3.control_name.data)
+			db.session.add(control)
+			company.control.append(control)
+			db.session.commit()
+		else:
+			company.control.append(control_query)
+			db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+	form4 = RegisterReagentLotForm()
+	form4.analyte.choices = analyte_list
+	if form4.validate_on_submit():
+		raw_lotno = form4.reagent_lot_no.data
+		alnum_lotno = ''.join(e for e in raw_lotno if e.isalnum())
+		rlot_query = ReagentLot.query.filter_by(lot_no=alnum_lotno).first()
+		analyte = Analyte.query.filter_by(id=form4.analyte.data).first()
+		if rlot_query is None:
+			lot_no = ReagentLot(lot_no=alnum_lotno, expiry=form4.reagent_expiry.data)
+			db.session.add(lot_no)
+			company.reagent_lot.append(lot_no)
+			analyte.reagent_lot.append(lot_no)
+			db.session.commit()
+		else:
+			company.reagent_lot.append(rlot_query)
+			analyte.reagent_lot.append(rlot_query)
+			db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+	form5 = RegisterQCLotForm()
+	form5.control.choices = control_list
+	if form5.validate_on_submit():
+		raw_control_lot = form5.control_lot_no.data
+		alnum_control_lot = ''.join(e for e in raw_control_lot if e.isalnum())
+		clot_query = ControlLot.query.filter_by(lot_no=alnum_control_lot).first()
+		control = Control.query.filter_by(id=form5.control.data).first()
+		if clot_query is None:
+			control_lot = ControlLot(lot_no=alnum_control_lot, expiry=form5.control_expiry.data)
+			db.session.add(control_lot)
+			company.control_lot.append(control_lot)
+			control.lot.append(control_lot)
+			db.session.commit()
+		else:
+			company.control_lot.append(clot_query)
+			control.lot.append(clot_query)
+			db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+	return render_template('quality_control/qc_variables.html', title='Variables', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form1=form1, form2=form2, form3=form3, form4=form4, form5=form5, control_lots=control_lots, reagent_lots=reagent_lots, machines=machines)
 
 
-@app.route('/quality_control_')
-def quality_control_sample():
+@app.route('/<company_name>/quality_control/encode_results', methods=['GET', 'POST'])
+@login_required
+def encode_qc_results(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('quality_control_sample.html', title='Quality Control', superuser=superuser)
-	
+	affiliate = Affiliates.query.filter_by(user_id=user.id, company_id=company.id, accepted=True).first()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	machine = company.machine.order_by(Machine.machine_name.asc())
+	machine_list = [(m.id, m.machine_name) for m in machine]
+	comp_analyte = company.analyte.order_by(Analyte.analyte.asc())
+	analyte_list = [(0, '')] + [(a.id, a.analyte) for a in comp_analyte]
+	#comp_controls = company.control.order_by(Control.control_name.asc())
+	#control_list = [(c.id, c.control_name) for c in comp_controls]
+	rgt_lot = company.reagent_lot.order_by(ReagentLot.expiry.desc())
+	rgt_lot_list = [(0, '')] + [(c.id, c.lot_no) for c in rgt_lot]
+	control_lot = company.control_lot.order_by(ControlLot.expiry.desc())
+	ctrl_lot_list = [(0, '')] + [(c.id, c.lot_no) for c in control_lot]
+	form = QCResultForm()
+	form.analyte.choices = analyte_list
+	form.reagent_lot.choices = rgt_lot_list
+	form.machine.choices = machine_list
+	form.control1.choices = ctrl_lot_list
+	form.control2.choices = ctrl_lot_list
+	form.control3.choices = ctrl_lot_list
+	if form.submit.data:
+		date_list = request.form.getlist('cDate')
+		level1_list = request.form.getlist('qc_data_lvl1')
+		level2_list = request.form.getlist('qc_data_lvl2')
+		#level3_list = request.form.getlist('qc_data_lvl3')
+		for i in range(0, len(date_list)):
+			print(date_list[i], level1_list[i], level2_list[i])
+	return render_template('quality_control/encode_qc_results.html', title='Encode Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
+
 @app.route('/inventory_management_demo/overview', methods=['GET', 'POST'])	
 @login_required
 def inventory_management_demo():
@@ -1689,8 +1840,26 @@ def documents(company_name, department_name, document_no, document_name):
 		db.session.add(section)
 		db.session.commit()
 		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
-	return render_template('documentation_page/lab_document.html', user=user, company=company, superuser=superuser, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, sections=sections, form1=form1)
+	form3 = EditDocumentSectionForm()
+	if form3.validate_on_submit():
+		section = DocumentSection.query.get(form3.section_id.data)
+		section.section_number = form3.edit_section_number.data
+		section.section_title = form3.edit_section_title.data
+		db.session.commit()
+		return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
+	elif request.method == 'GET':
+		for sect in sections:
+			form3.edit_section_number.data = sect.section_number
+			form3.edit_section_title.data = sect.section_title
+	form4 = DocumentSubmitForm()
+	if form4.validate_on_submit():
+		section_id_list = request.form.getlist('submit_section_id')
+		section_body_id_list = request.form.getlist('submit_section_body_id')
+		for i in range(0, len(section_id) ):
+			version = DocumentVersion(section_id=section_id_list[i], section_body_id=section_body_id_list[i])
+	return render_template('documentation_page/lab_document.html', user=user, company=company, superuser=superuser, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, sections=sections, form1=form1, form3=form3, form4=form4)
 	
+
 @app.route('/<company_name>/documents/<department_name>/<document_no>/<document_name>/<section_number>/<section_title>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_section_body(company_name, department_name, document_no, document_name, section_number, section_title):
@@ -1720,6 +1889,17 @@ def edit_section_body(company_name, department_name, document_no, document_name,
 		for sect in section.body:
 			form2.body.data = sect.section_body 
 	return render_template('documentation_page/lab_document.html', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_my_affiliate=is_my_affiliate, department=department, document=document, section=section, form2=form2)	
+	
+@app.route('/<company_name>/<department_name>/<document_no>/<document_name>/delete_document_section/<section_id>', methods=['GET', 'POST'])
+@login_required
+def delete_document_section(company_name, department_name, document_no, document_name, section_id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	department = DocumentationDepartment.query.filter_by(company_id=company.id, department_name=department_name).first()
+	document = DocumentName.query.filter_by(company_id=company.id, document_no=document_no, document_name=document_name).first()
+	section_id = DocumentSection.query.get(section_id)
+	db.session.delete(section_id)
+	db.session.commit()
+	return redirect(url_for('documents', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name))
 	
 @app.route('/stream', methods=['GET', 'POST'])
 @login_required

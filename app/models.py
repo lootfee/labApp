@@ -64,13 +64,45 @@ downvotes = db.Table('downvotes',
 	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
 )
 
+company_machine = db.Table('company_machine',
+	db.Column('company_id', db.Integer, db.ForeignKey('company.id')),
+	db.Column('machine_id', db.Integer, db.ForeignKey('machine.id')),
+)
 
-#deliveries = db.Table('deliveries',
-#	db.Column('purchase_list_id', db.Integer, db.ForeignKey('purchase_list.id')),
-#	db.Column('delivery_id', db.Integer, db.ForeignKey('delivery.id')),
-#)
+company_analyte = db.Table('company_analyte',
+	db.Column('company_id', db.Integer, db.ForeignKey('company.id')),
+	db.Column('analyte_id', db.Integer, db.ForeignKey('analyte.id')),
+)
 
+company_control = db.Table('company_control',
+	db.Column('company_id', db.Integer, db.ForeignKey('company.id')),
+	db.Column('control_id', db.Integer, db.ForeignKey('control.id')),
+)
 
+company_reagent_lot = db.Table('company_reagent_lot',
+	db.Column('company_id', db.Integer, db.ForeignKey('company.id')),
+	db.Column('reagent_lot_id', db.Integer, db.ForeignKey('reagent_lot.id')),
+)
+
+analyte_reagent_lot = db.Table('analyte_reagent_lot',
+	db.Column('analyte_id', db.Integer, db.ForeignKey('analyte.id')),
+	db.Column('reagent_lot_id', db.Integer, db.ForeignKey('reagent_lot.id')),
+)
+
+control_control_lot = db.Table('control_control_lot',
+	db.Column('control_id', db.Integer, db.ForeignKey('control.id')),
+	db.Column('control_lot_id', db.Integer, db.ForeignKey('control_lot.id')),
+)
+
+company_control_lot = db.Table('company_control_lot',
+	db.Column('company_id', db.Integer, db.ForeignKey('company.id')),
+	db.Column('control_lot_id', db.Integer, db.ForeignKey('control_lot.id')),
+)
+
+analyte_unit = db.Table('analyte_unit',
+	db.Column('analyte_id', db.Integer, db.ForeignKey('analyte.id')),
+	db.Column('unit_id', db.Integer, db.ForeignKey('unit.id')),
+)
 
 class Company(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -630,6 +662,7 @@ class DocumentationDepartment(db.Model):
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
+	company = db.relationship('Company', backref=db.backref('documentation_department', lazy='dynamic'))
 	document = db.relationship('DocumentName', backref=db.backref('department', lazy=True))
 	sections = db.relationship('DocumentSection', backref=db.backref('department', lazy=True))
 	versions = db.relationship('DocumentVersion', backref=db.backref('department', lazy=True))
@@ -695,9 +728,105 @@ class DocumentVersion(db.Model):
 	document_name_id = db.Column(db.Integer, db.ForeignKey('document_name.id'))
 	
 	section = db.relationship('DocumentSection', backref=db.backref('version', lazy=True))
-	body = db.relationship('DocumentSectionBody', backref=db.backref('version', lazy=True))
+	body = db.relationship('DocumentSectionBody', backref=db.backref('version', lazy='dynamic'))
 
 	def __repr__(self):
 		return '<DocumentVersion {}>'.format(self.id)
 
+class Machine(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	machine_name = db.Column(db.String(100))
+	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	
+	company = db.relationship(
+		'Company', secondary='company_machine',
+		backref=db.backref('machine', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	#company = db.relationship('Company', backref=db.backref('machine', lazy='dynamic'))
+	#department = db.relationship('DocumentationDepartment', backref=db.backref('machine', lazy='dynamic'))
+	
+class Analyte(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	analyte = db.Column(db.String(200))
+	#unit = db.Column(db.String(50))
+	#machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	#department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
+	company = db.relationship(
+		'Company', secondary='company_analyte',
+		backref=db.backref('analyte', lazy='dynamic'), lazy='dynamic'
+	)
 
+class Unit(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	unit = db.Column(db.String(50))
+	
+	analyte = db.relationship(
+		'Analyte', secondary='analyte_unit',
+		backref=db.backref('unit', lazy='dynamic'), lazy='dynamic'
+	)
+	
+class Control(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	control_name = db.Column(db.String(100))
+	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	company = db.relationship(
+		'Company', secondary='company_control',
+		backref=db.backref('control', lazy='dynamic'), lazy='dynamic'
+	)
+	#company = db.relationship('Company', backref=db.backref('control', lazy='dynamic'))
+	
+class ReagentLot(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	lot_no = db.Column(db.String(50))
+	expiry = db.Column(db.Date)
+	company = db.relationship(
+		'Company', secondary='company_reagent_lot',
+		backref=db.backref('reagent_lot', lazy='dynamic'), lazy='dynamic'
+	)
+	analyte = db.relationship(
+		'Analyte', secondary='analyte_reagent_lot',
+		backref=db.backref('reagent_lot', lazy='dynamic'), lazy='dynamic'
+	)
+	
+'''class CompanyReagentLot(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	
+	company = db.relationship('Company', backref=db.backref('reagent', lazy='joined'))
+	analyte = db.relationship('Analyte', backref=db.backref('reagent_lot', lazy='joined'))
+	lot = db.relationship('ReagentLot', backref=db.backref('company', lazy='joined'))'''
+	
+class ControlLot(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	lot_no = db.Column(db.String(50))
+	expiry = db.Column(db.Date)
+	
+	control = db.relationship(
+		'Control', secondary='control_control_lot',
+		backref=db.backref('lot', lazy='dynamic'), lazy='dynamic'
+	)
+	company = db.relationship(
+		'Company', secondary='company_control_lot',
+		backref=db.backref('control_lot', lazy='dynamic'), lazy='dynamic'
+	)
+
+class QCResult(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	run_date = db.Column(db.Date)
+	lvl1 = db.Column(db.Integer)
+	lvl2 = db.Column(db.Integer)
+	lvl3 = db.Column(db.Integer)
+	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	
+	

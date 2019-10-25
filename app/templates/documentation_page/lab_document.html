@@ -5,7 +5,7 @@
 	<div class="row" style="margin-top: 70px;">
 		<div class="col-md-3 col-sm-12 col-xs-12" style="border-right:solid 2px #808080; position:fixed; height:100%;">
 			<div id="doc_header">
-				<h4 style="font-family: serif;font-weight:bold;"><a href="#company_logo" rel="internal">{{ document.document_name }}</a></h4>
+				<h4 style="font-family: serif;font-weight:bold;"><a href="#company_logo_anchor" rel="internal">{{ document.document_name }}</a></h4>
 				<ul class="versions" style="list-style-type: circle; font-family: serif; font-size:14px">
 					<li>{{ company.company_abbrv }}-{{ document.document_no }}</li>
 					<li>Document issue date: </li>
@@ -14,25 +14,28 @@
 			</div>
 			{% if form1 %}
 			<div class="col-md-12">
-				<input type="checkbox" id="edit_checkbox" style="display:none;">
-				<p><button id="edit_status_button" style="float:left;font-size:10px;"></button></p>
 				<p class="edit_mode"><a href="#" data-toggle="modal" data-target="#create_section_modal" style="float:right;font-size:10px;">Create section</a></p>
 			</div>
 			{% endif %}
 			<br>
-			<div class="col-md-12">
+			<div class="col-md-12" style="height:60%;overflow-y:auto;overflow-x:hidden;">
 				<ul class="list-group" style="list-style-type:none;">
 				{% if sections %}
 				{% for sect in sections %}
-					<li><a href="#{{ sect.section_title }}" rel="internal">{{ sect.section_number }}. {{ sect.section_title }}</a><a class="edit_mode" href="{{ url_for('edit_section_body', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_number=sect.section_number, section_title=sect.section_title ) }}" style="float:right;"><span class="glyphicon glyphicon-edit" aria-hidden="true"></span></a></li>
+					<li><span class="col-md-10"><a href="#{{ sect.section_title }}_anchor" rel="internal">{{ sect.section_number }}. {{ sect.section_title }}</a></span><span class="edit_mode" style="float:right;"><span style="font-size:10px;margin-right: 3px;"><a href="#" data-toggle="modal" data-target="#edit_section_{{ sect.id }}_name_modal"><span class="glyphicon glyphicon-pencil" aria-hidden="true" title="edit section name"></span></a></span><span style="font-size:10px; margin-right:3px;"><a  href="{{ url_for('edit_section_body', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_number=sect.section_number, section_title=sect.section_title ) }}" ><span class="glyphicon glyphicon-edit" aria-hidden="true" title="edit section body"></span></a></span><span style="font-size:10px;"><a href="#" data-toggle="modal" data-target="#delete_section_{{ sect.id }}_modal"><span class="glyphicon glyphicon-trash" aria-hidden="true" title="delete section"></span></a></span></span></li>
 				{% endfor %}
 				{% endif %}
 				{% if section %}
 					<li><a href="#{{ section.section_title }}" rel="internal">{{ section.section_number }}. {{ section.section_title }}</a></li>
 				{% endif %}
 				</ul>
+				<div class="row" style="margin-bottom:20px;"></div>
 			</div>
 			
+			<div style="position: absolute;bottom: 88px;left: 0;">
+				<input type="checkbox" id="edit_checkbox" style="display:none;">
+				<p><button id="edit_status_button" style="float:left;font-size:8px;"></button></p>
+			</div>
 		</div>
 		<div class="col-md-9 col-sm-12 col-xs-12 main_body" style="position:absolute; margin-left: 25%; z-index: -1;">
 			<div class="row col-md-12 text-center">
@@ -42,8 +45,9 @@
 					<h2 style="font-family: serif;font-weight: bold;">{{ document.document_name }}</h2>
 				</div>
 				<div class="col-md-2" style="float:right;">
+					<span class="anchor" id="company_logo_anchor"></span>
 					{% if company.logo %}
-					<img id="company_logo" src="{{ company.logo }}" alt="{{ company.company_name }}">
+					<img  src="{{ company.logo }}" alt="{{ company.company_name }}">
 					{% else %}
 					<img src="{{ company.company_avatar(128) }}">
 					{% endif %}
@@ -54,9 +58,9 @@
 					{% if sections %}
 					{% for sect in sections %}
 					<!--to make href="#id" of section not on top of page-->
-					<span class="anchor" id="{{ sect.section_title }}"></span>
+					<span class="anchor" id="{{ sect.section_title }}_anchor"></span>
 					<section >
-						<header class="section_header"><li>{{ sect.section_title }}</header>
+						<header class="section_header"><li name="section_id_{{ sect.id }}">{{ sect.section_title }}</header>
 							<article>
 								{% if sect.body %}
 									{% for s in sect.body %}{{ s.body|safe }}{% endfor %}
@@ -69,20 +73,21 @@
 					{% if section %}
 					<section id="{{ section.section_title }}">
 						<h4>{{ section.section_number }}. {{ section.section_title }}</h4>
-							<!--div>
-								<ol>
-								{% if section.body %}
-								{% for s in section.body %}
-								<li>{{ s.section_body }}</li>
-								{% endfor %}
-								{% endif %}
-								</ol>
-							</div-->
-						
 					</section>
 					{% endif %}
 				</ol>
 			</div>
+			<div class="edit_mode" style="float:right;">
+				<form action method="post" class="form" role="form">
+					{{ form4.csrf_token() }}
+					{% for sect in sections %}
+					{{ form4.submit_section_id (value=sect.id)}}
+					{{ form4.submit_section_body_id (value=sect.body.id)}}
+					{% endfor %}
+					{{ form4.submit (class_="btn btn-default") }}
+				</form>
+			</div>
+			<div class="row" style="margin-bottom:60px;"></div>
 			{% if form2 %}
 			<div class="col-md-12">
 				<form action method="post" class="form" role="form">
@@ -123,6 +128,51 @@
 	  </div>
 	</div>
 	{% endif %}
+	{% if form3 %}
+	{% for sect in sections %}
+	<div class="modal fade" id="edit_section_{{ sect.id }}_name_modal" tabindex="-1" role="dialog" aria-labelledby="create_section_{{ sect.id }}_name_modal_label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		  </div>
+		  <div class="modal-body">
+			<form action method="post" class="form" role="form">
+			{{ form3.csrf_token() }}
+			{{ form3.section_id (value=sect.id)}}
+			{{ form3.edit_section_number.label (class_="control-label")}}
+			{{ form3.edit_section_number (class_="form-control", value=sect.section_number ) }}
+			{{ form3.edit_section_title.label (class_="control-label") }}
+			{{ form3.edit_section_title (class_="form-control", value=sect.section_title ) }}
+			<br>
+			{{ form3.edit_submit (class_="btn btn-default")}}
+			</form>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	<div class="modal fade" id="delete_section_{{ sect.id }}_modal" tabindex="-1" role="dialog" aria-labelledby="delete_section_{{ sect.id }}_modal_label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			
+		  </div>
+		  <div class="modal-body">
+			<p>Are you sure you want to delete section:</p>
+			<p><h4>{{ sect.section_number }}. {{ sect.section_title }}</h4></p>
+			<p>This section and its content will be permanently deleted.</p>
+		  </div>
+		  <div class="modal-footer">
+			<a class="btn btn-default" href="{{ url_for('delete_document_section', company_name=company.company_name, department_name=department.department_name, document_no=document.document_no, document_name=document.document_name, section_id=sect.id) }}" role="button">Delete</a>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	{% endfor %}
+	{% endif %}
+	
+	
 {% endblock %}
 
 {% block styles %}

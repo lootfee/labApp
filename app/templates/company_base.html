@@ -88,14 +88,6 @@
 
 	  gtag('config', 'UA-129673699-2');
 	</script>
-	<!-- google ads-->
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-	<script>
-	  (adsbygoogle = window.adsbygoogle || []).push({
-		google_ad_client: "ca-pub-3127407193207897",
-		enable_page_level_ads: true
-	  });
-	</script>
 	{{ super() }}
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/calculator.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/inventory.css')}}">
@@ -132,7 +124,7 @@
 	<script src="{{url_for('static', filename='js/calculator.js')}}"></script>
 	<script src="{{url_for('static', filename='js/biochem.js')}}"></script>
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
-	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	
 	<script>
 		$(document).ready(function() {
 			$('.sort_table').DataTable({

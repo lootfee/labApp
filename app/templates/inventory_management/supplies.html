@@ -5,7 +5,7 @@
 {% include 'inventory_management/inventory_manager_nav.html' %}	
     <h3 class="inventory_headers">Manage Supplies</h3>
 	<hr class="inventory_hr">
-	{% if is_inv_supervisor or company.id == 1 %}
+	{% if is_inv_supervisor %}
 	<div class="row sidenav" id="product_sidenav">
 		<div class="col-md-12">
 			<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
@@ -52,7 +52,7 @@
 	{% endif %}
 	<div class="row">
 		<div class="col-md-12">
-			{% if is_inv_supervisor or company.id == 1 %}
+			{% if is_inv_supervisor %}
 			<button type="button" class="btn btn-default" id="open_product_sidenav" aria-label="Left Align" style="float: left;">
 				<span>Register Supplies</span>
 				<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>

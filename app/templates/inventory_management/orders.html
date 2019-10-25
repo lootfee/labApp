@@ -35,7 +35,7 @@
 						{% if order.date_submitted %}
 						<td>{{ moment(order.date_submitted).format('lll') }}</td>
 						{% endif %}
-						{% if is_inv_admin or company.id == 1 %}
+						{% if is_inv_admin %}
 						{% if order.purchase_order %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ company.company_abbrv }}-PO-{{ order.purchase_order.purchase_order_no }}</a></td>
 						{% elif  order.date_submitted %}
