@@ -19,10 +19,12 @@
 				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
 				{% endif %}
 				<th class="col-md-1 admin-table">{{ form.inv_supervisor.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.qc_supervisor.label}}</th>
 				{% if user == superuser %}
 				<th class="col-md-1 admin-table">{{ form.doc_admin.label}}</th>
 				{% endif %}
 				<th class="col-md-1 admin-table">{{ form.inv_admin.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.qc_admin.label}}</th>
 				<th class="col-md-1 admin-table table-bordered">{{ form.super_admin.label}}</th>
 			</tr>
 			<tr>
@@ -33,10 +35,12 @@
 				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
 				{% endif %}
 				<td class="admin-table form-group">{{form.inv_supervisor(class_="single_check")}}</td>
+				<td class="admin-table form-group">{{form.qc_supervisor(class_="single_check")}}</td>
 				{% if user == superuser %}
 				<td class="admin-table form-group">{{form.doc_admin(class_="single_check double_check")}}</td>
 				{% endif %}
 				<td class="admin-table form-group">{{form.inv_admin(class_="single_check double_check")}}</td>
+				<td class="admin-table form-group">{{form.qc_admin(class_="single_check double_check")}}</td>
 				<td class="admin-table table-bordered form-group">{{form.super_admin}}</td>	
 			</tr>
 		</table>

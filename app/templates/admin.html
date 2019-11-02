@@ -30,6 +30,7 @@
 				</tr>
 					{% endfor %}
 				{% endif %}
+				<button class="btn btn-default" data-toggle="modal" href="#" data-target="#purchase_afiliate_role" style="float:right;">Purchase Affiliate Role</button>
 			</table>
 		</div>
 		<div class="col-md-12">
@@ -99,10 +100,99 @@
 		<p><h4>Affiliate Name: {{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ( {{ affiliate.users.username}} )</h4></p>
 	  </div>
 	  <div class="modal-footer">
-		<a class="btn btn-default" href="{{ url_for('delete_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}" role="button">Reject</a>
+		<a class="btn btn-default" href="{{ url_for('delete_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}" role="button">Reject</a>
 	  </div>
 	</div>
   </div>
 </div>	
 {% endfor %}
+<div class="modal fade" id="purchase_afiliate_role" tabindex="-1" role="dialog" aria-labelledby="{purchase_afiliate_roleLabel">
+  <div class="modal-dialog" role="document">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<p><h4>Purchase affiliate roles: </h4></p>
+	  </div>
+	  <div class="modal-body">
+		<table class="table= table-hover" style="font-size:16px;">
+			<tr>
+				<th></th>
+				<th></th>
+				<th>Quantity</th>
+			</tr>
+			<tr>
+				<td>Inventory Supervisor roles:</td>
+				<td></td>
+				<td><input class="form-control" id="inv_sup_qty"></td>
+			</tr>
+			<tr>
+				<td>QC Supervisor roles:</td>
+				<td></td>
+				<td><input class="form-control" id="qc_sup_qty"></td>
+			</tr>
+		</table>
+	  </div>
+	  <div class="modal-footer">
+		<a class="btn btn-default" id="checkout_btn" role="button">Checkout</a>
+	  </div>
+	</div>
+  </div>
+</div>	
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+      // Replace with your own public key: https://dashboard.stripe.com/test/apikeys
+      var PUBLIC_KEY = "pk_test_nxhioPDFD1HDMHC4tmP75ILv005GljK1XE";
+      // Replace with the domain you want your users to be redirected back to after payment
+      var DOMAIN = "http://localhost:5000";
+      // Replace with a SKU for your own product (created either in the Stripe Dashboard or with the API)
+      var SUBSCRIPTION_INVENTORY_SUP = "plan_G5BdQnTmlYMROY";
+      var SUBSCRIPTION_QC_SUP = "plan_5678";
+      /*if (PUBLIC_KEY === "pk_test_nxhioPDFD1HDMHC4tmP75ILv005GljK1XE") {
+        console.log(
+          "Replace the hardcoded public key with your own public key: https://dashboard.stripe.com/test/apikeys"
+        );
+      }
+      if (
+        SUBSCRIPTION_INVENTORY_SUP === "prod_G2npRlwdCRBlDN" ||
+        SUBSCRIPTION_QC_SUP === "plan_5678"
+      ) {
+        console.log(
+          "Replace the hardcoded plan ID with your own plan: https://stripe.com/docs/api/plans"
+        );
+      }*/
+      var stripe = Stripe(PUBLIC_KEY);
+      // Handle any errors from Checkout
+      var handleResult = function(result) {
+        if (result.error) {
+          var displayError = document.getElementById("error-message");
+          displayError.textContent = result.error.message;
+        }
+      };
+      var redirectToCheckout = function(planId) {
+        // Make the call to Stripe.js to redirect to the checkout page
+        // with the current quantity
+        stripe
+          .redirectToCheckout({
+            items: [{ plan: SUBSCRIPTION_INVENTORY_SUP, quantity: 1 }],
+            successUrl:
+              DOMAIN + "/admin/{{ company.company_name}}/success?session_id={CHECKOUT_SESSION_ID}",
+            cancelUrl: DOMAIN + "/canceled.html"
+          })
+          .then(handleResult);
+      };
+      document
+        .getElementById("checkout_btn")
+        .addEventListener("click", function(evt) {
+          redirectToCheckout(SUBSCRIPTION_INVENTORY_SUP);
+        });
+      /*document
+        .getElementById("pro-btn")
+        .addEventListener("click", function(evt) {
+          redirectToCheckout(SUBSCRIPTION_QC_SUP);
+        });*/
+    </script>
+
 {% endblock %}

@@ -473,24 +473,24 @@ def manage_affiliate(user_id, comp_id):
 		if form.validate_on_submit():
 			affiliate.title = form.title.data
 			affiliate.start_date = form.start_date.data
-			#affiliate.qc_supervisor = form.qc_supervisor.data
+			affiliate.qc_supervisor = form.qc_supervisor.data
 			affiliate.inv_supervisor = form.inv_supervisor.data
 			affiliate.doc_supervisor = form.doc_supervisor.data
-			#affiliate.qc_admin = form.qc_admin.data
+			affiliate.qc_admin = form.qc_admin.data
 			affiliate.inv_admin = form.inv_admin.data
 			affiliate.doc_admin = form.doc_admin.data
 			affiliate.super_admin = form.super_admin.data
-			#if form.qc_admin.data:
-			#	affiliate.qc_supervisor = True
+			if form.qc_admin.data:
+				affiliate.qc_supervisor = True
 			if form.inv_admin.data:
 				affiliate.inv_supervisor = True
 			if form.doc_admin.data:
 				affiliate.doc_supervisor = True
 			if form.super_admin.data:
-				#affiliate.qc_supervisor = True
+				affiliate.qc_supervisor = True
 				affiliate.inv_supervisor = True
 				affiliate.doc_supervisor = True
-				#affiliate.qc_admin = True
+				affiliate.qc_admin = True
 				affiliate.inv_admin = True
 				affiliate.doc_admin = True
 			db.session.commit()
@@ -499,10 +499,10 @@ def manage_affiliate(user_id, comp_id):
 	elif request.method == 'GET':
 		form.title.data = affiliate.title
 		form.start_date.data = affiliate.start_date
-		#form.qc_supervisor.data = affiliate.qc_supervisor
+		form.qc_supervisor.data = affiliate.qc_supervisor
 		form.inv_supervisor.data = affiliate.inv_supervisor
 		form.doc_supervisor.data = affiliate.doc_supervisor
-		#form.qc_admin.data = affiliate.qc_admin
+		form.qc_admin.data = affiliate.qc_admin
 		form.inv_admin.data = affiliate.inv_admin
 		form.doc_admin.data = affiliate.doc_admin
 		form.super_admin.data = affiliate.super_admin
@@ -544,11 +544,28 @@ def admin(company_name):
 		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, past_affiliates=past_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser)
 	else:
 		return redirect(url_for('company', company_name=company.company_name))
-	
+		
+
+@app.route('/admin/<company_name>/success')
+def success(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	if not is_super_admin:
+		return redirect(url_for('company', company_name=company.company_name))
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	return render_template('success.html', title='Success', superuser=superuser)
+
+		
+
 @app.route('/guides')
 def guides():
 	superuser = User.query.filter_by(id=1).first_or_404()
-	return render_template('guides.html', title='Guides', superuser=superuser)
+	return render_template('guides.html', title='Guides', superuser=superuser)	
+
 				
 @app.route('/calculators')
 def calculators():

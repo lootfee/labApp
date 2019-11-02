@@ -39,7 +39,7 @@ $(document).ready(function() {
 
 
 
-/*$(document).ready(function() {
+$(document).ready(function() {
 	$("#qc_admin").change(function(){
 		if (this.checked) {
 			$("#qc_supervisor").prop("disabled", true);
@@ -50,7 +50,7 @@ $(document).ready(function() {
 			$("#qc_supervisor").prop("checked", false);
 		}
 	});
-});*/
+});
 
 $(document).ready(function() {
 	$("#inv_admin").change(function(){
