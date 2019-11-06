@@ -30,7 +30,9 @@
 				</tr>
 					{% endfor %}
 				{% endif %}
-				<button class="btn btn-default" data-toggle="modal" href="#" data-target="#purchase_afiliate_role" style="float:right;">Purchase Affiliate Role</button>
+				{% if current_user == superuser %}
+				<!--button class="btn btn-default" data-toggle="modal" href="#" data-target="#purchase_afiliate_role" style="float:right;">Purchase Affiliate Role</button-->
+				{% endif %}
 			</table>
 		</div>
 		<div class="col-md-12">

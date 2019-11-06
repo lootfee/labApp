@@ -9,31 +9,63 @@
 	<div class="col-md-12">
 		<form action method="post" class="form" role="form">
 			{{ form.csrf_token() }}
-			<div class="col-md-4">
-				{{ form.machine.label (class_="control-label")}}
-				{{ form.machine (class_="form-control")}}
-				<br>
-				{{ form.control1.label (class_="control-label")}}
-				{{ form.control1 (class_="form-control")}}
+			<div class="col-md-11">
+				<div class="col-md-4">
+					{{ form.machine.label (class_="control-label")}}
+					{{ form.machine (class_="form-control")}}
+					<br>
+					{{ form.control1.label (class_="control-label")}}
+					{{ form.control1 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control1_mean.label (class_="control-label")}}
+					{{ form.control1_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control1_sd.label (class_="control-label")}}
+					{{ form.control1_sd (class_="form-control")}}
+					</div-->
+				</div>
+				<div class="col-md-4">
+					{{ form.analyte.label (class_="control-label")}}
+					{{ form.analyte (class_="form-control")}}
+					<br>
+					{{ form.control2.label (class_="control-label")}}
+					{{ form.control2 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control2_mean.label (class_="control-label")}}
+					{{ form.control2_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control2_sd.label (class_="control-label")}}
+					{{ form.control2_sd (class_="form-control")}}
+					</div-->
+				</div>
+				<div class="col-md-4">
+					{{ form.reagent_lot.label (class_="control-label")}}
+					{{ form.reagent_lot (class_="form-control")}}
+					<br>
+					{{ form.control3.label (class_="control-label")}}
+					{{ form.control3 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control3_mean.label (class_="control-label")}}
+					{{ form.control3_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control3_sd.label (class_="control-label")}}
+					{{ form.control3_sd (class_="form-control")}}
+					</div-->
+				</div>
 			</div>
-			<div class="col-md-4">
-				{{ form.analyte.label (class_="control-label")}}
-				{{ form.analyte (class_="form-control")}}
+			<!--div class="col-md-1">
 				<br>
-				{{ form.control2.label (class_="control-label")}}
-				{{ form.control2 (class_="form-control")}}
-			</div>
-			<div class="col-md-4">
-				{{ form.reagent_lot.label (class_="control-label")}}
-				{{ form.reagent_lot (class_="form-control")}}
-				<br>
-				{{ form.control3.label (class_="control-label")}}
-				{{ form.control3 (class_="form-control")}}
-			</div>
-				
+				{{ form.search (class_="btn btn-default")}}
+			</div-->
 			<div class="col-md-3">
 				<br>
-				<label for="my_file_input">Choose excel qc file</label>
+				<label for="my_file_input">Upload QC values from Excel</label>
 				<input type="file" id="my_file_input">
 			</div>
 			<div class="col-md-12" id="my_file_output"></div>
@@ -130,25 +162,25 @@ function handleFile(e) {
 			
 			$.each(data, function(indexR, valueR){
 						
-				var rows = "<input class='col-md-3 cDate ' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 ' name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>" + "<input class='col-md-1 qcImportData3 ' name='qc_data_lvl3'" + "value='" + data[indexR][3] + "'>";
+				var rows = "<input class='col-md-3 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 ' name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>" + "<input class='col-md-1 qcImportData3 ' name='qc_data_lvl3'" + "value='" + data[indexR][3] + "'>";
 					
 				$("#my_file_output").append(rows);
 				});	
 			}
 		else if ($("#control2").val() != 0){
-			var rowHeader = "<input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'>";
+			var rowHeader = "<input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'>";
 			$("#my_file_output").append(rowHeader);
 			$.each(data, function(indexR, valueR){
-				var rows = "<input class='col-md-2 cDate '  name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 '  name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 '  name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>";
+				var rows = "<input class='col-md-2 cDate'  name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 '  name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 '  name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>";
 						
 				$("#my_file_output").append(rows);
 			});
 		}
 		else {
-			var rowHeader = "<input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'>";
+			var rowHeader = "<input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'>";
 			$("#my_file_output").append(rowHeader);
 			$.each(data, function(indexR, valueR){
-				var rows = "<input class='col-md-2 cDate ' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" ;
+				var rows = "<input class='col-md-2 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" ;
 						
 				$("#my_file_output").append(rows);
 			});

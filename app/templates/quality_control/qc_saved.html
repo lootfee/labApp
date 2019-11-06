@@ -1,0 +1,129 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{% include 'quality_control/qc_nav.html' %}
+<hr class="inventory_hr">
+<div class="row">
+	<div class="col-md-12">
+		<form action method="post" class="form" role="form">
+			{{ form.csrf_token() }}
+			<div class="col-md-4">
+				{{ form.machine.label (class_="control-label")}}
+				{{ form.machine (class_="form-control")}}
+				<br>
+				{{ form.control1.label (class_="control-label")}}
+				{{ form.control1 (class_="form-control")}}
+			</div>
+			<div class="col-md-4">
+				{{ form.analyte.label (class_="control-label")}}
+				{{ form.analyte (class_="form-control")}}
+				<br>
+				{{ form.control2.label (class_="control-label")}}
+				{{ form.control2 (class_="form-control")}}
+			</div>
+			<div class="col-md-4">
+				{{ form.reagent_lot.label (class_="control-label")}}
+				{{ form.reagent_lot (class_="form-control")}}
+				<br>
+				{{ form.control3.label (class_="control-label")}}
+				{{ form.control3 (class_="form-control")}}
+			</div>
+				
+			<div class="col-md-3">
+				<br>
+				
+				{{ form.start_date.label (class_="control-label")}}
+				{{ form.start_date (class_="form-control")}}
+			</div>
+			<div class="col-md-3">
+				<br>
+				{{ form.end_date.label (class_="control-label")}}
+				{{ form.end_date (class_="form-control")}}
+			</div>
+			
+			<div class="col-md-12" id="my_file_output"></div>
+			<div style="float:right;">
+				<br>
+				{{ form.submit (class_="btn btn-default")}}
+			</div>
+			
+		</form>
+	</div>
+	{% if level3_data == True %}
+	<div class="col-md-12">
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Lv 3" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Lv 3" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Lv 3" readonly>
+		
+		{% for q in qc_res %}
+		<input class="col-md-1" value="{{ q.run_date }}" readonly>
+		<input class="col-md-1 decTostring" style="color:blue;" value="{{ q.lvl1 }}" readonly>
+		<input class="col-md-1 decTostring" style="color:red;" value="{{ q.lvl2 }}" readonly>
+		<input class="col-md-1 decTostring" style="color:yellow;" value="{{ q.lvl3 }}" readonly>
+		{% endfor %}
+	</div>
+	
+	{% elif level2_data == True %}
+	<div class="col-md-12">
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Lv 2" readonly>
+		
+		{% for q in qc_res %}
+		<input class="col-md-1" value="{{ q.run_date }}" readonly>
+		<input class="col-md-1 decTostring" style="color:blue;" value="{{ q.lvl1 }}" readonly>
+		<input class="col-md-1 decTostring" style="color:red;" value="{{ q.lvl2 }}" readonly>
+		{% endfor %}
+	</div>
+	{% elif level1_data == True %}
+	<div class="col-md-12">
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		<input class="col-md-1" value="Run Date" readonly>
+		<input class="col-md-1" value="Lv 1" readonly>
+		
+		{% for q in qc_res %}
+		<input class="col-md-1" value="{{ q.run_date }}" readonly>
+		<input class="col-md-1 decTostring" style="color:blue;" value="{{ q.lvl1 }}" readonly>
+		{% endfor %}
+	</div>
+	{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+
+$(document).ready(function() {
+	$(".decTostring").each(function() {
+		$(this).val(parseFloat($(this).val()));
+	});
+});
+
+</script>
+{% endblock %}

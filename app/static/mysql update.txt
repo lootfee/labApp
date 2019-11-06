@@ -1,0 +1,1 @@
+UPDATE `purchase_list` PL, `my_supplies` MS SET PL.`price` = MS.`price` WHERE PL.`my_supplies_id` = MS.id

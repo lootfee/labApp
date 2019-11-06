@@ -141,7 +141,7 @@
 			}
 					
 			{% for list in purchase_list %}
-				$("#{{ list.ref_number }}_total").html(parseFloat({{list.price }}) * parseFloat({{ list.quantity }}))
+				$("#{{ list.ref_number }}_total").html((parseFloat({{list.price }}) * parseFloat({{ list.quantity }})).toFixed(2));
 			{% endfor %}
 			
 			var sum1 = 0;

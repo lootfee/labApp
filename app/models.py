@@ -99,9 +99,9 @@ company_control_lot = db.Table('company_control_lot',
 	db.Column('control_lot_id', db.Integer, db.ForeignKey('control_lot.id')),
 )
 
-analyte_unit = db.Table('analyte_unit',
-	db.Column('analyte_id', db.Integer, db.ForeignKey('analyte.id')),
-	db.Column('unit_id', db.Integer, db.ForeignKey('unit.id')),
+company_analyte_control = db.Table('company_analyte_control',
+	db.Column('company_analyte_variables_id', db.Integer, db.ForeignKey('company_analyte_variables.id')),
+	db.Column('control_id', db.Integer, db.ForeignKey('control.id')),
 )
 
 class Company(db.Model):
@@ -762,10 +762,22 @@ class Unit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	unit = db.Column(db.String(50))
 	
-	analyte = db.relationship(
+	'''analyte = db.relationship(
 		'Analyte', secondary='analyte_unit',
 		backref=db.backref('unit', lazy='dynamic'), lazy='dynamic'
+	)'''
+	
+class CompanyAnalyteVariables(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	control = db.relationship(
+		'Control', secondary='company_analyte_control',
+		backref=db.backref('company_analyte', lazy='dynamic'), lazy='dynamic'
 	)
+	
+	unit = db.relationship('Unit', backref=db.backref('analyte', lazy='dynamic'))
 	
 class Control(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -817,16 +829,20 @@ class ControlLot(db.Model):
 class QCResult(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	run_date = db.Column(db.Date)
-	lvl1 = db.Column(db.Integer)
-	lvl2 = db.Column(db.Integer)
-	lvl3 = db.Column(db.Integer)
+	lvl1 = db.Column(db.Numeric(10,4))
+	lvl2 = db.Column(db.Numeric(10,4))
+	lvl3 = db.Column(db.Numeric(10,4))
 	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl1_mean = db.Column(db.Numeric(10,4))
+	lvl1_sd = db.Column(db.Numeric(10,4))
 	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl2_mean = db.Column(db.Numeric(10,4))
+	lvl2_sd = db.Column(db.Numeric(10,4))
 	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl3_mean = db.Column(db.Numeric(10,4))
+	lvl3_sd = db.Column(db.Numeric(10,4))
 	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
 	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
-	
-	
