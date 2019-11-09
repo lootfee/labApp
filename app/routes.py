@@ -4,7 +4,7 @@ from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues
 from datetime import datetime, timedelta, time
 from dateutil import parser
 from app.email import send_password_reset_email
@@ -608,8 +608,6 @@ def qc_variables(company_name):
 	machines = Machine.query.all()
 	#dept = company.documentation_department
 	#dept_list = [(d.id, d.department_name) for d in dept]
-	#machine = company.machine.order_by(Machine.machine_name.asc())
-	#machine_list = [(m.id, m.machine_name) for m in machine]
 	comp_analyte = company.analyte.order_by(Analyte.analyte.asc())
 	analyte_list = [(a.id, a.analyte) for a in comp_analyte]
 	comp_controls = company.control.order_by(Control.control_name.asc())
@@ -709,7 +707,53 @@ def qc_variables(company_name):
 			control.lot.append(clot_query)
 			db.session.commit()
 		return redirect(url_for('qc_variables', company_name=company.company_name))
-	return render_template('quality_control/qc_variables.html', title='Variables', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form1=form1, form2=form2, form3=form3, form4=form4, form5=form5, control_lots=control_lots, reagent_lots=reagent_lots, machines=machines)
+	form6 = QCResultForm()
+	rgt_lot = company.reagent_lot.order_by(ReagentLot.expiry.desc())
+	rgt_lot_list = [(0, '')] + [(c.id, c.lot_no) for c in rgt_lot]
+	machine = company.machine.order_by(Machine.machine_name.asc())
+	machine_list = [(m.id, m.machine_name) for m in machine]
+	control_lot = company.control_lot.order_by(ControlLot.expiry.desc())
+	ctrl_lot_list = [(0, '')] + [(c.id, c.lot_no) for c in control_lot]
+	form6.analyte.choices = analyte_list
+	form6.reagent_lot.choices = rgt_lot_list
+	form6.machine.choices = machine_list
+	form6.control1.choices = ctrl_lot_list
+	form6.control2.choices = ctrl_lot_list
+	form6.control3.choices = ctrl_lot_list
+	level1_data = False
+	level2_data = False
+	level3_data = False
+	#Control 1 2 3 are not control levels and should not be treated as such, only the number of controls that you want to encode. Do not set it as contol levels
+	if form6.submit.data:
+		analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form6.analyte.data, company_id=company.id).first()
+		if form6.control3.data:
+			level3_data = True
+			if form6.reagent_lot.data:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			else:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(values)
+			db.session.commit()
+			return redirect(url_for('qc_variables', company_name=company.company_name))
+		elif form6.control2.data:
+			level2_data = True
+			if form6.reagent_lot.data:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			else:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(values)
+			db.session.commit()
+			return redirect(url_for('qc_variables', company_name=company.company_name))
+		elif form6.control1.data:
+			level1_data = True
+			if form6.reagent_lot.data:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			else:
+				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data,  machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(values)
+			db.session.commit()
+			return redirect(url_for('qc_variables', company_name=company.company_name))
+	return render_template('quality_control/qc_variables.html', title='Variables', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form1=form1, form2=form2, form3=form3, form4=form4, form5=form5, form6=form6, control_lots=control_lots, reagent_lots=reagent_lots, machines=machines)
 
 
 @app.route('/<company_name>/quality_control/encode_results', methods=['GET', 'POST'])
@@ -742,7 +786,7 @@ def encode_qc_results(company_name):
 	form.control3.choices = ctrl_lot_list
 	if form.submit.data:
 		#analyte = Analyte.query.filter_by(id=form.analyte.data).first()
-		analyte_unit = AnalyteUnit.query.filter_by(analyte_id=form.analyte.data, company_id=company.id).first()
+		analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.analyte.data, company_id=company.id).first()
 		date_list = request.form.getlist('cDate')
 		if form.control3.data:
 			level3_list = request.form.getlist('qc_data_lvl3')
@@ -798,6 +842,7 @@ def saved_results(company_name):
 	form.control2.choices = ctrl_lot_list
 	form.control3.choices = ctrl_lot_list
 	qc_res = ''
+	qc_values = ''
 	level1_data = False
 	level2_data = False
 	level3_data = False
@@ -805,14 +850,32 @@ def saved_results(company_name):
 		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.control3.data:
 			level3_data = True
-			qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
+			if form.reagent_lot.data == 0:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).all()
+			else:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
+			qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
+			if qc_values is None:
+				qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
 		elif form.control2.data:
 			level2_data = True
-			qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
+			if form.reagent_lot.data == 0:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).all()
+			else:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
+			qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
+			if qc_values is None:
+				qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
 		elif form.control1.data:
 			level1_data = True
-			qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
-	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data)
+			if form.reagent_lot.data == 0:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).all()
+			else:
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
+			qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
+			if qc_values is None:
+				qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
+	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values=qc_values, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data)
 
 @app.route('/inventory_management_demo/overview', methods=['GET', 'POST'])	
 @login_required

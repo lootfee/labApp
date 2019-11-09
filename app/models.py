@@ -825,6 +825,24 @@ class ControlLot(db.Model):
 		'Company', secondary='company_control_lot',
 		backref=db.backref('control_lot', lazy='dynamic'), lazy='dynamic'
 	)
+	
+class QCValues(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl1_mean = db.Column(db.Numeric(10,4))
+	lvl1_sd = db.Column(db.Numeric(10,4))
+	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl2_mean = db.Column(db.Numeric(10,4))
+	lvl2_sd = db.Column(db.Numeric(10,4))
+	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl3_mean = db.Column(db.Numeric(10,4))
+	lvl3_sd = db.Column(db.Numeric(10,4))
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	
 
 class QCResult(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

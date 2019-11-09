@@ -32,6 +32,69 @@
 		</div>
 	</div>
 </div>
+<br>
+<div class="row">
+	<div class="col-md-12">
+		<h4>Encode QC Values</h4>
+		<form action method="post" class="form" role="form">
+			{{ form6.csrf_token() }}
+				<div class="col-md-4">
+					{{ form6.machine.label (class_="control-label")}}
+					{{ form6.machine (class_="form-control")}}
+					<br>
+					{{ form6.control1.label (class_="control-label")}}
+					{{ form6.control1 (class_="form-control")}}
+					<br>
+					<div class="col-md-6">
+					{{ form6.control1_mean.label (class_="control-label")}}
+					{{ form6.control1_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form6.control1_sd.label (class_="control-label")}}
+					{{ form6.control1_sd (class_="form-control")}}
+					</div>
+				</div>
+				<div class="col-md-4">
+					{{ form6.analyte.label (class_="control-label")}}
+					{{ form6.analyte (class_="form-control")}}
+					<br>
+					{{ form6.control2.label (class_="control-label")}}
+					{{ form6.control2 (class_="form-control")}}
+					<br>
+					<div class="col-md-6">
+					{{ form6.control2_mean.label (class_="control-label")}}
+					{{ form6.control2_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form6.control2_sd.label (class_="control-label")}}
+					{{ form6.control2_sd (class_="form-control")}}
+					</div>
+				</div>
+				<div class="col-md-4">
+					{{ form6.reagent_lot.label (class_="control-label")}}
+					{{ form6.reagent_lot (class_="form-control")}}
+					<br>
+					{{ form6.control3.label (class_="control-label")}}
+					{{ form6.control3 (class_="form-control")}}
+					<br>
+					<div class="col-md-6">
+					{{ form6.control3_mean.label (class_="control-label")}}
+					{{ form6.control3_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form6.control3_sd.label (class_="control-label")}}
+					{{ form6.control3_sd (class_="form-control")}}
+					</div>
+				</div>
+			<br>
+			<div style="float:right;margin-top:10px;margin-bottom:40px;">
+				{{ form6.submit (class_="btn btn-default")}}
+			</div>
+			
+		</form>
+	</div>
+	
+</div>
 
 {% endblock %}
 
