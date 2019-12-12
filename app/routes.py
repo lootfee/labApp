@@ -3,14 +3,18 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues
-from datetime import datetime, timedelta, time
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList
+from datetime import datetime, timedelta, time, date
 from dateutil import parser
 from app.email import send_password_reset_email
 from link_preview import link_preview
 import requests
-import markdown2 
+import markdown2
+import stripe
+import json
+
+stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
 # TO DO
 # - reaffiliate/rehire code
@@ -469,33 +473,83 @@ def manage_affiliate(user_id, comp_id):
 	is_my_affiliate = company.is_my_affiliate(user)
 	if not is_my_affiliate:
 		return redirect(url_for('company', company_name=company.company_name))
+	inv_subscription_qty = 0
+	plan_nickname = ''
+	inv_sup_count = company.inv_supervisor_count()
+	if company.stripe_id:
+		stripe_cust = stripe.Customer.retrieve(company.stripe_id)
+		for data in stripe_cust.subscriptions.data:
+			for item in data['items']:
+				inv_subscription_qty = item['quantity']
+				plan_nickname = item['plan']['nickname']
+	inv_sup_qty_remaining = int(inv_subscription_qty)-inv_sup_count
 	form = UserRoleForm()
 	if form.submit.data:
 		if form.validate_on_submit():
 			affiliate.title = form.title.data
 			affiliate.start_date = form.start_date.data
-			affiliate.qc_supervisor = form.qc_supervisor.data
-			affiliate.inv_supervisor = form.inv_supervisor.data
-			affiliate.doc_supervisor = form.doc_supervisor.data
-			affiliate.qc_admin = form.qc_admin.data
-			affiliate.inv_admin = form.inv_admin.data
-			affiliate.doc_admin = form.doc_admin.data
-			affiliate.super_admin = form.super_admin.data
-			if form.qc_admin.data:
-				affiliate.qc_supervisor = True
-			if form.inv_admin.data:
-				affiliate.inv_supervisor = True
-			if form.doc_admin.data:
-				affiliate.doc_supervisor = True
 			if form.super_admin.data:
-				affiliate.qc_supervisor = True
-				affiliate.inv_supervisor = True
-				affiliate.doc_supervisor = True
+				if inv_sup_qty_remaining > 0:
+					affiliate.inv_supervisor = True
+					affiliate.inv_admin = True
+					affiliate.super_admin = True
+					db.session.commit()
+					flash('Your changes has been saved!')
+					return redirect(url_for('admin', company_name=company.company_name))
+				else:
+					flash('No more inventory supervisor role available, please purchase additional inventory supervisor roles or reassign one.')
+					return redirect(url_for('manage_affiliate', user_id=affiliate.user_id, comp_id=company.id))
+				'''affiliate.qc_supervisor = True
 				affiliate.qc_admin = True
-				affiliate.inv_admin = True
-				affiliate.doc_admin = True
-			db.session.commit()
-			flash('Your changes has been saved!')
+				
+				affiliate.doc_supervisor = True
+				affiliate.doc_admin = True'''
+				
+			if form.inv_supervisor.data:
+				if inv_sup_qty_remaining > 0:
+					affiliate.inv_supervisor = form.inv_supervisor.data
+					affiliate.inv_admin = form.inv_admin.data
+					db.session.commit()
+					flash('Your changes has been saved!')
+					return redirect(url_for('admin', company_name=company.company_name))
+				else:
+					flash('No more inventory supervisor role available, please purchase additional inventory supervisor roles or reassign one.')
+					return redirect(url_for('manage_affiliate', user_id=affiliate.user_id, comp_id=company.id))
+			else:
+				if form.inv_admin.data:
+					if inv_sup_qty_remaining > 0:
+						affiliate.inv_supervisor = True
+						affiliate.inv_admin = True
+						db.session.commit()
+						flash('Your changes has been saved!')
+						return redirect(url_for('admin', company_name=company.company_name))
+					else:
+						flash('No more inventory supervisor role available, please purchase additional inventory supervisor roles or reassign one.')
+						return redirect(url_for('manage_affiliate', user_id=affiliate.user_id, comp_id=company.id))
+				else:
+					affiliate.inv_supervisor = form.inv_supervisor.data
+					affiliate.inv_admin = form.inv_admin.data
+					affiliate.super_admin = form.super_admin.data
+					db.session.commit()
+					flash('Your changes has been saved!')
+					return redirect(url_for('admin', company_name=company.company_name))
+			'''affiliate.qc_supervisor = form.qc_supervisor.data
+			affiliate.qc_admin = form.qc_admin.data
+			affiliate.doc_supervisor = form.doc_supervisor.data
+			affiliate.doc_admin = form.doc_admin.data
+			affiliate.super_admin = form.super_admin.data'''
+			
+			
+			'''if form.qc_admin.data:
+				affiliate.qc_supervisor = True
+			
+			if form.doc_admin.data:
+				affiliate.doc_supervisor = True'''
+			
+				
+				
+			#db.session.commit()
+			#flash('Your changes has been saved!')
 			return redirect(url_for('admin', company_name=company.company_name))
 	elif request.method == 'GET':
 		form.title.data = affiliate.title
@@ -507,7 +561,7 @@ def manage_affiliate(user_id, comp_id):
 		form.inv_admin.data = affiliate.inv_admin
 		form.doc_admin.data = affiliate.doc_admin
 		form.super_admin.data = affiliate.super_admin
-	return render_template('manage_affiliate_role.html', user=user, form=form, company=company, affiliate=affiliate, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser)
+	return render_template('manage_affiliate_role.html', user=user, form=form, company=company, affiliate=affiliate, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser, inv_sup_qty_remaining=inv_sup_qty_remaining, plan_nickname=plan_nickname)
 
 @app.route('/request_affiliate/<company_name>', methods=['GET', 'POST'])
 @login_required
@@ -527,24 +581,148 @@ def request_affiliate(company_name):
 @app.route('/admin/<company_name>', methods=['GET', 'POST'])
 @login_required
 def admin(company_name):
-	form = UserRoleForm()
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	affiliates = Affiliates.query.filter(Affiliates.start_date.isnot(None)).filter_by(company_id=company.id, end_date=None).all()
-	#for affiliate in affiliates:
-	#	affiliate.this_affiliate = affiliate.users.username
-	#	this_aff = affiliate.this_affiliate
+	inv_sup_count = company.inv_supervisor_count()
 	pending_affiliates = Affiliates.query.filter_by(company_id=company.id, start_date=None).all()
 	past_affiliates = Affiliates.query.filter(Affiliates.end_date.isnot(None), Affiliates.start_date.isnot(None)).filter_by(company_id=company.id).order_by(Affiliates.start_date.desc()).all()
+	inv_subscription_qty = 0
+	plan_nickname = ''
+	if company.stripe_id:
+		stripe_cust = stripe.Customer.retrieve(company.stripe_id)
+		for data in stripe_cust.subscriptions.data:
+			for item in data['items']:
+				inv_subscription_qty = item['quantity']
+				plan_nickname = item['plan']['nickname']
+				#print(item['plan']['nickname'])
+				#print(item['quantity'])
+			#print(data['items'])
+		#print(stripe_cust)
+	inv_sup_qty_remaining = int(inv_subscription_qty)-inv_sup_count
+	form = StripeIDForm()
+	if form.validate_on_submit():
+		company.stripe_id = form.stripe_id.data
+		db.session.commit()
+		return redirect(url_for('admin', company_name=company.company_name))
+	elif request.method == 'GET':
+		form.stripe_id.data = company.stripe_id
 	is_super_admin = company.is_super_admin(user)
 	if not is_super_admin:
 		return redirect(url_for('company', company_name=company.company_name))
 	is_my_affiliate = company.is_my_affiliate(user)
 	if is_my_affiliate:
-		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, past_affiliates=past_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser)
+		return render_template('admin.html', title='Admin', user=user, form=form, company=company, affiliates=affiliates, pending_affiliates=pending_affiliates, past_affiliates=past_affiliates, is_my_affiliate=is_my_affiliate, is_super_admin=is_super_admin, superuser=superuser, inv_subscription_qty=inv_subscription_qty, plan_nickname=plan_nickname, inv_sup_qty_remaining=inv_sup_qty_remaining)
 	else:
 		return redirect(url_for('company', company_name=company.company_name))
+
+
+#-------------------------------------------------------------------------------------------------
+@app.route('/public-key', methods=['GET'])
+def get_public_key():
+    return jsonify(publicKey=app.config['STRIPE_PUBLISHABLE_KEY'])
+	
+@app.route('/create-customer', methods=['POST'])
+def create_customer():
+    # Reads application/json and returns a response
+    data = json.loads(request.data)
+    paymentMethod = data['payment_method']
+    print(paymentMethod)
+    try:
+        # This creates a new Customer and attaches the PaymentMethod in one API call.
+        customer = stripe.Customer.create(
+            payment_method=paymentMethod,
+            email=data['email'],
+            invoice_settings={
+                'default_payment_method': paymentMethod
+            }
+        )
+        # At this point, associate the ID of the Customer object with your
+        # own internal representation of a customer, if you have one.
+        print(customer)
+
+        # Subscribe the user to the subscription created
+        subscription = stripe.Subscription.create(
+            customer=customer.id,
+            items=[
+                {
+                    "plan": os.getenv("SUBSCRIPTION_PLAN_ID"),
+                },
+            ],
+            expand=["latest_invoice.payment_intent"]
+        )
+        return jsonify(subscription)
+    except Exception as e:
+        return jsonify(e), 403
+
+
+@app.route('/subscription', methods=['POST'])
+def getSubscription():
+    # Reads application/json and returns a response
+    data = json.loads(request.data)
+    try:
+        subscription = stripe.Subscription.retrieve(data['subscriptionId'])
+        return jsonify(subscription)
+    except Exception as e:
+        return jsonify(e), 403
+		
+
+#-----------------------------------------------------------------------------------------
+
+#stripe checkeout server side
+@app.route('/setup', methods=['GET'])
+@login_required
+def get_publishable_key():
+    return jsonify({'publicKey': app.config['STRIPE_PUBLISHABLE_KEY'], 'invPlan': app.config['INV_SUP_SUBSCRIPTION_PLAN_ID']})
+	#return jsonify({'publicKey': os.getenv('STRIPE_PUBLISHABLE_KEY'), 'basicPlan': os.getenv('BASIC_PLAN_ID'), 'proPlan': os.getenv('PRO_PLAN_ID')})
+
+# Fetch the Checkout Session to display the JSON result on the success page
+@app.route('/checkout-session', methods=['GET'])
+@login_required
+def get_checkout_session():
+    id = request.args.get('sessionId')
+    checkout_session = stripe.checkout.Session.retrieve(id)
+    return jsonify(checkout_session)
+	
+@app.route('/create-checkout-session', methods=['GET','POST'])
+def create_checkout_session():
+    #data = json.loads(request.data)
+    domain_url = app.config['DOMAIN']
+
+    try:
+        # Create new Checkout Session for the order
+        # Other optional params include:
+        # [billing_address_collection] - to display billing address details on the page
+        # [customer] - if you have an existing Stripe Customer ID
+        # [customer_email] - lets you prefill the email input in the form
+        # For full details see https:#stripe.com/docs/api/checkout/sessions/create
+
+        # ?session_id={CHECKOUT_SESSION_ID} means the redirect will have the session ID set as a query param
+        checkout_session = stripe.checkout.Session.create(
+            success_url=domain_url +
+            "/success.html?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=domain_url + "/canceled.html",
+            payment_method_types=["card"],
+			subscription_data={"items": [{"plan": app.config['INV_SUP_SUBSCRIPTION_PLAN_ID']}]}
+            #subscription_data={"items": [{"plan": data['planId']}]}
+        )
+        return jsonify({'sessionId': checkout_session['id']})
+    except Exception as e:
+        return jsonify(e), 40
+
+@app.route('/admin/<company_name>/checkout')
+def checkout(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	if not is_super_admin:
+		return redirect(url_for('company', company_name=company.company_name))
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	return render_template('checkout.html', title='Checkout', superuser=superuser, is_my_affiliate=is_my_affiliate, company=company, is_super_admin=is_super_admin)
 		
 
 @app.route('/admin/<company_name>/success')
@@ -560,7 +738,8 @@ def success(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	return render_template('success.html', title='Success', superuser=superuser)
 
-		
+#----------------------------------------------------------------------------------------------------------------		
+
 
 @app.route('/guides')
 def guides():
@@ -638,11 +817,11 @@ def qc_variables(company_name):
 			if unit_query is None:
 				unit = Unit(unit=form2.unit.data)
 				db.session.add(unit)
-				analyte_unit = AnalyteUnit(unit_id=unit.id, company_id=company.id, analyte_id=analyte.id)
+				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte.id)
 				db.session.add(analyte_unit)
 				db.session.commit()
 			else:
-				analyte_unit = AnalyteUnit(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte.id)
+				analyte_unit = CompanyAnalyteVariables(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte.id)
 				db.session.add(analyte_unit)
 				db.session.commit()
 		else:
@@ -651,11 +830,11 @@ def qc_variables(company_name):
 			if unit_query is None:
 				unit = Unit(unit=form2.unit.data)
 				db.session.add(unit)
-				analyte_unit = AnalyteUnit(unit_id=unit.id, company_id=company.id, analyte_id=analyte.id)
+				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte_query.id)
 				db.session.add(analyte_unit)
 				db.session.commit()
 			else:
-				analyte_unit = AnalyteUnit(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte.id)
+				analyte_unit = CompanyAnalyteVariables(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte_query.id)
 				db.session.add(analyte_unit)
 				db.session.commit()
 		return redirect(url_for('qc_variables', company_name=company.company_name))
@@ -729,27 +908,27 @@ def qc_variables(company_name):
 		if form6.control3.data:
 			level3_data = True
 			if form6.reagent_lot.data:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			else:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			db.session.add(values)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		elif form6.control2.data:
 			level2_data = True
 			if form6.reagent_lot.data:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			else:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			db.session.add(values)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		elif form6.control1.data:
 			level1_data = True
 			if form6.reagent_lot.data:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.machine.data, analyte_id=form6.analyte.data, reagent_lot_id=form6.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			else:
-				values = QCValues(lvl1_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data,  machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data,  machine_id=form6.machine.data, analyte_id=form6.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			db.session.add(values)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))
@@ -793,23 +972,36 @@ def encode_qc_results(company_name):
 			level2_list = request.form.getlist('qc_data_lvl2')
 			level1_list = request.form.getlist('qc_data_lvl1')
 			for i in range(0, len(date_list)):
-				qc_results = QCResult(run_date=date_list[i], lvl1=level1_list[i], lvl2=level2_list[i], lvl3=level3_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				#if date_list[i] is datetime.date:
+				date_list[i] = parser.parse(date_list[i])
+				if form.reagent_lot.data == 0:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl2=level2_list[i], lvl3=level3_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				else:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl2=level2_list[i], lvl3=level3_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 				db.session.add(qc_results)
 				db.session.commit()
 		elif form.control2.data:
 			level2_list = request.form.getlist('qc_data_lvl2')
 			level1_list = request.form.getlist('qc_data_lvl1')
 			for i in range(0, len(date_list)):
-				print(level1_list[i] ,level2_list[i])
+				#if date_list[i] is datetime.date:
 				date_list[i] = parser.parse(date_list[i])
-				qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl2=level2_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				if form.reagent_lot.data == 0:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl2=level2_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data,  company_id=company.id, unit_id=analyte_unit.unit.id)
+				else:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl2=level2_list[i], lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 				db.session.add(qc_results)
 				db.session.commit()
 		elif form.control1.data:
 			level1_list = request.form.getlist('qc_data_lvl1')
 			for i in range(0, len(date_list)):
+				#if date_list[i] is datetime.date:
+				#	print(date_list[i])
 				date_list[i] = parser.parse(date_list[i])
-				qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				if form.reagent_lot.data == 0:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				else:
+					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 				db.session.add(qc_results)
 				db.session.commit()
 		return redirect(url_for('encode_qc_results', company_name=company_name))
@@ -842,7 +1034,9 @@ def saved_results(company_name):
 	form.control2.choices = ctrl_lot_list
 	form.control3.choices = ctrl_lot_list
 	qc_res = ''
-	qc_values = ''
+	qc_values1 = ''
+	qc_values2 = ''
+	qc_values3 = ''
 	level1_data = False
 	level2_data = False
 	level3_data = False
@@ -861,11 +1055,12 @@ def saved_results(company_name):
 			level2_data = True
 			if form.reagent_lot.data == 0:
 				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).all()
+				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
+				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
 			else:
 				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).all()
-			qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
-			if qc_values is None:
-				qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
+				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data,machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
+				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()				
 		elif form.control1.data:
 			level1_data = True
 			if form.reagent_lot.data == 0:
@@ -875,7 +1070,7 @@ def saved_results(company_name):
 			qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, reagent_lot_id=form.reagent_lot.data, company_id=company.id).first()
 			if qc_values is None:
 				qc_values = QCValues.query.filter_by(lvl1_lot=form.control1.data, machine_id=form.machine.data, analyte_id=form.analyte.data, company_id=company.id).first()
-	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values=qc_values, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data)
+	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values1=qc_values1, qc_values2=qc_values2, qc_values3=qc_values3, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data)
 
 @app.route('/inventory_management_demo/overview', methods=['GET', 'POST'])	
 @login_required
@@ -1154,7 +1349,7 @@ def consume_item(company_name, ref_number, id):
 	for i in item_query:
 		i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
 		i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
-		i.datas = str(i.lot_num) + " - " + str(i.id) +  " / " + str(i.expiry.strftime('%d-%m-%Y'))
+		i.datas = str(i.lot_num) + " - " + str(i.seq_no) +  " / " + str(i.expiry.strftime('%d-%m-%Y'))
 	form = ConsumeItemForm()
 	lot_list = [(i.id, i.datas) for i in item_query]
 	form.lot_numbers.choices = lot_list
@@ -1166,6 +1361,156 @@ def consume_item(company_name, ref_number, id):
 		db.session.commit()
 		return redirect(url_for('inventory', company_name=company.company_name))
 	return render_template('inventory_management/consume.html', title='Consume supply', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, product=product, item_query=item_query, form=form)
+	
+@app.route('/<company_name>/inventory_management/internal', methods=['GET', 'POST'])
+@login_required
+def internal(company_name):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	is_super_admin = company.is_super_admin(user)
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
+	form = InternalRequestForm()
+	dept = company.departments
+	dept_list = [(d.id, d.name) for d in dept]
+	form.from_department.choices = dept_list
+	form.to_department.choices = dept_list
+	if form.validate_on_submit():
+		from_dept = Department.query.filter_by(id=form.from_department.data).first()
+		#to_dept = Department.query.filter_by(id=form.to_department.data).first()
+		request_n = from_dept.abbrv + "-" + datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+		internal_request = InternalRequest(request_no=request_n, company_id=company.id, from_dept=form.from_department.data, to_dept=form.to_department.data)
+		db.session.add(internal_request)
+		internal_request.internal_request_creator.append(user)
+		db.session.commit()
+		return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))
+	internal_requests = InternalRequest.query.filter_by(company_id=company.id).order_by(InternalRequest.date_created.desc()).all()
+	for r in internal_requests:
+		n = 0
+		r.internal_request_complete = False
+		for l in r.request_list:
+			if l.received_quantity is None:
+				l.received_quantity = 0;
+			if l.supplied_quantity is None:
+				l.supplied_quantity = 0;
+			if l.received_quantity >= l.supplied_quantity:
+				n += 1
+			if len(r.request_list) == n:
+				r.internal_request_complete = True
+			print(r.internal_request_complete, l.id, len(r.request_list), n)
+	return render_template('inventory_management/internal.html', title='Internal', user=user, superuser=superuser, company=company, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, internal_requests=internal_requests)
+	
+@app.route('/<company_name>/inventory_management/create_internal_request/<request_no>', methods=['GET', 'POST'])
+@login_required
+def create_internal_request(company_name, request_no):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	internal_request = InternalRequest.query.filter_by(request_no=request_no, company_id=company.id).first_or_404()
+	request_list = InternalRequestList.query.filter_by(internal_request_id=internal_request.id, company_id=company.id).all()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_super_admin = company.is_super_admin(user)
+	is_inv_admin = company.is_inv_admin(user)
+	is_inv_supervisor = company.is_inv_supervisor(user)
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
+	dept = company.departments.order_by(Department.name.asc())
+	from_dept_abbrv = Department.query.filter_by(id=internal_request.from_dept).first().abbrv
+	to_dept_abbrv = Department.query.filter_by(id=internal_request.to_dept).first().abbrv
+	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
+	for my_s in my_supplies:
+		my_s.from_item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, department_id=internal_request.from_dept, date_used=None).count()
+		my_s.to_item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, department_id=internal_request.to_dept, date_used=None).count()
+		my_s.from_dept = MyDepartmentSupplies.query.filter_by(company_id=company.id, my_supplies_id=my_s.id, department_id=internal_request.from_dept).all()
+		'''my_s.to_dept = MyDepartmentSupplies.query.filter_by(company_id=company.id, my_supplies_id=my_s.id, department_id=internal_request.to_dept).all()
+		for fd in my_s.from_dept:
+			#my_ds.department = Department.query.filter_by(id=my_ds.department_id).first()
+			fd.item_count = Item.query.filter_by(my_supplies_id=my_s.id, product_id=my_s.product_id, company_id=company.id, department_id=my_ds.department_id, date_used=None).count()'''
+	for list in request_list:
+		list.requested_by = User.query.filter_by(id=list.user_id).first().username
+		list.from_item_count = Item.query.filter_by(my_supplies_id=list.my_supplies_id, company_id=company.id, department_id=internal_request.from_dept, date_used=None).count()
+		list.to_item_count = Item.query.filter_by(my_supplies_id=list.my_supplies_id, company_id=company.id, department_id=internal_request.to_dept, date_used=None).count()
+		list.lot_list = Item.query.filter_by(my_supplies_id=list.my_supplies_id, company_id=company.id, department_id=internal_request.to_dept, date_used=None).all()
+		for i in list.lot_list:
+			i.lot_num = Lot.query.filter_by(id=i.lot_id).first().lot_no
+			i.expiry = Lot.query.filter_by(id=i.lot_id).first().expiry
+	form = OrderListForm()
+	if form.save.data:
+		supply_id_list = request.form.getlist('supply_id')
+		refnum_list = request.form.getlist('refnum')
+		name_list = request.form.getlist('name')
+		qty_list = request.form.getlist('qty')
+		for i in range(0, len(refnum_list) ):
+			list = InternalRequestList(ref_number=refnum_list[i], name=name_list[i], quantity=qty_list[i], my_supplies_id=supply_id_list[i], internal_request_id=internal_request.id, user_id=user.id, company_id=company.id)
+			db.session.add(list)
+			db.session.commit()
+		return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))
+	if form.submit.data:
+		internal_request.request_submitted_by.append(user)
+		internal_request.date_submitted = datetime.utcnow()
+		db.session.commit()
+		return redirect (url_for('internal', company_name=company.company_name))
+	form2 = InternalRequestTransferForm()
+	if form2.transfer.data:
+		list_id = request.form.getlist('list_id')
+		transfer_qty = request.form.getlist('transfer_qty')
+		internal_request.date_transferred = datetime.utcnow()
+		db.session.commit()
+		for i in range(0, len(list_id) ):
+			list_i = InternalRequestList.query.filter_by(id=list_id[i]).first()
+			list_i.request_transferred_by.append(user)
+			list_i.supplied_quantity = transfer_qty[i]
+			list_i.date_transferred = datetime.utcnow()
+			db.session.commit()
+		return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))
+	return render_template('inventory_management/create_internal_request.html', title='Create Requests', user=user, superuser=superuser, company=company, my_supplies=my_supplies, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, internal_request=internal_request, request_list=request_list, form=form, form2=form2, dept=dept, from_dept_abbrv=from_dept_abbrv, to_dept_abbrv=to_dept_abbrv)
+	
+'''@app.route('/<company_id>/<request_no>/transfer_item/<int:irl_id>', methods=['GET', 'POST'])
+@login_required	
+def transfer_item(company_id, request_no, irl_id):
+	company = Company.query.filter_by(id=company_id).first_or_404()
+	internal_request = InternalRequest.query.filter_by(request_no=request_no, company_id=company.id).first_or_404()
+	irl_item = InternalRequestList.query.filter_by(id=irl_id).first()
+	#irl_item.date_transferred = datetime.utcnow()
+	#irl_item.supplied_quantity = qty
+	#irl_item.request_transferred_by.append(current_user)
+	#db.session.commit()
+	qty = request.form.get('transfer_qty_' + str(irl_id))
+	print(qty)
+	return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))'''
+	
+@app.route('/<company_id>/<request_no>/receive_item/<int:irl_id>/<int:item_id>')
+@login_required	
+def receive_item(company_id, request_no, irl_id, item_id):
+	company = Company.query.filter_by(id=company_id).first_or_404()
+	internal_request = InternalRequest.query.filter_by(request_no=request_no, company_id=company.id).first_or_404()
+	irl_item = InternalRequestList.query.filter_by(id=irl_id).first()
+	item = Item.query.filter_by(id=item_id).first()
+	if irl_item.received_quantity is None:
+		irl_item.received_quantity = 1
+	else:
+		irl_item.received_quantity += 1
+	irl_item.date_received = datetime.utcnow()
+	irl_item.request_received_by.append(current_user)
+	item.department_id = internal_request.from_dept
+	db.session.commit()
+	return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))
+	
+@app.route('/<company_name>/<request_no>/remove_request_item/<int:id>')
+@login_required	
+def remove_request_item(company_name, request_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	internal_request = InternalRequest.query.filter_by(request_no=request_no, company_id=company.id).first_or_404()
+	item = InternalRequestList.query.filter_by(id=id, company_id=company.id).first()
+	db.session.delete(item)
+	db.session.commit()
+	return redirect (url_for('create_internal_request', company_name=company.company_name, request_no=internal_request.request_no))
 
 @app.route('/<company_name>/inventory_management/orders', methods=['GET', 'POST'])
 @login_required
@@ -1407,8 +1752,9 @@ def remove_purchase_item(company_name, purchase_order_no, id):
 def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, supplier_id=delivery.supplier_id).all()
+	d_supplier = Supplier.query.filter_by(id=delivery.supplier_id).first().name
 	for list in purchase_list:
 		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
 		list.delivery_delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id, delivery_id=delivery.id).count()
@@ -1428,7 +1774,7 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 		is_my_affiliate = company.is_my_affiliate(user)
 		if not is_my_affiliate:
 			return redirect(url_for('company', company_name=company.company_name))
-	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, delivery=delivery)		
+	return render_template('inventory_management/accept_delivery.html', title='Accept Delivery', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, delivery=delivery, d_supplier=d_supplier)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/receive_delivery_item/<delivery_order_no>/<int:id>', methods=['GET', 'POST'])
@@ -1684,8 +2030,8 @@ def inventory_accounts(company_name):
 	is_inv_admin = company.is_inv_admin(user)
 	is_inv_supervisor = company.is_inv_supervisor(user)
 	if company.id is not 1:
-		is_my_affiliate = company.is_my_affiliate(user)
-		if not is_my_affiliate:
+		is_inv_admin = company.is_inv_admin(user)
+		if not is_inv_admin:
 			return redirect(url_for('company', company_name=company.company_name))
 	return render_template('inventory_management/inventory_accounts.html', title='Accounts', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
 

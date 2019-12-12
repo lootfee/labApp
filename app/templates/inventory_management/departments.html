@@ -27,7 +27,9 @@
 					{% for depts in company.departments %}
 					<tr>
 						<td>{{ depts.name }} ({{ depts.abbrv }})</td>
+						{% if is_inv_supervisor %}
 						<td><a href="{{ url_for('link_supplies', company_name=company.company_name, dept_id=depts.id) }}">Link supplies</a></td>
+						{% endif %}
 						{% if is_inv_admin %}
 						<td class="del-edit-btn"><a data-toggle="modal" href="#" data-target="#remove_{{ depts.id }}"><span class="glyphicon glyphicon-trash" aria-hidden="true" title="Remove department"></span></a></td>
 						{% endif %}

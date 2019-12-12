@@ -8,7 +8,7 @@
 	<hr class="inventory_hr">
 	<div class="row">
 		<div class="col-md-12">
-			<table class="text-center">
+			<table class="text-center table-bordered table-hover">
 				<tr>
 					<th class="col-md-2">Order ID</th>
 					<th class="col-md-1">Created by</th>
@@ -29,17 +29,26 @@
 						{% if order.date_created %}
 						<td>{{ moment(order.date_created).format('lll') }}</td>
 						{% endif %}
+						{% if order.order_submitted_by %}
 						{% for s in order.order_submitted_by %}
 						<td>{{ s.username }}</td>
 						{% endfor %}
+						{% else %}
+						<td></td>
+						{% endif %}
 						{% if order.date_submitted %}
 						<td>{{ moment(order.date_submitted).format('lll') }}</td>
+						{% else %}
+						<td></td>
+						<td></td>
 						{% endif %}
-						{% if is_inv_admin %}
+						{% if is_inv_admin or company.id == 1 %}
 						{% if order.purchase_order %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=order.purchase_order.purchase_order_no)}}">{{ company.company_abbrv }}-PO-{{ order.purchase_order.purchase_order_no }}</a></td>
 						{% elif  order.date_submitted %}
 						<td><button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#create_purchase_modal_{{ order.order_no }}">Create Purchase Order</button></td>
+						{% else %}
+						<td></td>
 						{% endif %}
 						{% endif %}
 					</tr>
@@ -63,6 +72,7 @@
 			</div>
 		  </div>
 		</div>
+		{% if is_inv_admin or company.id == 1 %}
 		{% if orders %}
 		{% for order in orders %}
 		<div class="modal fade" id="create_purchase_modal_{{ order.order_no }}" tabindex="-1" role="dialog">
@@ -92,6 +102,7 @@
 		  </div>
 		</div>
 		{% endfor %}
+		{% endif %}
 		{% endif %}
 	</div>   
 	

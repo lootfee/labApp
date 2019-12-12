@@ -90,7 +90,9 @@
 					<th>Description</th>
 					<th>Storage</th>
 					<th>Type</th>
+					{% if is_inv_admin %}
 					<th>Price</th>
+					{% endif %}
 					<th>Supplier</th>
 					<th>Status</th>
 					{% if is_inv_admin %}
@@ -106,7 +108,9 @@
 						<td>{{ my_s.description }}</td>
 						<td>{{ my_s.storage_req }}</td>
 						<td>{{ my_s.type }}</td>
+						{% if is_inv_admin %}
 						<td>{{ my_s.price }}</td>
+						{% endif %}
 						<td>{{ my_s.supplier_name }}</td>
 						{% if my_s.active == True %}
 						<td class="success">Active</td>

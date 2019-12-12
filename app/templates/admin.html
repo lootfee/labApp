@@ -10,7 +10,14 @@
 	
 	<div class="row">
 		<div class="col-md-12">
-			<h4>Manage Affiliates</h4>
+			<h3>Manage Affiliates</h3>
+			{% if company.stripe_id %}
+			<h4>Current subscriptions: {{ plan_nickname }} - {{ inv_subscription_qty }} roles, {{ inv_sup_qty_remaining }} available</h4>
+			{% else %}
+			<h4>You are currently using www.labapp.tech for free.</h4>
+			<p>The free plan includes 1 inventory supervisor role.</p>
+			<p>To purchase additional supervisory roles, please contact us at sales@labapp.tech</p>
+			{% endif %}
 			<table class="table table-striped table-hover sort_table">
 			{% if affiliates %}
 				<thead>
@@ -24,15 +31,13 @@
 					{% for affiliate in affiliates %}
 				<tr>
 					<td class="col-md-3 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname }} {{ affiliate.users.lastname}} ({{ affiliate.users.username}})</a></td>
-					<td class="col-md-3 admin-table">{{ affiliate.title}}</a></td>
+					<td class="col-md-3 admin-table"> {{ affiliate.title}} </a>{% if affiliate.super_admin %}<a href="#" title="Inventory Supervisor"> IS</a><a href="#" title="Inventory Admin"> IA</a><a href="#" title="Super Admin"> SA</a>{% elif affiliate.inv_admin %}<a href="#" title="Inventory Supervisor"> IS</a><a href="#" title="Inventory Admin"> IA</a>{% elif affiliate.inv_supervisor %}<a href="#" title="Inventory Supervisor"> IS</a>{% endif %}</td>
 					<td class="admin-table"><a href="{{ url_for('manage_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}" >Edit Role</a></td>
 					<td class="admin-table"><a data-toggle="modal" href="#" data-target="#retire_{{ affiliate.user_id }}">Retire</a></td>
 				</tr>
 					{% endfor %}
 				{% endif %}
-				{% if current_user == superuser %}
-				<!--button class="btn btn-default" data-toggle="modal" href="#" data-target="#purchase_afiliate_role" style="float:right;">Purchase Affiliate Role</button-->
-				{% endif %}
+
 			</table>
 		</div>
 		<div class="col-md-12">
@@ -48,8 +53,8 @@
 				{% for pending_affiliate in pending_affiliates %}
 				<tr>
 					<td class="col-md-4 admin-table"><a href="{{ url_for('user', username=pending_affiliate.users.username) }}">{{ pending_affiliate.users.firstname}} {{ pending_affiliate.users.lastname}} ({{ pending_affiliate.users.username}})</a></td>
-					<td class="col-md-1 admin-table"><a href="{{ url_for('accept_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}">Accept</a></td>
-					<td class="col-md-1 admin-table"><a data-toggle="modal" href="#" data-target="#reject_{{ affiliate.user_id }}">Reject</a></td>
+					<td class="col-md-1 admin-table"><a data-toggle="modal" href="#" data-target="#accept_{{ pending_affiliate.user_id }}">Accept</a></td>
+					<td class="col-md-1 admin-table"><a data-toggle="modal" href="#" data-target="#reject_{{ pending_affiliate.user_id }}">Reject</a></td>
 				</tr>
 				{% endfor %}
 			</table>
@@ -70,6 +75,12 @@
 			</table>
 		{% endif %}
 		</div>
+		{% if current_user == superuser %}
+		<button class="btn btn-default" data-toggle="modal" href="#" data-target="#purchase_afiliate_role" style="float:right;">Assign Supervisor Role</button>
+		<div class="col-md-6">
+			{{ wtf.quick_form(form) }}
+		</div>
+		{% endif %}
 	</div>
 </div>
 {% for affiliate in affiliates %}
@@ -91,7 +102,25 @@
 	</div>
   </div>
 </div>	
-<div class="modal fade" id="reject_{{ affiliate.user_id }}" tabindex="-1" role="dialog" aria-labelledby="{{ affiliate.user_id }}Label">
+{% endfor %}
+{% for pending_affiliate in pending_affiliates %}
+<div class="modal fade" id="accept_{{ pending_affiliate.user_id }}" tabindex="-1" role="dialog" aria-labelledby="accept_{{ pending_affiliate.user_id }}Label">
+  <div class="modal-dialog" role="document">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<p><h4>Accept Affiliate Request: </h4></p>
+	  </div>
+	  <div class="modal-body">
+		<p><h4>Affiliate Name: {{ pending_affiliate.users.firstname }} {{ pending_affiliate.users.lastname }} ( {{ pending_affiliate.users.username}} )</h4></p>
+	  </div>
+	  <div class="modal-footer">
+		<a class="btn btn-default" href="{{ url_for('accept_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}" role="button">Accept</a>
+	  </div>
+	</div>
+  </div>
+</div>	
+<div class="modal fade" id="reject_{{ pending_affiliate.user_id }}" tabindex="-1" role="dialog" aria-labelledby="reject_{{ pending_affiliate.user_id }}Label">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-header">
@@ -99,21 +128,22 @@
 		<p><h4>Reject Affiliate Request: </h4></p>
 	  </div>
 	  <div class="modal-body">
-		<p><h4>Affiliate Name: {{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ( {{ affiliate.users.username}} )</h4></p>
+		<p><h4>Affiliate Name: {{ pending_affiliate.users.firstname }} {{ pending_affiliate.users.lastname }} ( {{ pending_affiliate.users.username}} )</h4></p>
 	  </div>
 	  <div class="modal-footer">
-		<a class="btn btn-default" href="{{ url_for('delete_affiliate', user_id=affiliate.user_id, comp_id=affiliate.company_id) }}" role="button">Reject</a>
+		<a class="btn btn-default" href="{{ url_for('delete_affiliate', user_id=pending_affiliate.user_id, comp_id=pending_affiliate.company_id) }}" role="button">Reject</a>
 	  </div>
 	</div>
   </div>
 </div>	
 {% endfor %}
+{% if current_user == superuser %}
 <div class="modal fade" id="purchase_afiliate_role" tabindex="-1" role="dialog" aria-labelledby="{purchase_afiliate_roleLabel">
   <div class="modal-dialog" role="document">
 	<div class="modal-content">
 	  <div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-		<p><h4>Purchase affiliate roles: </h4></p>
+		<p><h4>Assign supervisor roles: </h4></p>
 	  </div>
 	  <div class="modal-body">
 		<table class="table= table-hover" style="font-size:16px;">
@@ -125,33 +155,101 @@
 			<tr>
 				<td>Inventory Supervisor roles:</td>
 				<td></td>
-				<td><input class="form-control" id="inv_sup_qty"></td>
+				<td><input class="form-control" id="inv_sup_qty" value=""></td>
 			</tr>
-			<tr>
+			<!--tr>
 				<td>QC Supervisor roles:</td>
 				<td></td>
 				<td><input class="form-control" id="qc_sup_qty"></td>
-			</tr>
+			</tr-->
 		</table>
 	  </div>
 	  <div class="modal-footer">
-		<a class="btn btn-default" id="checkout_btn" role="button">Checkout</a>
+		<a class="btn btn-default" id="checkout_inv_btn" role="button">Checkout</a>
+		<a class="btn btn-default" href="{{url_for('checkout', company_name=company.company_name)}}" role="button">Checkout</a>
 	  </div>
 	</div>
   </div>
-</div>	
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script>
+// Create a Checkout Session with the selected plan ID
+/*var createCheckoutSession = function(planId) {
+  return fetch("/create-checkout-session", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      planId: planId
+    })
+  }).then(function(result) {
+    return result.json();
+  });
+};
+
+// Handle any errors returned from Checkout
+var handleResult = function(result) {
+  if (result.error) {
+    var displayError = document.getElementById("error-message");
+    displayError.textContent = result.error.message;
+  }
+};*/
+
+/* Get your Stripe publishable key to initialize Stripe.js */
+/*fetch("/setup")
+  .then(function(result) {
+    return result.json();
+  })
+  .then(function(json) {
+    var publicKey = json.publicKey;
+    var invPlanId = json.invPlan;
+	console.log(invPlanId)
+    //var proPlanId = json.proPlan;
+
+    var stripe = Stripe(publicKey);
+    // Setup event handler to create a Checkout Session when button is clicked
+    document
+      .getElementById("checkout_inv_btn")
+      .addEventListener("click", function(evt) {
+        createCheckoutSession(invPlanId).then(function(data) {
+          // Call Stripe.js method to redirect to the new Checkout page
+          stripe
+            .redirectToCheckout({
+              sessionId: data.sessionId
+            })
+            .then(handleResult);
+        });
+      });
+
+    // Setup event handler to create a Checkout Session when button is clicked
+   /* document
+      .getElementById("pro-plan-btn")
+      .addEventListener("click", function(evt) {
+        createCheckoutSession(proPlanId).then(function(data) {
+          // Call Stripe.js method to redirect to the new Checkout page
+          stripe
+            .redirectToCheckout({
+              sessionId: data.sessionId
+            })
+            .then(handleResult);
+        });
+      });
+  });*/
+</script>
+<!--script>
       // Replace with your own public key: https://dashboard.stripe.com/test/apikeys
       var PUBLIC_KEY = "pk_test_nxhioPDFD1HDMHC4tmP75ILv005GljK1XE";
       // Replace with the domain you want your users to be redirected back to after payment
       var DOMAIN = "http://localhost:5000";
       // Replace with a SKU for your own product (created either in the Stripe Dashboard or with the API)
-      var SUBSCRIPTION_INVENTORY_SUP = "plan_G5BdQnTmlYMROY";
-      var SUBSCRIPTION_QC_SUP = "plan_5678";
+      var SUBSCRIPTION_INVENTORY_SUP = "plan_GFUF4tgd66NDVB";
+	var subs_qty = document.getElementById('inv_sup_qty');
+      //var SUBSCRIPTION_QC_SUP = "plan_5678";
       /*if (PUBLIC_KEY === "pk_test_nxhioPDFD1HDMHC4tmP75ILv005GljK1XE") {
         console.log(
           "Replace the hardcoded public key with your own public key: https://dashboard.stripe.com/test/apikeys"
@@ -176,6 +274,7 @@
       var redirectToCheckout = function(planId) {
         // Make the call to Stripe.js to redirect to the checkout page
         // with the current quantity
+		console.log(subs_qty.value)
         stripe
           .redirectToCheckout({
             items: [{ plan: SUBSCRIPTION_INVENTORY_SUP, quantity: 1 }],
@@ -195,6 +294,6 @@
         .addEventListener("click", function(evt) {
           redirectToCheckout(SUBSCRIPTION_QC_SUP);
         });*/
-    </script>
+    </script-->
 
 {% endblock %}

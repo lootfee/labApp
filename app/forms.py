@@ -85,7 +85,7 @@ class ResetPasswordRequestForm(FlaskForm):
 	submit = SubmitField('Request Password Reset')
 	
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired(), Regexp(regex=r'^(?=\S{8,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])', message="Password must be atleasst 8 characters long, must contain an uppercase letter, a number and a special character.")])
+    password = PasswordField('Password', validators=[DataRequired(), Regexp(regex=r'^(?=\S{8,20}$)(?=.*?\d)(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[^A-Za-z\s0-9])', message="Password must be atleast 8 characters long, must contain an uppercase letter, a number and a special character.")])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Request Password Reset')
@@ -103,6 +103,13 @@ class UserRoleForm(FlaskForm):
 	submit = SubmitField('Save')
 	cancel = SubmitField('Cancel')
 
+class AssignSupervisorForm(FlaskForm):
+	quantity = IntegerField('Quantity')
+	submit = SubmitField('Save')
+	
+class StripeIDForm(FlaskForm):
+	stripe_id = StringField('Stripe ID', validators=[DataRequired()])
+	submit_stripe_id = SubmitField('Save')
 
 class CompanyRegistrationForm(FlaskForm):
 	company_name = StringField('Company Name:', validators=[DataRequired()])
@@ -232,7 +239,16 @@ class CreatePurchaseOrderForm(FlaskForm):
 	order_no_purchase_form = StringField('For Order No:', validators=[DataRequired()])
 	purchase_order = StringField('Purchase Order No:', validators=[DataRequired()])
 	submit = SubmitField('Create')
+	
+class InternalRequestForm(FlaskForm):
+	from_department = SelectField('Requested by:', coerce=int, validators=[InputRequired()])
+	to_department = SelectField('Requesting to:', coerce=int, validators=[InputRequired()])
+	submit = SubmitField('Submit')
 
+class InternalRequestTransferForm(FlaskForm):
+	list_id = HiddenField('List ID')
+	transfer_qty = HiddenField('Quantity')
+	transfer = SubmitField('Transfer')
 	
 class InventorySearchForm(FlaskForm):
 	search_create_orders = StringField('Search')

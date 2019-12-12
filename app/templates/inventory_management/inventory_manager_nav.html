@@ -2,6 +2,7 @@
 	<ul class="nav nav-pills">
 		{{ nav_link('inventory_management', 'Overview') }}
 		{{ nav_link('inventory', 'Inventory') }}
+		{{ nav_link('internal', 'Internal') }}
 		{{ nav_link('orders', 'Orders') }}
 		{% if is_inv_admin or company.id == 1 %}
 		{{ nav_link('purchases', 'Purchases') }}
@@ -10,7 +11,9 @@
 		{{ nav_link('supplies', 'Supplies') }}
 		{{ nav_link('suppliers', 'Suppliers') }}
 		{{ nav_link('departments', 'Departments') }}
+		{% if is_inv_admin or company.id == 1 %}
 		{{ nav_link('inventory_accounts', 'Accounts') }}
+		{% endif %}
 	</ul>	
 </nav>
 <hr style="margin: 0;">

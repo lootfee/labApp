@@ -82,7 +82,7 @@
 		{% endblock %}
 	</div>
 {% block footer %}	
-<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px;">© 2019 labApp All Right Reserved</footer>
+<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px;">© 2019 LABAPP, Inc. All Right Reserved<span style="float:right;"><a href="https://www.termsfeed.com/terms-service/50bee2071179de444b24dfb078934616" target="_blank">Terms of Service&nbsp;&nbsp;&nbsp;</a></span></footer>
 {% endblock %}
 
 {% endblock %}
@@ -107,6 +107,7 @@
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script-->
 	<link rel="shortcut icon" href="/static/logo.jpg">
 {% endblock %}
@@ -121,6 +122,19 @@
 	<script src="{{url_for('static', filename='js/inventory.js')}}"></script>
 	<script src="{{url_for('static', filename='js/calculators.js')}}"></script>
 	<script src="{{url_for('static', filename='js/qc.js')}}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
+	<script>
+		window.cookieconsent.initialise({
+		  "palette": {
+			"popup": {
+			  "background": "#000"
+			},
+			"button": {
+			  "background": "#f1d600"
+			}
+		  }
+		});
+	</script>
 	{% if current_user.is_authenticated %}
 	<script>
 		$(document).ready(function(){

@@ -29,6 +29,25 @@ suppliers = db.Table('suppliers',
 	db.Column('supplier_id', db.Integer, db.ForeignKey('supplier.id')),
 )
 
+internal_request_creator = db.Table('internal_request_creator',
+	db.Column('internal_id', db.Integer, db.ForeignKey('internal_request.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+request_submitted_by = db.Table('request_submitted_by',
+	db.Column('internal_id', db.Integer, db.ForeignKey('internal_request.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+request_transferred_by = db.Table('request_transferred_by',
+	db.Column('internal_list_id', db.Integer, db.ForeignKey('internal_request_list.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
+request_received_by = db.Table('request_received_by',
+	db.Column('internal_list_id', db.Integer, db.ForeignKey('internal_request_list.id')),
+	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+)
+
 order_creator = db.Table('order_creator',
 	db.Column('order_id', db.Integer, db.ForeignKey('order.id')),
 	db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
@@ -115,6 +134,7 @@ class Company(db.Model):
 	about_me = db.Column(db.String(400))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_created = db.Column(db.DateTime)
+	stripe_id = db.Column(db.String(254))
 	
 	order = db.relationship('Order', backref=db.backref('company', lazy=True))
 	employees = db.relationship("User", secondary="affiliates")
@@ -138,28 +158,31 @@ class Company(db.Model):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date==None).count() > 0
 		
 	def is_my_affiliate(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date.isnot(None)).count() > 0
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date.isnot(None)).count() > 0  or user.id == 1
 		
 	def is_super_admin(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first() or user.id == 1
 		
 	def is_qc_supervisor(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_supervisor==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_supervisor==True).first() or user.id == 1
 		
 	def is_qc_admin(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_admin==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_admin==True).first() or user.id == 1
 		
 	def is_inv_supervisor(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_supervisor==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_supervisor==True).first() or user.id == 1
+		
+	def inv_supervisor_count(self):
+		return self.affiliate.filter(Affiliates.inv_supervisor==True).count()
 		
 	def is_inv_admin(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_admin==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.inv_admin==True).first() or user.id == 1
 		
 	def is_doc_supervisor(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_supervisor==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_supervisor==True).first() or user.id == 1
 		
 	def is_doc_admin(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_admin==True).first()
+		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_admin==True).first() or user.id == 1
 		
 		
 
@@ -215,6 +238,24 @@ class User(UserMixin, db.Model):
 		'Message',foreign_keys='Message.recipient_id',backref='recipient', lazy='dynamic'
 	)
 	
+	internal_request_creator = db.relationship(
+		'InternalRequest', secondary='internal_request_creator',
+		backref=db.backref('internal_request_creator', lazy='dynamic'), lazy='dynamic'
+	)
+	request_submitted_by = db.relationship(
+		'InternalRequest', secondary='request_submitted_by',
+		backref=db.backref('request_submitted_by', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	request_transferred_by = db.relationship(
+		'InternalRequestList', secondary='request_transferred_by',
+		backref=db.backref('request_transferred_by', lazy='dynamic'), lazy='dynamic'
+	)
+	
+	request_received_by = db.relationship(
+		'InternalRequestList', secondary='request_received_by',
+		backref=db.backref('request_received_by', lazy='dynamic'), lazy='dynamic'
+	)
 	
 	order_creator = db.relationship(
 		'Order', secondary='order_creator',
@@ -527,6 +568,42 @@ class MyDepartmentSupplies(db.Model):
 	
 	def __repr__(self):
 		return '<MyDepartmentSupplies {}>'.format(self.id)
+		
+class InternalRequest(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	request_no = db.Column(db.String(50), index=True, unique=True)
+	date_created = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+	date_submitted = db.Column(db.DateTime, index=True)
+	date_transferred = db.Column(db.DateTime, index=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	from_dept = db.Column(db.Integer, db.ForeignKey('department.id'))
+	to_dept = db.Column(db.Integer, db.ForeignKey('department.id'))
+	
+	request_list = db.relationship('InternalRequestList', backref=db.backref('request_no', lazy=True))
+
+	
+	def __repr__(self):
+		return '<InternalRequest {}>'.format(self.request_no)
+		
+class InternalRequestList(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	ref_number = db.Column(db.String(100))
+	name = db.Column(db.String(200), index=True)
+	quantity = db.Column(db.Integer)
+	supplied_quantity = db.Column(db.Integer)
+	received_quantity = db.Column(db.Integer)
+	my_supplies_id = db.Column(db.Integer, db.ForeignKey('my_supplies.id'))
+	#department_id = db.Column(db.Integer, db.ForeignKey('department.id'))
+	internal_request_id = db.Column(db.Integer, db.ForeignKey('internal_request.id'))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	date_transferred = db.Column(db.DateTime, index=True)
+	date_received = db.Column(db.DateTime, index=True)
+	
+	#user = db.relationship('User', backref=db.backref('internal_request_list', lazy=True))
+	
+	def __repr__(self):
+		return '<InternalRequestList {}>'.format(self.id)
 
 
 class Order(db.Model):
@@ -738,6 +815,9 @@ class Machine(db.Model):
 	machine_name = db.Column(db.String(100))
 	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
+	values = db.relationship('QCValues', backref=db.backref('machine', lazy=True))
+	result = db.relationship('QCResult', backref=db.backref('machine', lazy=True))
+	
 	company = db.relationship(
 		'Company', secondary='company_machine',
 		backref=db.backref('machine', lazy='dynamic'), lazy='dynamic'
@@ -749,6 +829,9 @@ class Machine(db.Model):
 class Analyte(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	analyte = db.Column(db.String(200))
+	
+	values = db.relationship('QCValues', backref=db.backref('analyte', lazy=True))
+	result = db.relationship('QCResult', backref=db.backref('analyte', lazy=True))
 	#unit = db.Column(db.String(50))
 	#machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
@@ -761,6 +844,9 @@ class Analyte(db.Model):
 class Unit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	unit = db.Column(db.String(50))
+	
+	values = db.relationship('QCValues', backref=db.backref('unit', lazy=True))
+	result = db.relationship('QCResult', backref=db.backref('unit', lazy=True))
 	
 	'''analyte = db.relationship(
 		'Analyte', secondary='analyte_unit',
@@ -793,6 +879,10 @@ class ReagentLot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_no = db.Column(db.String(50))
 	expiry = db.Column(db.Date)
+	
+	result = db.relationship('QCResult', backref=db.backref('reagent_lot', lazy=True))
+	values = db.relationship('QCValues', backref=db.backref('reagent_lot', lazy=True))
+	
 	company = db.relationship(
 		'Company', secondary='company_reagent_lot',
 		backref=db.backref('reagent_lot', lazy='dynamic'), lazy='dynamic'
@@ -817,6 +907,9 @@ class ControlLot(db.Model):
 	lot_no = db.Column(db.String(50))
 	expiry = db.Column(db.Date)
 	
+	#values = db.relationship('QCValues', backref=db.backref('qc_lot', lazy='dynamic'))
+	#result = db.relationship('QCResult', backref=db.backref('qc_lot', lazy='dynamic'))
+	
 	control = db.relationship(
 		'Control', secondary='control_control_lot',
 		backref=db.backref('lot', lazy='dynamic'), lazy='dynamic'
@@ -826,17 +919,12 @@ class ControlLot(db.Model):
 		backref=db.backref('control_lot', lazy='dynamic'), lazy='dynamic'
 	)
 	
+	
 class QCValues(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
-	lvl1_mean = db.Column(db.Numeric(10,4))
-	lvl1_sd = db.Column(db.Numeric(10,4))
-	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
-	lvl2_mean = db.Column(db.Numeric(10,4))
-	lvl2_sd = db.Column(db.Numeric(10,4))
-	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
-	lvl3_mean = db.Column(db.Numeric(10,4))
-	lvl3_sd = db.Column(db.Numeric(10,4))
+	control_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
+	control_mean = db.Column(db.Numeric(10,4))
+	control_sd = db.Column(db.Numeric(10,4))
 	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
 	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
@@ -850,13 +938,13 @@ class QCResult(db.Model):
 	lvl1 = db.Column(db.Numeric(10,4))
 	lvl2 = db.Column(db.Numeric(10,4))
 	lvl3 = db.Column(db.Numeric(10,4))
-	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl1_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
 	lvl1_mean = db.Column(db.Numeric(10,4))
 	lvl1_sd = db.Column(db.Numeric(10,4))
-	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl2_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
 	lvl2_mean = db.Column(db.Numeric(10,4))
 	lvl2_sd = db.Column(db.Numeric(10,4))
-	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control.id'))
+	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
 	lvl3_mean = db.Column(db.Numeric(10,4))
 	lvl3_sd = db.Column(db.Numeric(10,4))
 	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))

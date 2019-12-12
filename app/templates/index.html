@@ -28,7 +28,7 @@
 {% endblock %}
 {% block styles %}
 	{{ super() }}
-	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
+	
 {% endblock %}
 {% block scripts %}
 	{{ super() }}
@@ -37,17 +37,5 @@
 			$('#post_count').html(this.value.length + ' characters (max 1000)');
 		});
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js" data-cfasync="false"></script>
-	<script>
-		window.cookieconsent.initialise({
-		  "palette": {
-			"popup": {
-			  "background": "#000"
-			},
-			"button": {
-			  "background": "#f1d600"
-			}
-		  }
-		});
-	</script>
+	
 {% endblock %}

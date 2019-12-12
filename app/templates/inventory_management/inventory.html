@@ -143,16 +143,6 @@ $('#print_{{ i.lot.lot_no }}{{ i.seq_no }}').click(function(){
 	return false;
 });
 
-/*$('#print_{{ i.lot.lot_no }}{{ i.id }}').click(function(){
-	qz.websocket.connect().then(function() { 
-	   return qz.printers.find("zebra");  // Pass the printer name into the next Promise
-	}).then(function(printer) {
-	   var config = qz.configs.create(printer);       // Create a default config for the found printer
-	   var data = ['^XA^CF0,20,14^FO260,50^FB300,2,,^FD Received: {{ i.delivery.date_delivered .strftime("%d-%m-%Y")}} ^FS ^FO260,70^FB300,2,,^FD{{ my_s.product.name }} ^FS ^FO260,110^FB300,2,,^BY2,2.0^BCN,50,Y,N,N^FD {{ i.lot.lot_no }}-{{ i.id }} ^FS^XZ'];
-	   //var data = ['^XA^FO50,50^ADN,36,20^FDRAW ZPL Lot: {{ i.lot.lot_no }}-{{ i.id }}\&Date received: {{ i.delivery.date_delivered .strftime('%d-%m-%Y')}}\&{{ my_s.product.name }}^FS^XZ'];   // Raw ZPL
-	   return qz.print(config, data);
-	}).catch(function(e) { console.error(e); });					
-});*/
 {% endfor %}
 {% endfor %}
 {% endif %}

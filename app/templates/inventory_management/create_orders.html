@@ -134,8 +134,14 @@
 					}
 					return false;  
 				});
-				
+				$("#save").click(function() {
+					var qty_{{ my_s.ref_number}} = $("#qty_{{ my_s.ref_number}}").html();
+					$("#form_qty_{{ my_s.ref_number }}").val(qty_{{ my_s.ref_number}});
+				});
 			{% endfor %}
 		});
+		{% for my_s in my_supplies %}
+		
+		{% endfor %}
 	</script>
 {% endblock %}

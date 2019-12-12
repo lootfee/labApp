@@ -6,7 +6,35 @@
 {% include 'quality_control/qc_nav.html' %}
 <hr class="inventory_hr">
 <div class="row">
+	<div class="col-md-12 visible-print-block">
+		<div class="col-md-3">
+			{% if company.logo %}
+			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+			{% else %}
+			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+			{% endif %}
+		</div>
+		<div class="col-md-6 text-center" >
+			<h1>{{ company.company_name }}</h1>
+		</div>
+		<div class="col-md-3" style="height:150px;">
+			<div style="bottom:0;">
+				<p>Address: {{ company.address }}</p>
+				<p>Email: {{ company.email }}</p>
+				<p>Contact: {{ company.contact_info }}</p>
+			</div>
+		</div>
+	</div>
+</div>
+<br>
+<div class="row">
 	<div class="col-md-12">
+		<div class="row">
+			<div class="col-md-12" id="qc_title">
+				<input type="text" class="form-control qc-info text-center" style="font-size: 15px; font-weight: bold;" placeholder="Title">
+			</div>
+		</div>
+		<br>
 		<form action method="post" class="form" role="form">
 			{{ form.csrf_token() }}
 			<div class="col-md-4">
@@ -58,12 +86,16 @@
 		{% if level3_data == True %}
 		<div class="col-md-12">
 			<div class="col-md-6">
+			<span><h5><strong>Given Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
 					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values.lvl1_mean }}" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
 					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values.lvl1_sd }}" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CV" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 2 Mean:</label>
@@ -71,6 +103,9 @@
 					<br>
 					<label class="control-label"> Control 2 SD:</label>
 					<input id="lvl2Stndev" class="form-control decTostring" value="{{ qc_values.lvl2_sd }}" readonly>
+					<br>
+					<label class="control-label">Control 2 CV:</label>
+					<input id="lvl2CV" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 3 Mean:</label>
@@ -78,15 +113,23 @@
 					<br>
 					<label class="control-label"> Control 3 SD:</label>
 					<input id="lvl3Stndev" class="form-control decTostring" value="{{ qc_values.lvl3_sd }}" readonly>
+					<br>
+					<label class="control-label">Control 3 CV:</label>
+					<input id="lvl3CV" class="form-control decTostring" readonly>
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
+			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
+			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
 					<input id="lvl1MeanCalc" class="form-control decTostring" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
 					<input id="lvl1StndevCalc" class="form-control decTostring" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CVCalc" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 2 Mean:</label>
@@ -94,6 +137,9 @@
 					<br>
 					<label class="control-label"> Control 2 SD:</label>
 					<input id="lvl2StndevCalc" class="form-control decTostring" readonly>
+					<br>
+					<label class="control-label">Control 2 CV:</label>
+					<input id="lvl2CVCalc" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 3 Mean:</label>
@@ -101,6 +147,9 @@
 					<br>
 					<label class="control-label"> Control 3 SD:</label>
 					<input id="lvl3StndevCalc" class="form-control " readonly>
+					<br>
+					<label class="control-label">Control 3 CV:</label>
+					<input id="lvl3CVCalc" class="form-control decTostring" readonly>
 				</div>
 			</div>
 		</div>
@@ -128,29 +177,41 @@
 		
 		{% elif level2_data == True %}
 		<div class="col-md-12">
-			<div class="col-md-6"> 
+			<div class="col-md-6">
+			<span><h5><strong>Given Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
-					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values.lvl1_mean }}" readonly>
+					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values1.control_mean }}" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
-					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values.lvl1_sd }}" readonly>
+					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values1.control_sd }}" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CV" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 2 Mean:</label>
-					<input id="lvl2Mean" class="form-control decTostring" value="{{ qc_values.lvl2_mean }}" readonly>
+					<input id="lvl2Mean" class="form-control decTostring" value="{{ qc_values2.control_mean }}" readonly>
 					<br>
 					<label class="control-label"> Control 2 SD:</label>
-					<input id="lvl2Stndev" class="form-control decTostring" value="{{ qc_values.lvl2_sd }}" readonly>
+					<input id="lvl2Stndev" class="form-control decTostring" value="{{ qc_values2.control_sd }}" readonly>
+					<br>
+					<label class="control-label"> Control 2 CV:</label>
+					<input id="lvl2CV" class="form-control decTostring" readonly>
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
+			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
+			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
 					<input id="lvl1MeanCalc" class="form-control decTostring" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
 					<input id="lvl1StndevCalc" class="form-control decTostring" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CVCalc" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 2 Mean:</label>
@@ -158,6 +219,9 @@
 					<br>
 					<label class="control-label"> Control 2 SD:</label>
 					<input id="lvl2StndevCalc" class="form-control decTostring" readonly>
+					<br>
+					<label class="control-label">Control 2 CV:</label>
+					<input id="lvl2CVCalc" class="form-control decTostring" readonly>
 				</div>
 			</div>
 		</div>
@@ -176,29 +240,38 @@
 			<input class="col-md-1" value="Control 2" readonly>
 			
 			{% for q in qc_res %}
-			<input class="col-md-1 run_date_data" value="{{ q.run_date }}" readonly>
-			<input class="col-md-1 control1_data decTostring" style="color:blue;" value="{{ q.lvl1 }}" readonly>
-			<input class="col-md-1 control2_data decTostring" style="color:red;" value="{{ q.lvl2 }}" readonly>
+			<input class="col-md-1 run_date_data" value="{{ q.run_date }}">
+			<input class="col-md-1 control1_data decTostring" style="color:blue;" value="{{ q.lvl1 }}">
+			<input class="col-md-1 control2_data decTostring" style="color:red;" value="{{ q.lvl2 }}">
 			{% endfor %}
 		</div>
 		{% elif level1_data == True %}
 		<div class="col-md-12">
 			<div class="col-md-6">
+			<span><h5><strong>Given Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
 					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values.lvl1_mean }}" readonly>
 					<br>
 					<label class="control-label"> Control 1 SD:</label>
 					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values.lvl1_sd }}" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CV" class="form-control decTostring" readonly>
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
+			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
+			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
 					<input id="lvl1MeanCalc" class="form-control decTostring" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
 					<input id="lvl1StndevCalc" class="form-control decTostring" readonly>
+					<br>
+					<label class="control-label">Control 1 CV:</label>
+					<input id="lvl1CVCalc" class="form-control decTostring" readonly>
 				</div>
 			</div>
 		</div>
@@ -353,6 +426,11 @@ $(document).ready(function() {
 	$(".decTostring").each(function() {
 		$(this).val(parseFloat($(this).val()));
 	});
+	
+	function N(id, places) { 
+		return +(Math.round(id + "e+" + places)  + "e-" + places);
+	}
+	
 	function decimalPlaces(num) {
 		let match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
 		if (!match) { return 0; }
@@ -362,10 +440,6 @@ $(document).ready(function() {
 		   (match[1] ? match[1].length : 0)
 		   // Adjust for scientific notation.
 		   - (match[2] ? +match[2] : 0));
-	}
-	
-	function N(id, places) { 
-		return +(Math.round(id + "e+" + places)  + "e-" + places);
 	}
 	
 	$("#calculate_meansd_btn").click(function() {
@@ -397,6 +471,8 @@ $(document).ready(function() {
 		cv1 = N(cv1, dp1);
 		$("#lvl1MeanCalc").val(mean1);
 		$("#lvl1StndevCalc").val(sd1);
+		$("#lvl1CVCalc").val(cv1)
+		
 		//control 2
 		var sum2 = 0;
 		var totSqrd2 = 0;
@@ -424,6 +500,7 @@ $(document).ready(function() {
 		cv2 = N(cv2, dp2);
 		$("#lvl2MeanCalc").val(mean2);
 		$("#lvl2StndevCalc").val(sd2);
+		$("#lvl2CVCalc").val(cv2)
 		
 		//control 3
 		var sum3 = 0;
@@ -452,6 +529,7 @@ $(document).ready(function() {
 		cv3 = N(cv3, dp3);
 		$("#lvl3MeanCalc").val(mean3);
 		$("#lvl3StndevCalc").val(sd3);
+		$("#lvl3CVCalc").val(cv3)
 		
 		$("#calculted_mean_container").css('display', 'block');
 	});
@@ -461,12 +539,24 @@ $(document).ready(function() {
 //----for lj chart
 $("#create_chart_btn").click(function(){
 	var ctx = document.getElementById('chartContainer');
-	var ctrl1_mean = $("#lvl1Mean").val()
-	var ctrl2_mean = $("#lvl2Mean").val()
-	var ctrl3_mean = $("#lvl3Mean").val()
-	var ctrl1_stdv = $("#lvl1Stndev").val()
-	var ctrl2_stdv = $("#lvl2Stndev").val()
-	var ctrl3_stdv = $("#lvl3Stndev").val()
+	var gbtn = document.getElementById("use_calc_values").checked//$("#use_calc_values").checked;
+	var ctrl1_mean = $("#lvl1Mean").val();
+	var ctrl2_mean = $("#lvl2Mean").val();
+	var ctrl3_mean = $("#lvl3Mean").val();
+	var ctrl1_stdv = $("#lvl1Stndev").val();
+	var ctrl2_stdv = $("#lvl2Stndev").val();
+	var ctrl3_stdv = $("#lvl3Stndev").val();
+	
+	if (gbtn == true) {
+		ctrl1_mean = $("#lvl1MeanCalc").val();
+		ctrl2_mean = $("#lvl2MeanCalc").val();
+		ctrl3_mean = $("#lvl3MeanCalc").val();
+		ctrl1_stdv = $("#lvl1StndevCalc").val();
+		ctrl2_stdv = $("#lvl2StndevCalc").val();
+		ctrl3_stdv = $("#lvl3StndevCalc").val();
+	}
+	
+	
 	var arr1 = [];
 	var arr2 = [];
 	var arr3 = [];
@@ -602,6 +692,70 @@ $("#create_chart_btn").click(function(){
 			};
 	var chart = new google.visualization.LineChart(ctx);
     chart.draw(data, options);
+});
+
+
+$(document).ready(function() {
+//calculated given values cv	
+	function N(id, places) { 
+		return +(Math.round(id + "e+" + places)  + "e-" + places);
+	}
+	
+	function decimalPlaces(num) {
+		let match = (''+num).match(/(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/);
+		if (!match) { return 0; }
+		return Math.max(
+		   0,
+		   // Number of digits right of decimal point.
+		   (match[1] ? match[1].length : 0)
+		   // Adjust for scientific notation.
+		   - (match[2] ? +match[2] : 0));
+	}
+	
+	//control 1
+	var x1 = 0;
+	var z1 = $("#lvl1Mean").val();
+	if (decimalPlaces($("#lvl1Stndev").val()) > decimalPlaces(z1)){
+		z1 = $("#lvl1Stndev").val();
+	}
+	if (decimalPlaces(z1) > x1){
+		y1 = z1;
+		x1 = decimalPlaces(y1);
+	}
+	dp1 = x1
+	var cv1 = parseFloat(($("#lvl1Stndev").val() / $("#lvl1Mean").val()) * 100);
+	cv1 = N(cv1, dp1);
+	$("#lvl1CV").val(cv1);
+	
+	//control 2
+	var x2 = 0;
+	var z2 = $("#lvl2Mean").val();
+	if (decimalPlaces($("#lvl2Stndev").val()) > decimalPlaces(z2)){
+		z2 = $("#lvl2Stndev").val();
+	}
+	if (decimalPlaces(z2) > x2){
+		y2 = z2;
+		x2 = decimalPlaces(y2);
+	}
+	dp2 = x2
+	var cv2 = parseFloat(($("#lvl2Stndev").val() / $("#lvl2Mean").val()) * 100);
+	cv2 = N(cv2, dp2);
+	$("#lvl2CV").val(cv2);
+	
+	//control 3
+	var x3 = 0;
+	var z3 = $("#lvl3Mean").val();
+	if (decimalPlaces($("#lvl3Stndev").val()) > decimalPlaces(z3)){
+		z3 = $("#lvl3Stndev").val();
+	}
+	if (decimalPlaces(z3) > x3){
+		y3 = z3;
+		x3 = decimalPlaces(y3);
+	}
+	dp3 = x3
+	var cv3 = parseFloat(($("#lvl3Stndev").val() / $("#lvl3Mean").val()) * 100);
+	cv3 = N(cv3, dp3);
+	$("#lvl3CV").val(cv3);
 });
 </script>
 {% endblock %}

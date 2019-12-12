@@ -1,0 +1,186 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+{% include 'inventory_management/inventory_manager_nav.html' %}	
+    <h3 class="inventory_headers">Internal Requests</h3>
+	<hr class="inventory_hr">
+    <div class="row sidenav" id="create_orders_sidenav">
+		<div class="col-md-12 registerContainer" id="create_orders_form_container">
+			<div>
+				<button type="button" class="btn btn-default hide_sidenav" aria-label="Left Align">
+					<span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+				</button>
+				<div class="col-md-5" style="margin-bottom: 10px;">
+					<div class="col-md-6">
+						<label class="control-label" for="department">Search</label>
+						<input class="form-control" id="search_create_orders">
+					</div>
+					<!--div class="col-md-6">
+						<label class="control-label" for="department">Department</label>
+						<select class="form-control" id="department">
+							<option value=''>All</option>
+							{% for d in dept %}
+							<option value='{{ d.name }}'>{{ d.name }}</option>
+							{% endfor %}
+						</select>
+					</div-->
+				</div>
+			</div>
+			<table class="sort_table table table-bordered table-hover" id="create_order_table">
+			<thead>
+				<tr>
+					<th style="width:150px;">Ref No</th>
+					<th style="width:500px;">Name</th>
+					<th style="width:40px;">{{ from_dept_abbrv }} - Qty Remaining</th>
+					<th style="width:40px;">Qty Request </th>
+					<th style="width:40px;">{{ to_dept_abbrv }} - Qty Available </th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			{% if my_supplies %}
+				{% for my_s in my_supplies %}
+				{% for i in my_s.from_dept %}
+				<tr class="my_products_row">
+					<td>{{ my_s.product.ref_number }}</td>
+					<td>{{ my_s.product.name }}</td>
+					<td>{{ my_s.from_item_count }}</td>
+					<td class="text-center" id="quantity_request_{{ my_s.product.ref_number }}" contenteditable></td>
+					<td >{{ my_s.to_item_count }}</td>
+					<td><a href="#" class="add_item_to_order" id="add_{{ my_s.product.ref_number }}">Add</a></td>
+				</tr>
+				{% endfor %}
+				{% endfor %}
+			{% endif %}
+		</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+		{% if not internal_request.date_submitted %}
+		<button type="button" class="btn btn-default" id="open_orders_sidenav" aria-label="Left Align">
+			<span>Add items</span>
+			<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>
+		</button>
+		{% endif %}
+		<span class="text-center"><h4>Order No: <span style="color: blue;">{{ company.company_abbrv }}-INT-{{ internal_request.request_no }}</span></h4> </span>
+			<table class="sort_table table table-bordered table-hover text-center" id="orders_list_table">
+				<thead>
+					<tr>
+						<th style="width:150px;">Reference No</th>
+						<th style="width:300px;">Name</th>
+						<th style="width:40px;">{{ from_dept_name }} Qty</th>
+						<th style="width:40px;">Requested Qty</th>
+						<th style="width:40px;">Requested By</th>
+						<th style="width:40px;">{{ to_dept_name }} available Qty</th>
+						{% if not internal_request.date_submitted %}
+						<th style="width:50px;">Action</th>
+						{% else %}
+						<th style="width:100px;">Transfer Qty</th>
+						<th>Status</th>
+						{% endif %}
+						
+					</tr>
+				</thead>
+				
+				{% for list in request_list %}
+					<tr>
+						<td>{{ list.ref_number }}</td>
+						<td>{{ list.name }}</td>
+						<td>{{ list.from_item_count }}</td>
+						<td><strong>{{ list.quantity }}</strong></td>
+						<td>{{ list.requested_by }}</td>
+						<td>{{ list.to_item_count }}</td>
+						{% if not internal_request.date_submitted %}
+						<td><a href="{{url_for('remove_request_item', company_name=company.company_name, request_no=internal_request.request_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></a></td>
+						{% else %}
+							{% if not list.date_transferred %}
+								{% if is_inv_supervisor %}
+								<td id="transfer_qty_{{list.id}}" contenteditable></td>
+								<td></td>
+								{% else %}
+								<td></td>
+								<td></td>
+								{% endif %}
+							{% elif list.date_received %}
+							<td><div>{% if list.supplied_quantity %}{{ list.supplied_quantity }}{% endif %} supplied by {% if list.request_transferred_by %}{% for l in list.request_transferred_by %}{{ l.username }}{% endfor %}{% endif %}</div><div>{% if list.received_quantity %}{{ list.received_quantity }}{% endif %} received by {% if list.request_received_by %}{% for l in list.request_received_by %}{{ l.username }}{% endfor %}{% endif %}</div></td>
+							<td>{% if list.supplied_quantity > list.received_quantity %}{% for i in list.lot_list %}<div>{{ i.lot_num}}-{{i.seq_no}}/{{i.expiry.strftime('%d-%m-%Y')}} - <a href="{{ url_for('receive_item', company_id=company.id, request_no=internal_request.request_no, irl_id=list.id, item_id=i.id)}}">Receive</a></div>{% endfor %}{% elif list.supplied_quantity <= list.received_quantity %}<span> Complete </span>{% endif %}</td>
+							{% elif list.date_transferred %}
+							<td>{% if list.supplied_quantity %}{{ list.supplied_quantity }}{% endif %} supplied by {% if list.request_transferred_by %}{% for l in list.request_transferred_by %}{{ l.username }}{% endfor %}{% endif %}</td>
+							<td>{% for i in list.lot_list %}<div>{{ i.lot_num}}-{{i.seq_no}}/{{i.expiry.strftime('%d-%m-%Y')}} - <a href="{{ url_for('receive_item', company_id=company.id, request_no=internal_request.request_no, irl_id=list.id, item_id=i.id)}}">Receive</a></div>{% endfor %}</td>
+							{% endif %}
+						{% endif %}
+					</tr>
+				{% endfor %}
+			</table>
+		{% if not internal_request.date_submitted %}
+		<form action method="post" class="form" role="form" name="orders_list_form" id="orders_list_form">
+			{{ form.csrf_token() }}
+			<div style="width: 200px;float: right; margin-bottom: 20px;">
+				<div>
+					{{ form.save(class_="btn btn-default")}}
+					{% if request_list %}
+					{% if is_inv_supervisor %}
+					{{ form.submit(class_="btn btn-default")}}
+					{% endif %}
+					{% endif %}
+				</div>
+			</div>
+		</form>
+		{% else %}
+			{% if not internal_request.date_transferred %}
+			{% if is_inv_supervisor %}
+			<form action method="post" class="form" role="form" id="internal_transfer_form" name="internal_transfer_form">
+				{{ form2.csrf_token() }}
+				<div style="width: 200px;float: right; margin-bottom: 20px;">
+					<div>
+						{% for list in request_list %}
+						<div><input type='hidden' name='list_id' value='{{ list.id }}'></div>
+						<div><input type='hidden' name='transfer_qty' id='form_transfer_qty_{{list.id}}' value=''></div>
+						{% endfor %}
+						{{ form2.transfer(class_="btn btn-default")}}
+						
+					</div>
+				</div>
+			</form>
+			{% endif %}
+			{% endif %}
+		{% endif %}
+		</div>
+    </div>
+{% endblock %}
+{% block scripts %}
+	{{ super() }}
+	<script>
+		$(document).ready(function() {
+			$('input#search_create_orders').quicksearch('table#create_order_table .my_products_row');
+			$('select#department').quicksearch('table#create_order_table .my_products_row');
+			
+			{% for my_s in my_supplies %}
+			
+				$("#add_{{ my_s.product.ref_number }}").click(function() {
+					
+					var exists=$('#orders_list_table tr td:contains('+'{{ my_s.product.ref_number }}'+')').length;
+					  if (!exists ){
+						var qty_req = $("#quantity_request_{{ my_s.product.ref_number }}").html();
+						
+						$('#orders_list_table > tbody:last-child').append("<tr><td>{{ my_s.product.ref_number}}</td><td>{{ my_s.product.name }}</td><td id='qty_{{ my_s.product.ref_number}}'contenteditable></td></tr>");
+						$("#qty_{{ my_s.product.ref_number}}").html(qty_req);
+						
+						$("#orders_list_form").append("<div><input type='hidden' name='supply_id' value='{{ my_s.id }}'><input type='hidden' name='refnum' value='{{ my_s.product.ref_number}}'><input type='hidden' name='name' value='{{ my_s.product.name }}'><input type='hidden' name='qty' id='form_qty_{{ my_s.product.ref_number }}' value=''></div>");
+						$('#form_qty_{{ my_s.product.ref_number }}').val(qty_req);
+						
+					}
+					return false;  
+				});
+				
+			{% endfor %}
+		});
+		$("#transfer").click(function(){
+		{% for list in request_list %}
+		qty_transfer = $("#transfer_qty_{{list.id}}").html()
+		$('#form_transfer_qty_{{list.id}}').val(qty_transfer);
+		{% endfor %}
+		});
+	</script>
+{% endblock %}

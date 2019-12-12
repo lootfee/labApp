@@ -3,13 +3,13 @@
 
 {% block app_content %}
 <h3>Guides in using labApp</h3>
-<div class="row container">
+<div class="row container"  style="padding-bottom:20px;">
 	<div class="col-md-3">
 		<ul class="nav nav-stacked" role="tablist">
 		  <li role="presentation"><a href="#getting_started" aria-controls="general_use" role="tab" data-toggle="tab">Getting started</a></li>
 		  <li role="presentation"><a href="#creating_company_profile" aria-controls="general_use" role="tab" data-toggle="tab">Creating a company profile</a></li>
 		  <li role="presentation"><a href="#affiliating" aria-controls="general_use" role="tab" data-toggle="tab">Affiliating to a company</a></li>
-		  <li role="presentation"><a href="#inventory_management" aria-controls="general_use" role="tab" data-toggle="tab">Using the Inventory Management</a></li>
+		  <li role="presentation"><a href="#inventory_management" aria-controls="general_use" role="tab" data-toggle="tab">Using the Inventory Software</a></li>
 		</ul>
 	</div>
 	<div class="col-md-9">
@@ -68,7 +68,7 @@
 						<li>Click on register supplier.</li>
 						<li>Fill out supplier details.</li>
 					</ol>
-					<li>Click on Supplies tab (To be done by Inventory Admin(to be set on the Admin page) ).</li>
+					<li>Click on Supplies tab (To be done by Inventory Admin/User who created the company on labapp.tech ).</li>
 					<ol>
 						<li>Click on register supplies.</li>
 						<li>Type product reference number.</li>
@@ -113,6 +113,22 @@
 					<li>Expiry date of items that are below the minimum expiry that was set will be marked red.</li>
 					<li>On the Overview page, Reagents that are less than minimum quantity, near expiry, undelivered reagents will be visible.</li>
 					<li>Submitted orders, Pending purchases and Pending deliveries will be visible for inventory admins as well.</li>
+				</ol>
+				<h4>Transferring supplies to different departments (Also for use by those that have centralised inventory system.)</h4>
+				<ol>
+					<li>Navigate to Internal tab.</li>
+					<li>Click create request on the top right.</li>
+					<li>Choose the requesting department and the department where you would like to request the supplies and click submit.</li>
+					<li>Click on add items on the top left and the list of supplies on each department will be shown.</li>
+					<li>Click on the Qty request column and enter the quantity that you would like to request and click add.</li>
+					<li>Click on save to save your request.</li>
+					<li>Inventory supervisors can then submit the request once it is complete.</li>
+					<li>Your newly created request will now be shown on the internal page.</li>
+					<li>(For inventory supervisors)To transfer the requested supplies:</li>
+					<ol>
+						<li>Click on the request ID in the internal page to take you to the request list.</li>
+						<li>On the transfer qty column, enter the quantity you wish to transfer and click the transfer button.</li>
+					</ol>
 				</ol>
 			</div>
 		</div>

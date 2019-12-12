@@ -6,7 +6,13 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-
+{% if company.stripe_id %}
+<h4>Current subscriptions: {{ plan_nickname }} - {{ inv_sup_qty_remaining }} roles available</h4>
+{% else %}
+<h4>You are currently using www.labapp.tech for free.</h4>
+<p>The free plan includes 1 inventory supervisor role.</p>
+<p>To purchase additional supervisory roles, please contact us at sales@labapp.tech</p>
+{% endif %}
 <div class="row">
 	<form action method="post" class="form" role="form">
 		{{ form.hidden_tag() }}
@@ -15,33 +21,33 @@
 				<th class="col-md-2 admin-table">Affiliate</th>
 				<th class="col-md-2 admin-table">{{ form.title.label}}</th>
 				<th class="col-md-2 admin-table">{{ form.start_date.label}}</th>
-				{% if user == superuser %}
-				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
-				{% endif %}
+				{% if company.stripe_id %}
 				<th class="col-md-1 admin-table">{{ form.inv_supervisor.label}}</th>
-				<th class="col-md-1 admin-table">{{ form.qc_supervisor.label}}</th>
-				{% if user == superuser %}
-				<th class="col-md-1 admin-table">{{ form.doc_admin.label}}</th>
-				{% endif %}
 				<th class="col-md-1 admin-table">{{ form.inv_admin.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.qc_supervisor.label}}</th>
 				<th class="col-md-1 admin-table">{{ form.qc_admin.label}}</th>
 				<th class="col-md-1 admin-table table-bordered">{{ form.super_admin.label}}</th>
+				{% endif %}
+				{% if user == superuser %}
+				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
+				<th class="col-md-1 admin-table">{{ form.doc_admin.label}}</th>
+				{% endif %}				
 			</tr>
 			<tr>
 				<td class="col-md-2 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ({{ affiliate.users.username }})</a></td>
 				<th class="col-md-2 admin-table">{{ form.title (class_="form-control") }}</th>
 				<th class="col-md-2 admin-table">{{ form.start_date (class_="form-control", type="date") }}</th>
-				{% if user == superuser %}
-				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
-				{% endif %}
+				{% if company.stripe_id %}
 				<td class="admin-table form-group">{{form.inv_supervisor(class_="single_check")}}</td>
-				<td class="admin-table form-group">{{form.qc_supervisor(class_="single_check")}}</td>
-				{% if user == superuser %}
-				<td class="admin-table form-group">{{form.doc_admin(class_="single_check double_check")}}</td>
-				{% endif %}
 				<td class="admin-table form-group">{{form.inv_admin(class_="single_check double_check")}}</td>
+				<td class="admin-table form-group">{{form.qc_supervisor(class_="single_check")}}</td>				
 				<td class="admin-table form-group">{{form.qc_admin(class_="single_check double_check")}}</td>
 				<td class="admin-table table-bordered form-group">{{form.super_admin}}</td>	
+				{% endif %}
+				{% if user == superuser %}
+				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
+				<td class="admin-table form-group">{{form.doc_admin(class_="single_check double_check")}}</td>
+				{% endif %}
 			</tr>
 		</table>
 		<div id="manage_afiliate_footer">
@@ -53,3 +59,14 @@
 
 	
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function(){
+	$(".alert-info").css("background-color", "#f7d9d9");
+	$(".alert-info").css("border-color", "#f1bcbc")
+});
+</script>
+{% endblock %}
+

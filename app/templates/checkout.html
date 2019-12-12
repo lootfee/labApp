@@ -1,0 +1,107 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+<!-- Use the CSS tab above to style your Element's container. -->
+<div class="row" id="card_element_container" style="padding: 20%;">
+	<div class="col-md-3"></div>
+	<div class="col-md-6">
+		<div id="card-element" class="MyCardElement">
+		  <!-- Elements will create input elements here -->
+		</div>
+		<!-- We'll put the error messages in this element -->
+		<div id="card-errors" role="alert"></div>
+	<br>
+	<button id="submit" class="btn btn-default" style="float:right;">Pay</button>
+	</div>
+	<div class="col-md-3"></div>
+</div>
+
+
+
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<script src="https://js.stripe.com/v3/"></script>
+<link rel="stylesheet" href="StripeElements.css">
+<style>
+
+/**
+* Shows how you can use CSS to style your Element's container.
+*/
+
+.MyCardElement {
+  height: 40px;
+  padding: 10px 12px;
+  width: 100%;
+  color: #32325d;
+  background-color: white;
+  border: 1px solid transparent;
+  border-radius: 4px;
+
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+.MyCardElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.MyCardElement--invalid {
+  border-color: #fa755a;
+}
+
+.MyCardElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+// Set your publishable key: remember to change this to your live publishable key in production
+// See your keys here: https://dashboard.stripe.com/account/apikeys
+var stripe = Stripe('pk_test_nxhioPDFD1HDMHC4tmP75ILv005GljK1XE');
+var elements = stripe.elements();
+
+// Set up Stripe.js and Elements to use in checkout form
+var style = {
+  base: {
+    color: "#32325d",
+    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+    fontSmoothing: "antialiased",
+    fontSize: "16px",
+    "::placeholder": {
+      color: "#aab7c4"
+    }
+  },
+  invalid: {
+    color: "#fa755a",
+    iconColor: "#fa755a"
+  }
+};
+
+var card = elements.create("card", { style: style });
+card.mount("#card-element");
+
+card.addEventListener('change', function(event) {
+  var displayError = document.getElementById('card-errors');
+  if (event.error) {
+    displayError.textContent = event.error.message;
+  } else {
+    displayError.textContent = '';
+  }
+});
+
+stripe.createPaymentMethod('card', cardElement, {
+  billing_details: {
+    email: '{{company.email}}',
+  },
+}).then(function(result) {
+  // Handle result.error or result.paymentMethod
+});
+</script>
+{% endblock %}

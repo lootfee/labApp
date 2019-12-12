@@ -52,6 +52,12 @@ $(document).ready(function() {
 	});
 });
 
+$(document).ready(function(){
+	if ($("#inv_admin").is(":checked")){
+		$("#inv_supervisor").prop("disabled", true);
+	};
+});
+
 $(document).ready(function() {
 	$("#inv_admin").change(function(){
 		if (this.checked) {

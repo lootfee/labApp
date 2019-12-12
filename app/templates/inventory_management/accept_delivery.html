@@ -8,7 +8,7 @@
     <div class="row">
 		<div class="col-md-12">
 		<span class="text-center"><h4>Purchase Order No: <span style="color: blue;">{{ purchase.purchase_order_no }}</span></h4> </span>
-		<span class="text-center"><h4>Delivery Order No: <span style="color: blue;">{{ delivery.delivery_no }}</span></h4> </span>
+		<span class="text-center"><h4>Delivery Order No: <span style="color: blue;">{{ delivery.delivery_no }} ({{d_supplier}})</span></h4> </span>
 			<table class="table table-bordered table-hover text-center" id="orders_list_table">
 				<tr>
 					<th>Reference No</th>
@@ -26,7 +26,7 @@
 						{% if list.complete_delivery %}
 						<td><div>Complete</div><div><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
 						{% else %}
-						<td><div><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></div><div ><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
+						<td><div><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></div>{% if list.delivered_qty > 0 %}<div ><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div>{% endif %}</td>
 						{% endif %}
 					</tr>
 				{% endfor %}
