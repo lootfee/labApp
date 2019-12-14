@@ -61,7 +61,7 @@
 			{% for my_s in my_supplies %}
 			{% for i in my_s.item_query %}
 			{% if i.greater_expiry  %}
-			<tr id="{{ my_s.ref_number }}_gr_expiry_{{ i.lot_num }}_{{ i.dept }}" class="my_products_row">
+			<tr id="{{ my_s.product.ref_number }}_gr_expiry_{{ i.lot.lot_no }}_{{ i.department }}" class="my_products_row">
 				<td>{{ my_s.product.ref_number }}</td>
 				<td>{{ my_s.product.name }}</td>
 				<td>{{ i.department.name }}</td>
