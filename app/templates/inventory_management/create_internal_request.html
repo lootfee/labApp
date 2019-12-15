@@ -173,6 +173,10 @@
 					}
 					return false;  
 				});
+				$("#save").click(function() {
+					var qty_{{  my_s.product.ref_number}} = $("#qty_{{  my_s.product.ref_number }}").html();
+					$("#form_qty_{{ my_s.product.ref_number }}").val(qty_{{ my_s.product.ref_number }});
+				});
 				
 			{% endfor %}
 		});
