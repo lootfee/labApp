@@ -2060,27 +2060,32 @@ def total_purchases_accounts(company_name):
 		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.department.data == 0 and form.supplier.data == 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
+			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+				purchase.total_purchased = 0
+				for p in purchase.purchase_list:
+					purchase.total_purchased += p.total
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 		elif form.supplier.data == 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 		elif form.supplier.data is not 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
 
 
@@ -2111,6 +2116,10 @@ def total_deliveries_accounts(company_name):
 		if form.department.data == 0 and form.supplier.data == 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+				purchase.total_purchased = 0
+				for p in purchase.purchase_list:
+					purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id).all()
 					p.delivery_total = 0
@@ -2120,9 +2129,9 @@ def total_deliveries_accounts(company_name):
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, supplier_id=form.supplier.data).all()
 					p.delivery_total = 0
@@ -2132,9 +2141,9 @@ def total_deliveries_accounts(company_name):
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data).all()
 					p.delivery_total = 0
@@ -2144,9 +2153,9 @@ def total_deliveries_accounts(company_name):
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
 				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
-				purchase.total = 0
+				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total += p.total
+					purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
 					p.delivery_total = 0

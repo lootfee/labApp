@@ -42,7 +42,7 @@
 					{% for purchase in purchases %}
 					<tr>
 						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
-						<td class="individual_purchase">{{ purchase.total }}</td>
+						<td class="individual_purchase">{{ purchase.total_purchased }}</td>
 						<td>{% for p in purchase.delivery %}<div>{{ p.delivery_no }}</div>{% endfor %}</td>
 						<td>{% for p in purchase.delivery %}<div class="individual_delivery">{{ p.delivery_total }}</div>{% endfor %}</td>
 					</tr>
