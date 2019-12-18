@@ -3,10 +3,28 @@
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}	
-    <h3 class="inventory_headers">Total Deliveries</h3>
-	<hr class="inventory_hr">
 	<div class="container">
+		<table class="visible-print" style="width:100vw;margin-top:10px;">
+			<tr>
+				<td style="width:30%;">
+					{% if company.logo %}
+					<span width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:90px;height:90px;"></span>
+					{% else %}
+					<span width="180px"><img src="{{ company.company_avatar(90) }}"></span>
+					{% endif %}
+				</td>
+				<td class="text-center" style="width:40%;"><h1>{{ company.company_name }}</h1></td>
+				<td style="width:30%;">
+					<p>Address: {{ company.address }}</p>
+					<p>Email: {{ company.email }}</p>
+					<p>Contact: {{ company.contact_info }}</p>
+				</td>
+			</tr>
+		</table>
+		<hr class="inventory_hr visible-print-block">	
 		<div class="row">
+			<h3 class="inventory_headers">Total Deliveries</h3>
+			<hr class="inventory_hr">
 			<div class="col-md-12">
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}
@@ -40,21 +58,35 @@
 						</tr>
 					</thead>
 					{% for purchase in purchases %}
+					{% if purchase.delivery %}
 					<tr>
 						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
 						<td class="individual_purchase">{{ purchase.total_purchased }}</td>
 						<td>{% for p in purchase.delivery %}<div>{{ p.delivery_no }}</div>{% endfor %}</td>
 						<td>{% for p in purchase.delivery %}<div class="individual_delivery">{{ p.delivery_total }}</div>{% endfor %}</td>
 					</tr>
+					{% endif %}
 					{% endfor %}
-					<tr>
+					<!--tr>
 						<td></td>
 						<td style="font-size:16px; font-weight:bold;">Total: <span id="purchase_total" style="color: blue;"></span></td>
 						<td></td>
 						<td style="font-size:16px; font-weight:bold;">Total: <span id="delivery_total" style="color: blue;"></span></td>
-					</tr>
+					</tr-->
 				</table>
-				<button class="btn btn-default hidden-print" id="print_button" style="float:right;">Print</button>
+				<div style="float:right;width: 400px;">
+					<table class="table table-bordered table-hover">
+						<tr>
+							<td style="font-size:16px; font-weight:bold;">Purchased Total: <span id="purchase_total" style="color: blue;"></span></td>
+							
+							
+						</tr>
+						<tr>
+							<td style="font-size:16px; font-weight:bold;">Deliveries Total: <span id="delivery_total" style="color: blue;"></span></td>
+						</tr>
+					</table>
+					<button class="btn btn-default hidden-print" id="print_button" style="float:right;">Print</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -82,13 +114,13 @@ $(document).ready(function() {
 	var sum = 0;
 	$(".individual_purchase").each(function() {
 		sum += parseFloat($(this).text());
-		$("#purchase_total").html( sum);
+		$("#purchase_total").html(parseFloat(sum).toFixed(2));
 	});
 	
 	var sum1 = 0;
 	$(".individual_delivery").each(function() {
 		sum1 += parseFloat($(this).text());
-		$("#delivery_total").html( sum1)
+		$("#delivery_total").html(parseFloat(sum1).toFixed(2));
 	});
 });
 

@@ -3,10 +3,29 @@
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}	
-    <h3 class="inventory_headers">Total Purchases</h3>
-	<hr class="inventory_hr">
+   
 	<div class="container">
+		<table class="visible-print" style="width:100vw;margin-top:10px;">
+			<tr>
+				<td style="width:30%;">
+					{% if company.logo %}
+					<span width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:90px;height:90px;"></span>
+					{% else %}
+					<span width="180px"><img src="{{ company.company_avatar(90) }}"></span>
+					{% endif %}
+				</td>
+				<td class="text-center" style="width:40%;"><h1>{{ company.company_name }}</h1></td>
+				<td style="width:30%;">
+					<p>Address: {{ company.address }}</p>
+					<p>Email: {{ company.email }}</p>
+					<p>Contact: {{ company.contact_info }}</p>
+				</td>
+			</tr>
+		</table>
+		<hr class="inventory_hr visible-print-block">	
 		<div class="row">
+			<h3 class="inventory_headers">Total Purchases</h3>
+			<hr class="inventory_hr">
 			<div class="col-md-12">
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}

@@ -652,7 +652,7 @@ class Purchase(db.Model):
 	order_id = db.Column(db.Integer, db.ForeignKey('order.id'))
 	
 	purchase_list = db.relationship('PurchaseList', backref=db.backref('purchase', lazy=True))
-	purchase_to_delivery = db.relationship('Delivery', backref=db.backref('purchase_to_delivery', lazy=True))
+	#purchase_to_delivery = db.relationship('Delivery', backref=db.backref('purchase_to_delivery', lazy=True))
 	order = db.relationship('Order', backref=db.backref('purchase', lazy=True))
 
 	def __repr__(self):
@@ -671,6 +671,7 @@ class PurchaseList(db.Model):
 	purchase_id = db.Column(db.Integer, db.ForeignKey('purchase.id'))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	date_cancelled = db.Column(db.DateTime)
 	
 	item = db.relationship('Item', backref=db.backref('purchase_list_to_item', lazy=True))
 	my_supplies = db.relationship('MySupplies', backref=db.backref('purchase_list', lazy=True))
@@ -680,7 +681,15 @@ class PurchaseList(db.Model):
 	def __repr__(self):
 		return '<PurchaseList {}>'.format(self.id)
 		
+class CancelledPurchaseListPending(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	cancelled_qty = db.Column(db.Integer)
+	purchase_list_id = db.Column(db.Integer, db.ForeignKey('purchase_list.id'))
+	cancelled_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+	date_cancelled = db.Column(db.DateTime, default=datetime.utcnow)
 	
+	def __repr__(self):
+		return '<CancelledPurchaseListPending {}>'.format(self.id)
 
 class Delivery(db.Model):
 	id = db.Column(db.Integer, primary_key=True)

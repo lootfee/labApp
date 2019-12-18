@@ -4,7 +4,7 @@ from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending
 from datetime import datetime, timedelta, time, date
 from dateutil import parser
 from app.email import send_password_reset_email
@@ -1094,7 +1094,7 @@ def inventory_management_demo():
 	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
 	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
 	for dp in delivered_purchases:
-		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id).all()
+		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, date_cancelled=None).all()
 		for pl in dp.purchase_list:
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
 			pl.dept_name = Department.query.filter_by(id=pl.department_id).first().name
@@ -1127,10 +1127,10 @@ def inventory_management(company_name):
 			i.min_expiry = datetime.utcnow() + timedelta(days=my_s.min_expiry)
 			i.greater_expiry =  (i.lot.expiry < i.min_expiry)
 			i.quantity_dept = Item.query.filter_by(lot_id=i.lot_id, product_id=my_s.product_id, company_id=company.id, department_id=i.department_id, date_used=None).count()
-	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, purchase_to_delivery=None).all()
+	pending_deliveries = Purchase.query.filter(Purchase.date_purchased.isnot(None)).filter_by(company_id=company.id, delivery=None).all()
 	delivered_purchases = Delivery.query.filter_by(company_id=company.id).all()
 	for dp in delivered_purchases:
-		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id).all()
+		dp.purchase_list = PurchaseList.query.filter_by(company_id=company.id, purchase_id=dp.purchase_id, date_cancelled=None).all()
 		for pl in dp.purchase_list:
 			pl.delivered_qty = Item.query.filter_by(purchase_list_id=pl.id).count()
 			pl.dept_name = Department.query.filter_by(id=pl.department_id).first().name
@@ -1654,7 +1654,7 @@ def purchases(company_name):
 	purchases = Purchase.query.filter_by(company_id=company.id).order_by(Purchase.date_created.desc()).all()
 	for purchase in purchases:
 		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
-		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, date_cancelled=None).all()
 		purchase.purchase_order_complete = False
 		completed_item = 0
 		for list in purchase.purchase_list:
@@ -1676,7 +1676,7 @@ def purchases(company_name):
 def purchase_list(company_name, purchase_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, date_cancelled=None).all()
 	for list in purchase_list:
 		#list.user = User.query.filter_by(id=list.user_id).first()
 		list.product_id = Product.query.filter_by(ref_number=list.ref_number).first().id
@@ -1684,6 +1684,8 @@ def purchase_list(company_name, purchase_order_no):
 		#list.price = MySupplies.query.filter_by(id=list.my_supplies_id ,active=True).first().price
 		#for s in list.supplier:
 			#s.supplier_total_price += PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).total()
+		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
+		list.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=list.id).first()
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -1731,8 +1733,8 @@ def purchase_list(company_name, purchase_order_no):
 		purchase.date_purchased = datetime.utcnow()
 		db.session.commit()
 		return redirect (url_for('purchases', company_name=company.company_name))
-	subtotal = form.subtotal.data
-	print(subtotal)
+	#subtotal = form.subtotal.data
+	#print(subtotal)
 	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies, supplier=supplier)		
 
 
@@ -1740,12 +1742,56 @@ def purchase_list(company_name, purchase_order_no):
 @login_required	
 def remove_purchase_item(company_name, purchase_order_no, id):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	if company.id is not 1:
+		is_my_affiliate = company.is_my_affiliate(user)
+		if not is_my_affiliate:
+			return redirect(url_for('company', company_name=company.company_name))
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
 	item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
 	db.session.delete(item)
 	db.session.commit()
 	return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
 	
+@app.route('/<company_name>/<purchase_order_no>/cancel_purchased_item/<int:id>')
+@login_required	
+def cancel_purchased_item(company_name, purchase_order_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	if company.id is not 1:
+		is_inv_admin = company.is_inv_admin(current_user)
+		if not is_inv_admin:
+			return redirect(url_for('company', company_name=company.company_name))
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	item = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
+	item_query = Item.query.filter_by(purchase_list_id=item.id).first()
+	if item_query is not None:
+		flash("Cannot cancel item, already delivered")
+		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
+	else:
+		item.date_cancelled = datetime.utcnow()
+		db.session.commit()
+		return redirect (url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no))
+		
+@app.route('/<company_name>/<purchase_order_no>/cancel_pending_item/<delivery_order_no>/<int:id>')
+@login_required	
+def cancel_pending_item(company_name, purchase_order_no, delivery_order_no, id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	if company.id is not 1:
+		is_inv_admin = company.is_inv_admin(current_user)
+		if not is_inv_admin:
+			return redirect(url_for('company', company_name=company.company_name))
+	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
+	purchase_list = PurchaseList.query.filter_by(id=id, company_id=company.id).first()
+	purchase_list_delivered_qty = Item.query.filter_by(purchase_list_id=purchase_list.id, company_id=company.id).count()
+	cancelled_qty = purchase_list.quantity - purchase_list_delivered_qty
+	if cancelled_qty <= 0:
+		flash("Cannot cancel, items already delivered")
+		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase_order_no, delivery_order_no=delivery_order_no))
+	else:
+		cancelled_item = CancelledPurchaseListPending(cancelled_qty=cancelled_qty, purchase_list_id=purchase_list.id, cancelled_by=current_user.id)
+		db.session.add(cancelled_item)
+		db.session.commit()
+		return redirect(url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase_order_no, delivery_order_no=delivery_order_no))
+		
 
 @app.route('/<company_name>/<purchase_order_no>/accept_delivery/<delivery_order_no>')
 @login_required	
@@ -1753,12 +1799,15 @@ def accept_delivery(company_name, purchase_order_no, delivery_order_no):
 	company = Company.query.filter_by(company_name=company_name).first_or_404()
 	purchase = Purchase.query.filter_by(purchase_order_no=purchase_order_no, company_id=company.id).first_or_404()
 	delivery = Delivery.query.filter_by(delivery_no=delivery_order_no, company_id=company.id).first_or_404()
-	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, supplier_id=delivery.supplier_id).all()
+	purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, supplier_id=delivery.supplier_id, date_cancelled=None).all()
 	d_supplier = Supplier.query.filter_by(id=delivery.supplier_id).first().name
 	for list in purchase_list:
 		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
 		list.delivery_delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id, delivery_id=delivery.id).count()
+		list.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=list.id).first()
 		list.complete_delivery = list.delivered_qty >= list.quantity
+		if list.cancelled_item:
+			list.complete_delivery = list.delivered_qty >= (list.quantity - list.cancelled_item.cancelled_qty)
 		list.item = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).all()
 		list.delivery_no_list = []
 		for l in list.item:
@@ -1835,7 +1884,7 @@ def deliveries(company_name):
 	purchases = Purchase.query.filter_by(company_id=company.id).order_by(Purchase.date_purchased.desc()).all()
 	for purchase in purchases:
 		purchase.delivered_purchases = Delivery.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
-		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).all()
+		purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id, date_cancelled=None).all()
 		purchase.purchase_order_complete = False
 		completed_item = 0
 		for list in purchase.purchase_list:
@@ -2061,31 +2110,47 @@ def total_purchases_accounts(company_name):
 		if form.department.data == 0 and form.supplier.data == 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 		elif form.supplier.data == 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 		elif form.supplier.data is not 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 	return render_template('inventory_management/total_purchases.html', title='Total Purchases', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
 
 
@@ -2110,57 +2175,74 @@ def total_deliveries_accounts(company_name):
 	form.department.choices = dept_list
 	form.supplier.choices = supplier_list
 	deliveries = Delivery.query.filter_by(company_id=company.id).all()
-	purchases = ''
-	if form.validate_on_submit():
+	purchases = ''		
+	#total delivered prices are based on price from purchase list, i.e. the item price from when it was purchased, to avoid confusion if  prices change in the future
+	if form.validate_on_submit():   
 		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.department.data == 0 and form.supplier.data == 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id).all()
 					p.delivery_total = 0
 					for item in p.delivery_list:
-						p.delivery_total += item.my_supplies.price
+						p.delivery_total += item.purchase_list_to_item.price
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, supplier_id=form.supplier.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, supplier_id=form.supplier.data).all()
 					p.delivery_total = 0
 					for item in p.delivery_list:
-						p.delivery_total += item.my_supplies.price
+						p.delivery_total += item.purchase_list_to_item.price
 		elif form.supplier.data == 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data).all()
 					p.delivery_total = 0
 					for item in p.delivery_list:
-						p.delivery_total += item.my_supplies.price
+						p.delivery_total += item.purchase_list_to_item.price
 		elif form.supplier.data is not 0 and form.department.data is not 0:
 			purchases = Purchase.query.filter(Purchase.date_purchased.between(form.start_date.data, end_date)).filter_by(company_id=company.id).all()
 			for purchase in purchases:
-				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
+				purchase.purchase_list = PurchaseList.query.filter_by(purchase_id=purchase.id, department_id=form.department.data, supplier_id=form.supplier.data, date_cancelled=None).all()
 				purchase.total_purchased = 0
 				for p in purchase.purchase_list:
-					purchase.total_purchased += p.total
+					p.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=p.id).first()
+					if p.cancelled_item:
+						purchase.total_purchased += p.total - (p.cancelled_item.cancelled_qty * p.price)
+					else:
+						purchase.total_purchased += p.total
 				for p in purchase.delivery:
 					p.delivery_list = Item.query.filter_by(delivery_id=p.id, department_id=form.department.data, supplier_id=form.supplier.data).all()
 					p.delivery_total = 0
 					for item in p.delivery_list:
-						p.delivery_total += item.my_supplies.price
+						p.delivery_total += item.purchase_list_to_item.price
 	return render_template('inventory_management/total_deliveries.html', title='Total Deliveries', is_super_admin=is_super_admin, company=company, user=user, superuser=superuser, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, form=form, purchases=purchases)
 	
 
@@ -2201,10 +2283,11 @@ def total_inventory_accounts(company_name):
 							removed_item.append(my_item)
 							my_s.item.remove(my_item)
 					my_s.count = len(my_s.item)
-					print(my_s.item)
-					print(my_item)
+	#current total inventory price is set on current pricing since it measures the current value of total inventory
+					#print(my_s.item)
+					#print(my_item)
 					#print(my_s.id, my_item, my_item.delivery_date, my_item.date_used)
-					print("removed_item:", removed_item)
+					#print("removed_item:", removed_item)
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			for my_s in my_supplies:
 				my_s.item = Item.query.filter_by(my_supplies_id=my_s.id, supplier_id=form.supplier.data).all()
@@ -2268,6 +2351,8 @@ def total_consumed_accounts(company_name):
 			for my_s in my_supplies:
 				my_s.used_item = Item.query.filter(Item.date_used.between(form.start_date.data, end_date)).filter_by(my_supplies_id=my_s.id).all()
 				my_s.count = len(my_s.used_item)
+				for item in my_s.used_item:
+					my_s.purchased_price = item.purchase_list_to_item.price
 				#print(my_s.used_item, len(my_s.used_item))
 		elif form.department.data == 0 and form.supplier.data is not 0:
 			for my_s in my_supplies:

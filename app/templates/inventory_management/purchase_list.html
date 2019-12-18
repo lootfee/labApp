@@ -86,6 +86,8 @@
 						<th style="width:50px;">Added by</th>
 						{% if not purchase.date_purchased %}
 						<th style="width:40px;">Action</th>
+						{% else %}
+						<th style="width:90px;">Status</th>
 						{% endif %}
 					</tr>
 				</thead>
@@ -94,36 +96,53 @@
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.price }}</td>
-						<td>{{ list.quantity }}</td>
-						<td class='individual_total' id="{{ list.ref_number }}_total"></td>
+						<td>{% if list.cancelled_item %}{{ list.quantity-list.cancelled_item.cancelled_qty }}{% else %}{{ list.quantity }} {% endif %}</td>
+						{% if purchase.date_purchased %}<td class='individual_total'>{{ list.total }}</td>{% else %}<td class='individual_total' id="{{ list.ref_number }}_total"></td>{% endif %}
 						<td>{{ list.supplier.name }}</td>
 						<td>{{ list.user.username }}</td>
 						<!--td><a href="#" data-toggle="modal" id="edit_{{ list.ref_number }}" data-target="#edit_purchase_list_modal_{{ list.ref_number }}">Edit</a></td-->
 						{% if not purchase.date_purchased %}
-						<td><a href="{{url_for('remove_purchase_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></a></td>
+						<td><a href="{{url_for('remove_purchase_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" title="Delete from list" aria-hidden="true"></a></td>
+						{% else %}
+						{% if list.delivered_qty > 0 %}
+						<td><div><span class="individual_delivered">{{ list.delivered_qty }}</span> delivered<span class="delivered_total" id="{{ list.ref_number }}_delivered_total" style="display:none;"></span></div>{% if list.cancelled_item %}<div>{{ list.cancelled_item.cancelled_qty }} cancelled</div>{% endif %}</td>
+						{% else %}
+						<td><a href="{{url_for('cancel_purchased_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-remove" title="Cancel purchased item" aria-hidden="true"></a></td>
 						{% endif %}
-						
+						{% endif %}
 					</tr>
-					
 				{% endfor %}
 			</table>
 			</div>
+			<div class="col-md-12">
+				<div class="col-md-8"></div>
+				<div class="col-md-4">
+				<!--div style="width: 600px;float: right;"-->
+					<table id="subtotal_container" class="table table-bordered text-center" style="width: 400px;">
+						<tr>
+							<td>Total purchased: <span id="subtotal_price_" style="color: blue;"></span></td>
+						</tr>
+						{% if purchase.date_purchased %}
+						<tr>
+							<td>Total delivered: <span id="subtotal_delivered_price" style="color: blue;"></span></td>
+						</tr>
+						{% endif %}
+					</table>
+				</div>
+			</div>
 			<form action method="post" class="form" role="form" name="orders_list_form" id="orders_list_form">
 			{{ form.csrf_token() }}
-			<div style="width: 200px;float: right; margin-bottom: 20px;">
-				<div id="subtotal_container">Total: <span id="subtotal_price_" style="color: blue;"></span></div>
-				<span id="subtotal_price" style="display: none;"></span>
 				{{ form.subtotal }}
 				{% if not purchase.date_purchased %}
-				<div>
+				<div style="float:right;">
 					{{ form.save(class_="btn btn-default")}}
 					{% if purchase_list %}
 					{{ form.submit(class_="btn btn-default")}}
 					{% endif %}
 				</div>
 				{% endif %}
-			</div>
-		</form>
+			</form>
+		
 		</div>	
 		
     </div>
@@ -141,26 +160,37 @@
 			}
 					
 			{% for list in purchase_list %}
+				{% if list.cancelled_item %}
+				$("#{{ list.ref_number }}_total").html((parseFloat({{list.price }}) * parseFloat({{ list.quantity-list.cancelled_item.cancelled_qty }})).toFixed(2));
+				{% else %}
 				$("#{{ list.ref_number }}_total").html((parseFloat({{list.price }}) * parseFloat({{ list.quantity }})).toFixed(2));
+				{% endif %}
+				//$("#{{ list.ref_number }}_delivered_total").html((parseFloat({{list.price }}) * parseFloat({{ list.delivered_qty  }})).toFixed(2));
 			{% endfor %}
 			
 			var sum1 = 0;
 			$(".individual_total").each(function() {
 				sum1 += parseFloat($(this).text());
-				$("#subtotal_price").html(sum1);
+				$("#subtotal_price").html(parseFloat(sum1).toFixed(2));
 			});
-			var sum2 = 0
+			var sum2 = 0;
 			$(".individual_total").each(function() {
 					sum2 += parseFloat($(this).text());
-				$("#subtotal_price_").html(sum2);
+				$("#subtotal_price_").html(parseFloat(sum2).toFixed(2));
 			});
+			
+			var delivered_sum = 0;
+			{% for list in purchase_list %}
+					delivered_sum += {{ list.delivered_qty }} * {{ list.price }};
+			{% endfor %}
+			$("#subtotal_delivered_price").html(parseFloat(delivered_sum).toFixed(2));
 			
 			$("select#supplier").change(function() {
 				var sum3 = 0;
 				$('select#supplier').quicksearch('table#orders_list_table .orders_list_row');//<-------------
-				$("table#orders_list_table .individual_total:visible").each(function() {
+				$("table#orders_list_table .orders_list_row .individual_total:visible").each(function() {
 						sum3 += parseFloat($(this).text());
-						$("#subtotal_price_").html(sum3);
+						$("#subtotal_price_").html(parseFloat(sum3).toFixed(2));
 				});
 			});
 			

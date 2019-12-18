@@ -3,20 +3,40 @@
 
 {% block app_content %}
 {% include 'inventory_management/inventory_manager_nav.html' %}
-    <h3 class="inventory_headers">Inventory Remaining</h3>
-	<hr class="inventory_hr">
 	<div class="container">
+		<table class="visible-print" style="width:100vw;margin-top:10px;">
+			<tr>
+				<td style="width:30%;">
+					{% if company.logo %}
+					<span width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:90px;height:90px;"></span>
+					{% else %}
+					<span width="180px"><img src="{{ company.company_avatar(90) }}"></span>
+					{% endif %}
+				</td>
+				<td class="text-center" style="width:40%;"><h1>{{ company.company_name }}</h1></td>
+				<td style="width:30%;">
+					<p>Address: {{ company.address }}</p>
+					<p>Email: {{ company.email }}</p>
+					<p>Contact: {{ company.contact_info }}</p>
+				</td>
+			</tr>
+		</table>
+		<hr class="inventory_hr visible-print-block">	
+		<h3 class="inventory_headers">Inventory Remaining</h3>
+		<hr class="inventory_hr">
 		<div class="row">
 			<div class="col-md-12">
 			<form action method="post" class="form" role="form">
 				{{ form.hidden_tag() }}
 				<table class="table table-hover">
 					<tr>
-						<th>From</th>
-						<th>To</th>
-						<th>Supplier</th>
-						<th>Department</th>
-						<th></th>
+						<thead>
+							<th>From</th>
+							<th>To</th>
+							<th>Supplier</th>
+							<th>Department</th>
+							<th></th>
+						</thead>
 					</tr>
 					<tr>
 						<td>{{ form.start_date(class_="form-control", type="date") }}</td>
@@ -53,17 +73,14 @@
 					{% endif %}
 					{% endfor %}
 				</table>
-				<table class="table table-bordered table-hover">
-					<tr>
-						<td class="col-md-2" ></td>
-						<td class="col-md-2" ></td>
-						<td class="col-md-1" ></td>
-						<td class="col-md-1" ></td>
-						<td class="col-md-1" ></td>
-						<td class="col-md-1" style="font-size:16px; font-weight:bold;">Total: <span id="delivery_total" style="color: blue;"></span></td>
-					</tr>
-				</table>
-				<button class="btn btn-default hidden-print" id="print_button" style="float:right;">Print</button>
+				<div style="float:right;width: 400px;">
+					<table class="table table-bordered table-hover">
+						<tr>
+							<td class="col-md-1" style="font-size:16px; font-weight:bold;">Total: <span id="delivery_total" style="color: blue;"></span></td>
+						</tr>
+					</table>
+					<button class="btn btn-default hidden-print" id="print_button" style="float:right;">Print</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -88,7 +105,7 @@ $(document).ready(function() {
 	$("#subtotal_container").css("display", "block");
 	}*/
 	
-	var sum = 0;
+	/*var sum = 0;
 	$(".individual_purchase").each(function() {
 		sum += parseFloat($(this).text());
 		$("#purchase_total").html( sum);
@@ -98,18 +115,18 @@ $(document).ready(function() {
 	$(".individual_delivery").each(function() {
 		sum1 += parseFloat($(this).text());
 		$("#delivery_total").html( sum1)
-	});
+	});*/
 	
 	{% for my_s in my_supplies %}
 	{% if my_s.count %}
-		$("#{{my_s.product.ref_number}}_total").html({{ my_s.count }} * {{ my_s.price }});
+		$("#{{my_s.product.ref_number}}_total").html(parseFloat({{ my_s.count }} * {{ my_s.price }}).toFixed(2));
 	{% endif %}
 	{% endfor %}
 	
 	var sum1 = 0;
 	$(".individual_total").each(function() {
 		sum1 += parseFloat($(this).text());
-		$("#delivery_total").html(sum1);
+		$("#delivery_total").html(parseFloat(sum1).toFixed(2));
 	});
 });
 

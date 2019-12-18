@@ -15,7 +15,7 @@
 					<th>Name</th>
 					<th>Qty Requested</th>
 					<th>Qty Received</th>
-					<th>Status</th>
+					<th>Action/Status</th>
 				</tr>
 				{% for list in purchase_list %}
 					<tr>
@@ -24,16 +24,36 @@
 						<td>{{ list.quantity }}</td>
 						<td><a href="#" id="delivery_popup_{{ list.ref_number }}">{{ list.delivered_qty }}</a></td>
 						{% if list.complete_delivery %}
-						<td><div>Complete</div><div><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div></td>
+						<td><span class="glyphicon glyphicon-ok" title="Delivery complete" aria-hidden="true" style="margin:5px;"></span>{% if list.cancelled_item %}<span><span class="glyphicon glyphicon-info-sign" title="{{ list.cancelled_item.cancelled_qty }} item cancelled" aria-hidden="true" style="margin:5px;">{% endif %}<span><a href="#" id="print_bc_{{ list.ref_number }}"><span class="glyphicon glyphicon-barcode" title="print barcode" aria-hidden="true" style="margin:5px;"></span></a></span></td>
 						{% else %}
-						<td><div><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}">Receive</a></div>{% if list.delivered_qty > 0 %}<div ><a href="#" id="print_bc_{{ list.ref_number }}">Print BCode</a></div>{% endif %}</td>
+						<td><span><a href="{{ url_for('receive_delivery_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}"><span class="glyphicon glyphicon-download-alt" title="Receive item" aria-hidden="true" style="margin:5px;"></span></a></span>
+						<span><a data-toggle="modal" href="#" data-target="#cancel_pending_{{ list.ref_number }}"><span class="glyphicon glyphicon-remove" title="cancel pending items" aria-hidden="true" style="margin:5px;"></span></a></span>{% if list.delivered_qty > 0 %}<span><a href="#" id="print_bc_{{ list.ref_number }}"><span class="glyphicon glyphicon-barcode" title="print barcode" aria-hidden="true" style="margin:5px;"></span></a></span>{% endif %}</td>
 						{% endif %}
 					</tr>
 				{% endfor %}
 			</table>
 		</div>
     </div>
-
+	{% for list in purchase_list %}
+	<div class="modal fade" id="cancel_pending_{{ list.ref_number }}" tabindex="-1" role="dialog" aria-labelledby="cancel_pending_{{ list.ref_number }}Label">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		  </div>
+		  <div class="modal-body">
+			<p><h4>Are you sure you want to cancel the pending items for {{ list.name }} ({{ list.ref_number }})</h4></p>
+			<p><strong>Requested quantity: {{ list.quantity }}</strong></p>
+			<p><strong>Delivered quantity: {{ list.delivered_qty }}</strong></p>
+			<p><strong>Quantity to be cancelled: {{ list.quantity  - list.delivered_qty }}</strong></p>
+		  </div>
+		  <div class="modal-footer">
+			<a class="btn btn-default" href="{{ url_for('cancel_pending_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=delivery.delivery_no, id=list.id)}}" role="button" style="float:left;">Cancel items</a>
+		  </div>
+		</div>
+	  </div>
+	</div>	
+	{% endfor %}
 {% endblock %}
 {% block scripts%}
 {{ super() }}
