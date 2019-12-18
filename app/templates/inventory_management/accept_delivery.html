@@ -18,7 +18,11 @@
 					<th>Action/Status</th>
 				</tr>
 				{% for list in purchase_list %}
+					{% if list.complete_delivery %}
+					<tr class="success">
+					{% else %}
 					<tr>
+					{% endif %}
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.quantity }}</td>

@@ -1685,7 +1685,8 @@ def purchase_list(company_name, purchase_order_no):
 		#for s in list.supplier:
 			#s.supplier_total_price += PurchaseList.query.filter_by(purchase_id=purchase.id, company_id=company.id).total()
 		list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id).count()
-		list.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=list.id).first()
+		list.cancelled_item = CancelledPurchaseListPending.query.filter_by(purchase_list_id=list.id).first() #cancelled with some items delivered
+	cancelled_purchases = PurchaseList.query.filter(PurchaseList.date_cancelled.isnot(None)).filter_by(purchase_id=purchase.id, company_id=company.id).all() #cancelled without any item delivered
 	user = User.query.filter_by(username=current_user.username).first_or_404()
 	superuser = User.query.filter_by(id=1).first_or_404()
 	is_super_admin = company.is_super_admin(user)
@@ -1735,7 +1736,7 @@ def purchase_list(company_name, purchase_order_no):
 		return redirect (url_for('purchases', company_name=company.company_name))
 	#subtotal = form.subtotal.data
 	#print(subtotal)
-	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies, supplier=supplier)		
+	return render_template('inventory_management/purchase_list.html', title='Purchase List', user=user, superuser=superuser, company=company, purchase=purchase, is_super_admin=is_super_admin, is_inv_supervisor=is_inv_supervisor, is_inv_admin=is_inv_admin, purchase_list=purchase_list, form=form, dept=dept, my_supplies=my_supplies, supplier=supplier, cancelled_purchases=cancelled_purchases)		
 
 
 @app.route('/<company_name>/<purchase_order_no>/remove_purchase_item/<int:id>')

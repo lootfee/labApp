@@ -97,7 +97,7 @@
 						<td>{{ list.name }}</td>
 						<td>{{ list.price }}</td>
 						<td>{% if list.cancelled_item %}{{ list.quantity-list.cancelled_item.cancelled_qty }}{% else %}{{ list.quantity }} {% endif %}</td>
-						{% if purchase.date_purchased %}<td class='individual_total'>{{ list.total }}</td>{% else %}<td class='individual_total' id="{{ list.ref_number }}_total"></td>{% endif %}
+						<td class='individual_total' id="{{ list.ref_number }}_total"></td>
 						<td>{{ list.supplier.name }}</td>
 						<td>{{ list.user.username }}</td>
 						<!--td><a href="#" data-toggle="modal" id="edit_{{ list.ref_number }}" data-target="#edit_purchase_list_modal_{{ list.ref_number }}">Edit</a></td-->
@@ -110,6 +110,18 @@
 						<td><a href="{{url_for('cancel_purchased_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-remove" title="Cancel purchased item" aria-hidden="true"></a></td>
 						{% endif %}
 						{% endif %}
+					</tr>
+				{% endfor %}
+				{% for cancelled in cancelled_purchases %}
+					<tr class="danger">
+						<td>{{ cancelled.ref_number }}</td>
+						<td>{{ cancelled.name }}</td>
+						<td>{{ cancelled.price }}</td>
+						<td>{{ cancelled.quantity }}</td>
+						<td>{{ cancelled.price * cancelled.quantity }}</td>
+						<td>{{ cancelled.supplier.name }}</td>
+						<td>{{ cancelled.user.username }}</td>
+						<td>Cancelled</td>
 					</tr>
 				{% endfor %}
 			</table>
