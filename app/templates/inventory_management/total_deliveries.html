@@ -60,9 +60,9 @@
 					{% for purchase in purchases %}
 					{% if purchase.delivery %}
 					<tr>
-						<td>{{ company.company_abbrv }}-PO-{{ purchase.purchase_order_no }}</td>
+						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ company.company_abbrv}}-PO-{{ purchase.purchase_order_no }}</a></td>
 						<td class="individual_purchase">{{ purchase.total_purchased }}</td>
-						<td>{% for p in purchase.delivery %}<div>{{ p.delivery_no }}</div>{% endfor %}</td>
+						<td>{% for p in purchase.delivery %}<div><a href="{{ url_for('accept_delivery', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, delivery_order_no=p.delivery_no)}}">{{ p.delivery_no }}</a></div>{% endfor %}</td>
 						<td>{% for p in purchase.delivery %}<div class="individual_delivery">{{ p.delivery_total }}</div>{% endfor %}</td>
 					</tr>
 					{% endif %}

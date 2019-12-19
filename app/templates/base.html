@@ -68,7 +68,7 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container" style="margin-bottom:20px;">
+	<div class="container" style="margin-bottom:20px;padding-bottom: 40px;">
 		{% with messages = get_flashed_messages() %}
 		{% if messages %}
 			{% for message in messages %}
@@ -82,7 +82,7 @@
 		{% endblock %}
 	</div>
 {% block footer %}	
-<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px;">© 2019 LABAPP, Inc. All Right Reserved<span style="float:right;"><a href="https://www.termsfeed.com/terms-service/50bee2071179de444b24dfb078934616" target="_blank">Terms of Service&nbsp;&nbsp;&nbsp;</a></span></footer>
+<footer style="position: fixed;left: 0;bottom: 0;width: 100%;background-color: #efefef;  color: black;text-align: center;font-size: 12px;margin-top:25px;">© 2019 LABAPP, Inc. All Right Reserved</footer>
 {% endblock %}
 
 {% endblock %}

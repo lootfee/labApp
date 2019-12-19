@@ -82,6 +82,16 @@ def login():
 			next_page = url_for('index')
 		return redirect(next_page)
 	return render_template('login.html', title='Sign In', form=form)
+	
+
+@app.route('/terms_of_service')
+def terms_of_service():
+	return render_template('terms_of_service.html', title='LABAPP Terms of Service')
+	
+@app.route('/privacy_policy')
+def privacy_policy():
+	return render_template('privacy_policy.html', title='LABAPP Terms of Service')
+	
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
