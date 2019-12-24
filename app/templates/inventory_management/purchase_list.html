@@ -80,19 +80,31 @@
 						<th style="width:150px;">Reference No</th>
 						<th style="width:500px;">Name</th>
 						<th style="width:50px;">Price Each</th>
-						<th style="width:40px;">Quantity</th>
+						<th style="width:40px;">Requested Qty</th>
 						<th style="width:50px;">Total Price</th>
 						<th style="width:150px;">Supplier</th>
 						<th style="width:50px;">Added by</th>
 						{% if not purchase.date_purchased %}
 						<th style="width:40px;">Action</th>
 						{% else %}
+						<th style="width:40px;">Delivered Qty</th>
+						<th style="width:50px;">Delivery Price</th>
 						<th style="width:90px;">Status</th>
 						{% endif %}
 					</tr>
 				</thead>
 				{% for list in purchase_list %}
-					<tr class="orders_list_row">
+					{% if list.cancelled_item %}
+					{% if (list.quantity - list.cancelled_item.cancelled_qty) == list.delivered_qty %}
+					<tr class="orders_list_row success">
+					{% else %}
+					<tr class="orders_list_row warning">
+					{% endif %}
+					{% elif list.quantity == list.delivered_qty %}
+					<tr class="orders_list_row success">
+					{% else %}
+					<tr class="orders_list_row warning">
+					{% endif %}
 						<td>{{ list.ref_number }}</td>
 						<td>{{ list.name }}</td>
 						<td>{{ list.price }}</td>
@@ -105,8 +117,13 @@
 						<td><a href="{{url_for('remove_purchase_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-trash" title="Delete from list" aria-hidden="true"></a></td>
 						{% else %}
 						{% if list.delivered_qty > 0 %}
-						<td><div><span class="individual_delivered">{{ list.delivered_qty }}</span> delivered<span class="delivered_total" id="{{ list.ref_number }}_delivered_total" style="display:none;"></span></div>{% if list.cancelled_item %}<div>{{ list.cancelled_item.cancelled_qty }} cancelled</div>{% endif %}</td>
+						<td>{{ list.delivered_qty }}</td>
+						<td class="delivered_total">{{ list.delivered_qty * list.price }}</td>
+						<td>{% if list.cancelled_item %}{% if (list.quantity - list.cancelled_item.cancelled_qty) == list.delivered_qty %}<span class="glyphicon glyphicon-ok" title="Delivery complete" aria-hidden="true" style="margin:5px;"></span>{% endif %}<span class="glyphicon glyphicon-info-sign" title="{{ list.cancelled_item.cancelled_qty }} item cancelled" aria-hidden="true" style="margin:5px;"></span>{% else %}{% if list.quantity == list.delivered_qty %}<span class="glyphicon glyphicon-ok" title="Delivery complete" aria-hidden="true" style="margin:5px;"></span>{% else %}<span class="glyphicon glyphicon-question-sign" title="items pending" aria-hidden="true" style="margin:5px;"></span>{% endif %}{% endif %}</td>
+						<!--td><div><span class="individual_delivered">{{ list.delivered_qty }}</span> delivered<span class="delivered_total" id="{{ list.ref_number }}_delivered_total" style="display:none;"></span></div>{% if list.cancelled_item %}<div>{{ list.cancelled_item.cancelled_qty }} cancelled</div>{% endif %}</td-->
 						{% else %}
+						<td></td>
+						<td></td>
 						<td><a href="{{url_for('cancel_purchased_item', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no, id=list.id)}}"><span class="glyphicon glyphicon-remove" title="Cancel purchased item" aria-hidden="true"></a></td>
 						{% endif %}
 						{% endif %}
@@ -121,6 +138,8 @@
 						<td>{{ cancelled.price * cancelled.quantity }}</td>
 						<td>{{ cancelled.supplier.name }}</td>
 						<td>{{ cancelled.user.username }}</td>
+						<td></td>
+						<td></td>
 						<td>Cancelled</td>
 					</tr>
 				{% endfor %}
@@ -203,6 +222,11 @@
 				$("table#orders_list_table .orders_list_row .individual_total:visible").each(function() {
 						sum3 += parseFloat($(this).text());
 						$("#subtotal_price_").html(parseFloat(sum3).toFixed(2));
+				});
+				var sum4 = 0;
+				$("table#orders_list_table .orders_list_row .delivered_total:visible").each(function() {
+						sum4 += parseFloat($(this).text());
+						$("#subtotal_delivered_price").html(parseFloat(sum4).toFixed(2));
 				});
 			});
 			

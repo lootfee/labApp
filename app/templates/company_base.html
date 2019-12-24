@@ -3,11 +3,11 @@
 {% block title %}labApp - {{company.company_name }} {% if title %} - {{ title }} {% endif %}{% endblock %}
 {% block description %} {% if description %} {{ description }} {% endif %} {% endblock %}
 
-{% macro nav_link(endpoint, name) %}
+{% macro nav_link(endpoint, name, badge_var) %}
 {% if request.endpoint.endswith(endpoint) %}
-  <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}{% if badge_var %}<span class="badge">{{ badge_var}}</span>{% endif %}</a></li>
 {% else %}
-  <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}{% if badge_var %}<span class="badge">{{ badge_var }}</span>{% endif %}</a></li>
 {% endif %}
 {% endmacro %}
 

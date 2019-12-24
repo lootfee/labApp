@@ -3,9 +3,9 @@
 		{{ nav_link('inventory_management', 'Overview') }}
 		{{ nav_link('inventory', 'Inventory') }}
 		{{ nav_link('internal', 'Internal') }}
-		{{ nav_link('orders', 'Orders') }}
+		{{ nav_link('orders', 'Orders', company.pending_orders() ) }}
 		{% if is_inv_admin or company.id == 1 %}
-		{{ nav_link('purchases', 'Purchases') }}
+		{{ nav_link('purchases', 'Purchases', company.pending_purchases()) }}
 		{% endif %}
 		{{ nav_link('deliveries', 'Deliveries') }}
 		{{ nav_link('supplies', 'Supplies') }}

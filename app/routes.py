@@ -1669,9 +1669,9 @@ def purchases(company_name):
 		completed_item = 0
 		for list in purchase.purchase_list:
 			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
-			list.complete_item_delivery = list.delivered_qty == list.quantity
+			#list.complete_item_delivery = list.delivered_qty == list.quantity
 		for n in range(0, len(purchase.purchase_list)):
-			if list.complete_item_delivery:
+			if list.delivered_qty == list.quantity:
 				completed_item += 1
 		if len(purchase.purchase_list) == completed_item:
 			purchase.purchase_order_complete = True
@@ -1900,9 +1900,9 @@ def deliveries(company_name):
 		completed_item = 0
 		for list in purchase.purchase_list:
 			list.delivered_qty = Item.query.filter_by(purchase_list_id=list.id, company_id=company.id).count()
-			list.complete_item_delivery = list.delivered_qty == list.quantity
+			#list.complete_item_delivery = list.delivered_qty == list.quantity
 		for n in range(0, len(purchase.purchase_list)):
-			if list.complete_item_delivery:
+			if list.delivered_qty == list.quantity:
 				completed_item += 1
 		if len(purchase.purchase_list) == completed_item:
 			purchase.purchase_order_complete = True

@@ -1,0 +1,111 @@
+2019-12-24 20:24:38,231 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_cors\extension.py", line 161, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
+    return render_template('inventory_management/orders.html', title='Orders', user=user, superuser=superuser, company=company, form=form, form1=form1, orders=orders, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
+    context, ctx.app)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
+    rv = template.render(context)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
+    {% import 'bootstrap/wtf.html' as wtf %}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
+    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
+    {% block doc -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
+    {%- block html %}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
+    {% block body -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
+    {% block content -%}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
+    {% block app_content %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
+    {% include 'inventory_management/inventory_manager_nav.html' %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
+    {{ nav_link('orders', 'Orders', 'orders', 'pending_order') }}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
+    rv = self._func(*arguments)
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
+    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}<span class="badge">{{ x.y(company) }}</span></a></li>
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
+2019-12-24 20:26:55,027 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_cors\extension.py", line 161, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
+    db.session.commit()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
+    context, ctx.app)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
+    rv = template.render(context)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
+    {% import 'bootstrap/wtf.html' as wtf %}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
+    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
+    {% block doc -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
+    {%- block html %}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
+    {% block body -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
+    {% block content -%}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
+    {% block app_content %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
+    {% include 'inventory_management/inventory_manager_nav.html' %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
+    {{ nav_link('orders', 'Orders') }}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
+    rv = self._func(*arguments)
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
+    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
+2019-12-24 20:27:00,398 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]

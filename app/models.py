@@ -184,6 +184,12 @@ class Company(db.Model):
 	def is_doc_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.doc_admin==True).first() or user.id == 1
 		
+	def pending_orders(self):
+		return Order.query.filter(Order.company_id == self.id, Order.date_submitted.isnot(None), Order.puchase_no == None).count()
+		
+	def pending_purchases(self):
+		return Purchase.query.filter(Purchase.company_id == self.id, Purchase.date_purchased == None).count()
+		
 		
 
 class Affiliates(db.Model):

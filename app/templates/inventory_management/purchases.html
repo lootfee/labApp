@@ -8,7 +8,7 @@
 	<hr class="inventory_hr">
 	<div class="row">
 		<div class="col-md-12">
-			<table class="text-center table-bordered table-hover">
+			<table class="text-center table table-bordered table-hover">
 				<tr>
 					<th class="col-md-2">Purchase Order</th>
 					<th class="col-md-1">Created by</th>
@@ -19,7 +19,13 @@
 				</tr>
 				{% if purchases %}
 					{% for purchase in purchases %}
+					{% if purchase.purchase_order_complete == True %}
+					<tr class="success">
+					{% elif purchase.date_purchased %}
+					<tr class="warning">
+					{% else %}
 					<tr>
+					{% endif %}
 						<td><a href="{{ url_for('purchase_list', company_name=company.company_name, purchase_order_no=purchase.purchase_order_no)}}">{{ company.company_abbrv}}-PO-{{ purchase.purchase_order_no }}</a></td>
 						{% for p in purchase.purchase_created_by %}
 						<td>{{ p.username }}</td>
@@ -31,9 +37,9 @@
 								<td>{{ moment(purchase.date_purchased).format('lll') }}</td>
 							{% endfor %}
 							{% if purchase.purchase_order_complete == True %}
-								<td>Delivery completed</td>
+								<td><span class="glyphicon glyphicon-ok" title="Complete" aria-hidden="true"></span></td>
 								{% else %}
-								<td>Items pending</td>
+								<td><span class="glyphicon glyphicon-question-sign" title="Items pending" aria-hidden="true"></span></td>
 							{% endif %}
 						{% else %}
 						<td></td>

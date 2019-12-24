@@ -27,11 +27,12 @@
 				<th class="col-md-1 admin-table">{{ form.qc_supervisor.label}}</th>
 				<th class="col-md-1 admin-table">{{ form.qc_admin.label}}</th>
 				<th class="col-md-1 admin-table table-bordered">{{ form.super_admin.label}}</th>
-				{% endif %}
 				{% if user == superuser %}
 				<th class="col-md-1 admin-table">{{ form.doc_supervisor.label}}</th>
 				<th class="col-md-1 admin-table">{{ form.doc_admin.label}}</th>
-				{% endif %}				
+				{% endif %}	
+				{% endif %}
+							
 			</tr>
 			<tr>
 				<td class="col-md-2 admin-table"><a href="{{ url_for('user', username=affiliate.users.username) }}">{{ affiliate.users.firstname }} {{ affiliate.users.lastname }} ({{ affiliate.users.username }})</a></td>
@@ -43,11 +44,12 @@
 				<td class="admin-table form-group">{{form.qc_supervisor(class_="single_check")}}</td>				
 				<td class="admin-table form-group">{{form.qc_admin(class_="single_check double_check")}}</td>
 				<td class="admin-table table-bordered form-group">{{form.super_admin}}</td>	
-				{% endif %}
 				{% if user == superuser %}
 				<td class="admin-table form-group">{{form.doc_supervisor(class_="single_check")}}</td>
 				<td class="admin-table form-group">{{form.doc_admin(class_="single_check double_check")}}</td>
 				{% endif %}
+				{% endif %}
+				
 			</tr>
 		</table>
 		<div id="manage_afiliate_footer">
