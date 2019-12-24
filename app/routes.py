@@ -1588,7 +1588,8 @@ def create_orders(company_name, order_no):
 		is_my_affiliate = company.is_my_affiliate(user)
 		if not is_my_affiliate:
 			return redirect(url_for('company', company_name=company.company_name))
-	dept = company.departments.order_by(Department.name.asc())
+	#dept = company.departments.order_by(Department.name.asc())
+	dept = Department.query.filter_by(id=order.department_id).first()
 	products = Product.query.order_by(Product.name.asc())
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:
@@ -1706,7 +1707,8 @@ def purchase_list(company_name, purchase_order_no):
 		is_my_affiliate = company.is_my_affiliate(user)
 		if not is_my_affiliate:
 			return redirect(url_for('company', company_name=company.company_name))
-	dept = company.departments.order_by(Department.name.asc())
+	#dept = company.departments.order_by(Department.name.asc())
+	dept = Department.query.filter_by(id=purchase.order.department_id).first()
 	supplier = company.suppliers.order_by(Supplier.name.asc())
 	my_supplies = MySupplies.query.filter_by(company_id=company.id, active=True).all()
 	for my_s in my_supplies:

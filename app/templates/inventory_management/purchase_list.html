@@ -20,10 +20,10 @@
 					<div class="col-md-6">
 						<label class="control-label" for="department">Department</label>
 						<select class="form-control" id="department">
-							<option value=''>All</option>
-							{% for d in dept %}
-							<option value='{{ d.name }}'>{{ d.name }}</option>
-							{% endfor %}
+							<!--option value=''>All</option-->
+							
+							<option value='{{ dept.name }}'>{{ dept.name }}</option>
+							
 						</select>
 					</div>
 				</div>
