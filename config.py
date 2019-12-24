@@ -5,8 +5,8 @@ basedir = os.path.abspath(os.path.dirname(__file__) )
 load_dotenv()
 
 class Config(object):
-	SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-	SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://labApp:labApp123@localhost:3306/labApp'#os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
+	SECRET_KEY = os.getenv('SECRET_KEY') or 'you-will-never-guess'
+	SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	MAIL_SERVER = os.getenv('MAIL_SERVER')
 	MAIL_PORT = int(os.getenv('MAIL_PORT') or 25)
