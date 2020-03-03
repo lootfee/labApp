@@ -1,11 +1,9 @@
 <nav class="navbar" id="inventoryNav">
 	<ul class="nav nav-pills">
 		{{ nav_link('quality_control', 'QC Basic') }}
-		{% if current_user == ssuperuser %}
 		{{ nav_link('saved_results', 'Saved QC') }}
 		{{ nav_link('encode_qc_results', 'Upload QC Values') }}
 		{{ nav_link('qc_variables', 'Variables') }}
-		{% endif %}
 	</ul>	
 </nav>
 <hr style="margin: 0;">

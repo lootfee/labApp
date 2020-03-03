@@ -39,8 +39,8 @@
 		<form action method="post" class="form" role="form">
 			{{ form6.csrf_token() }}
 				<div class="col-md-4">
-					{{ form6.machine.label (class_="control-label")}}
-					{{ form6.machine (class_="form-control")}}
+					{{ form6.qcrf_machine.label (class_="control-label")}}
+					{{ form6.qcrf_machine (class_="form-control")}}
 					<br>
 					{{ form6.control1.label (class_="control-label")}}
 					{{ form6.control1 (class_="form-control")}}
@@ -55,8 +55,8 @@
 					</div>
 				</div>
 				<div class="col-md-4">
-					{{ form6.analyte.label (class_="control-label")}}
-					{{ form6.analyte (class_="form-control")}}
+					{{ form6.qcrf_analyte.label (class_="control-label")}}
+					{{ form6.qcrf_analyte (class_="form-control")}}
 					<br>
 					{{ form6.control2.label (class_="control-label")}}
 					{{ form6.control2 (class_="form-control")}}
@@ -71,8 +71,8 @@
 					</div>
 				</div>
 				<div class="col-md-4">
-					{{ form6.reagent_lot.label (class_="control-label")}}
-					{{ form6.reagent_lot (class_="form-control")}}
+					{{ form6.qcrf_reagent_lot.label (class_="control-label")}}
+					{{ form6.qcrf_reagent_lot (class_="form-control")}}
 					<br>
 					{{ form6.control3.label (class_="control-label")}}
 					{{ form6.control3 (class_="form-control")}}
@@ -88,7 +88,7 @@
 				</div>
 			<br>
 			<div style="float:right;margin-top:10px;margin-bottom:40px;">
-				{{ form6.submit (class_="btn btn-default")}}
+				{{ form6.qcrf_submit (class_="btn btn-default")}}
 			</div>
 			
 		</form>
@@ -111,7 +111,7 @@ $(document).ready(function() {
 		{% endfor %}
 	  ]
 	  
-	$( "#control_lot_no" ).autocomplete({
+	$( "#rqclf_control_lot_no" ).autocomplete({
 	  source: control_tags,
 	  focus: function(event, ui) {
 	  event.preventDefault();
@@ -120,7 +120,7 @@ $(document).ready(function() {
 	  select: function(event, ui) {
 	  event.preventDefault();
 	  $(this).val(ui.item.label);
-	  $("#control_expiry").val(ui.item.expiry);
+	  $("#rqclf_control_expiry").val(ui.item.expiry);
 	  }
 	});
 	
@@ -133,7 +133,7 @@ $(document).ready(function() {
 		{% endfor %}
 	  ]
 	  
-	$( "#reagent_lot_no" ).autocomplete({
+	$( "#rrlf_reagent_lot_no" ).autocomplete({
 	  source: reagent_lot_tags,
 	  focus: function(event, ui) {
 	  event.preventDefault();
@@ -142,7 +142,7 @@ $(document).ready(function() {
 	  select: function(event, ui) {
 	  event.preventDefault();
 	  $(this).val(ui.item.label);
-	  $("#reagent_expiry").val(ui.item.expiry);
+	  $("#rrlf_reagent_expiry").val(ui.item.expiry);
 	  }
 	});
 	
@@ -154,9 +154,148 @@ $(document).ready(function() {
 		{% endfor %}
 	  ]
 	  
-	 $( "#machine_name" ).autocomplete({
+	 $( "#rmf_machine_name" ).autocomplete({
 		  source: machine_tags
 		});
+		
+		
+	var analyte_tags = [
+		{% for analyte in analytes %}
+			{
+				label: "{{ analyte.analyte }}"
+			},
+		{% endfor %}
+	]
+	
+	 
+	 $( "#raf_analyte" ).autocomplete({
+		  source: analyte_tags
+		});
+		
+		
+	var unit_tags = [
+		{% for unit in units %}
+			{
+				label: "{{ unit.unit }}"
+			},
+		{% endfor %}
+	]
+	
+	$( "#raf_unit" ).autocomplete({
+		  source: unit_tags
+		});
+		
+	//    for updating select options   
+	
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	
+	$('#rrlf_machine').change(function(){
+		$('#rrlf_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#rrlf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#qcrf_machine').change(function(){
+		$('#qcrf_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			/*$('#control1').empty();   --------------cannot use qcvalues only company controls
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control2').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id :$('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control3').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});*/
+		});
+		
+		return false;
+	});
+	
+	$('#qcrf_analyte').change(function(){
+		$('#qcrf_reagent_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});
+		/*$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});*/
+		return false;
+	});
+	
 });
 </script>
 {% endblock %}

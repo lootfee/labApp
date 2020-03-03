@@ -855,6 +855,17 @@ class Analyte(db.Model):
 		'Company', secondary='company_analyte',
 		backref=db.backref('analyte', lazy='dynamic'), lazy='dynamic'
 	)
+	
+	
+'''class CompanyMachineAnalyte(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	
+	company = db.relationship('Company', backref=db.backref('machine_analyte_link', lazy='dynamic'))
+	machine = db.relationship('Machine', backref=db.backref('company_analyte_link', lazy='dynamic'))
+	analyte = db.relationship('Analyte', backref=db.backref('company_machine_link', lazy='dynamic'))'''
 
 class Unit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -872,6 +883,7 @@ class CompanyAnalyteVariables(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
 	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	control = db.relationship(
 		'Control', secondary='company_analyte_control',
@@ -879,6 +891,9 @@ class CompanyAnalyteVariables(db.Model):
 	)
 	
 	unit = db.relationship('Unit', backref=db.backref('analyte', lazy='dynamic'))
+	company = db.relationship('Company', backref=db.backref('machine_analyte_link', lazy='dynamic'))
+	machine = db.relationship('Machine', backref=db.backref('company_analyte_link', lazy='dynamic'))
+	analyte = db.relationship('Analyte', backref=db.backref('company_machine_link', lazy='dynamic'))
 	
 class Control(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -922,7 +937,7 @@ class ControlLot(db.Model):
 	lot_no = db.Column(db.String(50))
 	expiry = db.Column(db.Date)
 	
-	#values = db.relationship('QCValues', backref=db.backref('qc_lot', lazy='dynamic'))
+	values = db.relationship('QCValues', backref=db.backref('qc_lot', lazy=True))
 	#result = db.relationship('QCResult', backref=db.backref('qc_lot', lazy='dynamic'))
 	
 	control = db.relationship(
@@ -945,6 +960,11 @@ class QCValues(db.Model):
 	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	
+	#lot_no = db.relationship('ControlLot', backref=db.backref('qc_values', lazy='dynamic'))
+	#machine = db.relationship('Machine', backref=db.backref('qc_values', lazy='dynamic'))
+	#analyte = db.relationship('Analyte', backref=db.backref('qc_values', lazy='dynamic'))
+	company = db.relationship('Company', backref=db.backref('qc_values', lazy='dynamic'))
 	
 
 class QCResult(db.Model):

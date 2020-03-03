@@ -11,8 +11,8 @@
 			{{ form.csrf_token() }}
 			<div class="col-md-11">
 				<div class="col-md-4">
-					{{ form.machine.label (class_="control-label")}}
-					{{ form.machine (class_="form-control")}}
+					{{ form.qcrf_machine.label (class_="control-label")}}
+					{{ form.qcrf_machine (class_="form-control")}}
 					<br>
 					{{ form.control1.label (class_="control-label")}}
 					{{ form.control1 (class_="form-control")}}
@@ -27,8 +27,8 @@
 					</div-->
 				</div>
 				<div class="col-md-4">
-					{{ form.analyte.label (class_="control-label")}}
-					{{ form.analyte (class_="form-control")}}
+					{{ form.qcrf_analyte.label (class_="control-label")}}
+					{{ form.qcrf_analyte (class_="form-control")}}
 					<br>
 					{{ form.control2.label (class_="control-label")}}
 					{{ form.control2 (class_="form-control")}}
@@ -43,8 +43,8 @@
 					</div-->
 				</div>
 				<div class="col-md-4">
-					{{ form.reagent_lot.label (class_="control-label")}}
-					{{ form.reagent_lot (class_="form-control")}}
+					{{ form.qcrf_reagent_lot.label (class_="control-label")}}
+					{{ form.qcrf_reagent_lot (class_="form-control")}}
 					<br>
 					{{ form.control3.label (class_="control-label")}}
 					{{ form.control3 (class_="form-control")}}
@@ -61,7 +61,7 @@
 			</div>
 			<!--div class="col-md-1">
 				<br>
-				{{ form.search (class_="btn btn-default")}}
+				{{ form.qcrf_search (class_="btn btn-default")}}
 			</div-->
 			<div class="col-md-3">
 				<br>
@@ -71,7 +71,7 @@
 			<div class="col-md-12" id="my_file_output"></div>
 			<div style="float:right;">
 				<br>
-				{{ form.submit (class_="btn btn-default")}}
+				{{ form.qcrf_submit (class_="btn btn-default")}}
 			</div>
 			
 		</form>
@@ -84,35 +84,116 @@
 {{ super() }}
 <script>
 $(document).ready(function() {
-	//update control lot selectfield on analyte select
-	/*var reagent_lot_tags = [
-		{% for lot in rgt_lot %}
-			{
-				value: "{{ lot.id}}",
-				name: "{{ lot.lot_no }}",
-				analyte: "{% for l in lot.analyte %}{{ l.id }}{% endfor %}",
-			},
-		{% endfor %}
-	  ]
-	$("select#analyte").change(function() {
-		$.grep([
-		{% for lot in rgt_lot %}
-			{
-				value: "{{ lot.id}}",
-				name: "{{ lot.lot_no }}",
-				analyte: "{% for l in lot.analyte %}{{ l.id }}{% endfor %}",
-			},
-		{% endfor %}
-	  ], function(n, i){
-		return n.analyte === $("select#analyte").val();
-	  });
-		//console.log($("select#analyte").val());
+	//    for updating select options   
+	
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	
+		
+	$('#qcrf_machine').change(function(){
+		$('#qcrf_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			$('#control1').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control2').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id :$('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control3').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+		});
+		return false;
 	});
-	var $el = $("#reagent_lot");
-	$el.empty(); // remove old options
-	$.each(newOptions, function(key,value) {
-	  $el.append($("<option></option>")
-		 .attr("value", value).text(key));
+	
+	$('#qcrf_analyte').change(function(){
+		$('#qcrf_reagent_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	
+	/*$('#qcrf_analyte').change(function(){
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
 	});*/
 });
 

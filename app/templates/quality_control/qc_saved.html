@@ -38,22 +38,22 @@
 		<form action method="post" class="form" role="form">
 			{{ form.csrf_token() }}
 			<div class="col-md-4">
-				{{ form.machine.label (class_="control-label")}}
-				{{ form.machine (class_="form-control")}}
+				{{ form.qcrf_machine.label (class_="control-label")}}
+				{{ form.qcrf_machine (class_="form-control")}}
 				<br>
 				{{ form.control1.label (class_="control-label")}}
 				{{ form.control1 (class_="form-control")}}
 			</div>
 			<div class="col-md-4">
-				{{ form.analyte.label (class_="control-label")}}
-				{{ form.analyte (class_="form-control")}}
+				{{ form.qcrf_analyte.label (class_="control-label")}}
+				{{ form.qcrf_analyte (class_="form-control")}}
 				<br>
 				{{ form.control2.label (class_="control-label")}}
 				{{ form.control2 (class_="form-control")}}
 			</div>
 			<div class="col-md-4">
-				{{ form.reagent_lot.label (class_="control-label")}}
-				{{ form.reagent_lot (class_="form-control")}}
+				{{ form.qcrf_reagent_lot.label (class_="control-label")}}
+				{{ form.qcrf_reagent_lot (class_="form-control")}}
 				<br>
 				{{ form.control3.label (class_="control-label")}}
 				{{ form.control3 (class_="form-control")}}
@@ -71,7 +71,7 @@
 				</div>
 				<div class="col-md-6" style="margin-top:20px;">
 					<br>
-					{{ form.submit (class_="btn btn-default")}}
+					{{ form.qcrf_submit (class_="btn btn-default")}}
 					<input id="calculate_meansd_btn" type="button" class="btn btn-default" value="Calculate Mean SD">
 					<input id="create_chart_btn" type="button" class="btn btn-default" value="Create Chart">
 				</div>	
@@ -89,30 +89,30 @@
 			<span><h5><strong>Given Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
-					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values.lvl1_mean }}" readonly>
+					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values1.control_mean }}" readonly>
 					<br>
 					<label class="control-label">Control 1 SD:</label>
-					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values.lvl1_sd }}" readonly>
+					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values1.control_sd }}" readonly>
 					<br>
 					<label class="control-label">Control 1 CV:</label>
 					<input id="lvl1CV" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 2 Mean:</label>
-					<input id="lvl2Mean" class="form-control decTostring" value="{{ qc_values.lvl2_mean }}" readonly>
+					<input id="lvl2Mean" class="form-control decTostring" value="{{ qc_values2.control_mean }}" readonly>
 					<br>
 					<label class="control-label"> Control 2 SD:</label>
-					<input id="lvl2Stndev" class="form-control decTostring" value="{{ qc_values.lvl2_sd }}" readonly>
+					<input id="lvl2Stndev" class="form-control decTostring" value="{{ qc_values2.control_sd }}" readonly>
 					<br>
 					<label class="control-label">Control 2 CV:</label>
 					<input id="lvl2CV" class="form-control decTostring" readonly>
 				</div>
 				<div class="col-md-4">
 					<label class="control-label">Control 3 Mean:</label>
-					<input id="lvl3Mean" class="form-control decTostring" value="{{ qc_values.lvl3_mean }}" readonly>
+					<input id="lvl3Mean" class="form-control decTostring" value="{{ qc_values3.control_mean }}" readonly>
 					<br>
 					<label class="control-label"> Control 3 SD:</label>
-					<input id="lvl3Stndev" class="form-control decTostring" value="{{ qc_values.lvl3_sd }}" readonly>
+					<input id="lvl3Stndev" class="form-control decTostring" value="{{ qc_values3.control_sd }}" readonly>
 					<br>
 					<label class="control-label">Control 3 CV:</label>
 					<input id="lvl3CV" class="form-control decTostring" readonly>
@@ -251,10 +251,10 @@
 			<span><h5><strong>Given Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
-					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values.lvl1_mean }}" readonly>
+					<input id="lvl1Mean" class="form-control decTostring" value="{{ qc_values1.control_mean }}" readonly>
 					<br>
 					<label class="control-label"> Control 1 SD:</label>
-					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values.lvl1_sd }}" readonly>
+					<input id="lvl1Stndev" class="form-control decTostring" value="{{ qc_values1.control_sd }}" readonly>
 					<br>
 					<label class="control-label">Control 1 CV:</label>
 					<input id="lvl1CV" class="form-control decTostring" readonly>
@@ -423,6 +423,80 @@
 google.charts.load('current', {'packages':['line', 'corechart']});
 
 $(document).ready(function() {
+	$('select#qcrf_machine option').addClass(function() {
+		{% for ma in machine_analyte_link %}
+			return this.value;
+		{% endfor %}
+		
+	});
+	
+	//    for updating select options   
+	
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	
+		
+	$('#qcrf_machine').change(function(){
+		$('#qcrf_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#qcrf_analyte').change(function(){
+		$('#qcrf_reagent_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+});
+
+$(document).ready(function() {
 	$(".decTostring").each(function() {
 		$(this).val(parseFloat($(this).val()));
 	});
@@ -447,23 +521,29 @@ $(document).ready(function() {
 		var sum1 = 0;
 		var totSqrd1 = 0;
 		var x1 = 0;
-		var n1 = $(".control1_data").length;
+		var n1 = 0//$(".control1_data").length;
 		$(".control1_data").each(function(){
-			sum1 += parseFloat($(this).val());
-			if (decimalPlaces($(".control1_data").val()) > x1){
-					y = $(".control1_data").val();
-					x1 = decimalPlaces(y);
-				}
+			if ($(this).val() != ""){
+				n1 += 1
+				
+				sum1 += parseFloat($(this).val());
+				if (decimalPlaces($(this).val()) > x1){
+						y = $(this).val();
+						x1 = decimalPlaces(y);
+					}
+			}
+			
 		});
+		console.log(sum1)
 		var dp1 = x1;
 		var mean1 = sum1/n1;
 		$(".control1_data").each(function(i){
-			if ($(".control1_data").val()!= ''){
+			if ($(this).val() != ''){
 				totSqrd1 += (parseFloat($(this).val()) - mean1) * (parseFloat($(this).val()) - mean1);
 			}
 		});
-		var variance1 = totSqrd1 / (n1 - 1);
 		
+		var variance1 = totSqrd1 / (n1 - 1);
 		var sd1 = Math.sqrt(variance1);
 		var cv1 = parseFloat(sd1 / mean1) * 100;
 		mean1 = N(mean1, dp1);
@@ -477,21 +557,27 @@ $(document).ready(function() {
 		var sum2 = 0;
 		var totSqrd2 = 0;
 		var x2 = 0;
-		var n2 = $(".control2_data").length;
+		var n2 = 0//$(".control2_data").length;
 		$(".control2_data").each(function(){
-			sum2 += parseFloat($(this).val());
-			if (decimalPlaces($(".control2_data").val()) > x2){
-					y = $(".control2_data").val();
-					x2 = decimalPlaces(y);
-				}
+			if ($(this).val() != ""){
+				n2 += 1
+				
+				sum2 += parseFloat($(this).val());
+				if (decimalPlaces($(".control2_data").val()) > x2){
+						y = $(".control2_data").val();
+						x2 = decimalPlaces(y);
+					}
+			}
+			
 		});
 		var dp2 = x2;
 		var mean2 = sum2/n2;
 		$(".control2_data").each(function(i){
-			if ($(".control2_data").val()!= ''){
+			if ( $(this).val() !=  ''){
 				totSqrd2 += (parseFloat($(this).val()) - mean2) * (parseFloat($(this).val()) - mean2);
 			}
 		});
+		
 		var variance2 = totSqrd2 / (n2 - 1);
 		var sd2 = Math.sqrt(variance2);
 		var cv2 = parseFloat(sd2 / mean2) * 100;
@@ -506,18 +592,23 @@ $(document).ready(function() {
 		var sum3 = 0;
 		var totSqrd3 = 0;
 		var x3 = 0;
-		var n3 = $(".control3_data").length;
+		var n3 = 0//$(".control3_data").length;
 		$(".control3_data").each(function(){
-			sum3 += parseFloat($(this).val());
-			if (decimalPlaces($(".control3_data").val()) > x3){
-					y = $(".control3_data").val();
-					x3 = decimalPlaces(y);
-				}
+			if ($(this).val() !=  ""){
+				n3 += 1
+				
+				sum3 += parseFloat($(this).val());
+				if (decimalPlaces($(this).val()) > x3){
+						y = $(this).val()
+						x3 = decimalPlaces(y);
+					}
+			}
+			
 		});
 		var dp3 = x3;
 		var mean3 = sum3/n3;
 		$(".control3_data").each(function(i){
-			if ($(".control3_data").val()!= ''){
+			if ($(this).val() !=  ''){
 				totSqrd3 += (parseFloat($(this).val()) - mean3) * (parseFloat($(this).val()) - mean3);
 			}
 		});

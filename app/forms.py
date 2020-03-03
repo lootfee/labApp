@@ -335,40 +335,41 @@ class DocumentSubmitForm(FlaskForm):
 	submit = SubmitField('Submit for review')
 	
 class RegisterMachineForm(FlaskForm):
-	machine_name = StringField('Machine name', validators=[DataRequired()])
+	rmf_machine_name = StringField('Machine name', validators=[DataRequired()])
 	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
-	submit = SubmitField('Submit')
+	rmf_submit = SubmitField('Submit')
 	
 class RegisterAnalyteForm(FlaskForm):
-	analyte = StringField('Analyte', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUC3, ALB2, etc."})
-	unit = StringField('Unit', validators=[DataRequired()])
-	#machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	raf_analyte = StringField('Analyte', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUC3, ALB2, etc."})
+	raf_unit = StringField('Unit', validators=[DataRequired()])
+	raf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
 	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
-	submit = SubmitField('Submit')
+	raf_submit = SubmitField('Submit')
 	
 class RegisterReagentLotForm(FlaskForm):
-	analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
-	reagent_lot_no = StringField('Lot No', validators=[DataRequired()])
-	reagent_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
-	submit = SubmitField('Submit')
+	rrlf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	rrlf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	rrlf_reagent_lot_no = StringField('Lot No', validators=[DataRequired()])
+	rrlf_reagent_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	rrlf_submit = SubmitField('Submit')
 	
 class RegisterControlForm(FlaskForm):
-	control_name = StringField('Control name', validators=[DataRequired()])
-	submit = SubmitField('Submit')
+	rcf_control_name = StringField('Control name', validators=[DataRequired()])
+	rcf_submit = SubmitField('Submit')
 	
 class RegisterQCLotForm(FlaskForm):
-	control = SelectField('Control', coerce=int, validators=[InputRequired()])
-	control_lot_no = StringField('Lot No', validators=[DataRequired()])
-	control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
-	submit = SubmitField('Submit')
+	rqclf_control = SelectField('Control', coerce=int, validators=[InputRequired()])
+	rqclf_control_lot_no = StringField('Lot No', validators=[DataRequired()])
+	rqclf_control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	rqclf_submit = SubmitField('Submit')
 	
 class QCResultForm(FlaskForm):
 	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
 	end_date = DateField('To:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
-	analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
-	unit = SelectField('Unit', coerce=int, validators=[InputRequired()])
-	reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
-	machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	qcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	qcrf_unit = SelectField('Unit', coerce=int, validators=[InputRequired()])
+	qcrf_reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
+	qcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
 	control1 = SelectField('Control 1', coerce=int, validators=[InputRequired()])
 	control1_mean = DecimalField('Control 1 Mean')
 	control1_sd = DecimalField('Control 1 SD')
@@ -382,5 +383,5 @@ class QCResultForm(FlaskForm):
 	qc_data_lvl1 = DecimalField('Level 1')
 	qc_data_lvl2 = DecimalField('Level 2')
 	qc_data_lvl3 = DecimalField('Level 3')
-	search = SubmitField('Search')
-	submit = SubmitField('Submit')
+	qcrf_search = SubmitField('Search')
+	qcrf_submit = SubmitField('Submit')
