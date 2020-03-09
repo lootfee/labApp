@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending
 from datetime import datetime, timedelta, time, date
 from dateutil import parser
@@ -896,6 +896,7 @@ def qc_variables(company_name):
 			if unit_query is None:
 				unit = Unit(unit=form2.raf_unit.data)
 				db.session.add(unit)
+				db.session.commit()
 				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte.id, machine_id=form2.raf_machine.data)
 				db.session.add(analyte_unit)
 				db.session.commit()
@@ -909,6 +910,7 @@ def qc_variables(company_name):
 			if unit_query is None:
 				unit = Unit(unit=form2.raf_unit.data)
 				db.session.add(unit)
+				db.session.commit()
 				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte_query.id, machine_id=form2.raf_machine.data)
 				db.session.add(analyte_unit)
 				db.session.commit()
@@ -992,19 +994,32 @@ def qc_variables(company_name):
 		if form6.control3.data:
 			level3_data = True
 			if form6.qcrf_reagent_lot.data:
-				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values3 = QCValues(control_lot=form6.control3.data, control_mean=form6.control3_mean.data, control_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			else:
-				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-			db.session.add(values)
+				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values3 = QCValues(control_lot=form6.control3.data, control_mean=form6.control3_mean.data, control_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(values1)
+			db.session.add(values2)
+			db.session.add(values3)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		elif form6.control2.data:
 			level2_data = True
-			if form6.reagent_lot.data:
-				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			if form6.qcrf_reagent_lot.data:
+				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 			else:
-				values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-			db.session.add(values)
+				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(values1)
+			db.session.add(values2)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		elif form6.control1.data:
@@ -1129,6 +1144,11 @@ def saved_results(company_name):
 	level1_data = False
 	level2_data = False
 	level3_data = False
+	comments = ''
+	qc1_lot = []
+	qc2_lot = []
+	qc3_lot = []
+	qc_rgt_lot = []
 	if form.qcrf_submit.data:
 		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
 		if form.control3.data:
@@ -1143,6 +1163,7 @@ def saved_results(company_name):
 				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data,machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
 				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
 				qc_values3 = QCValues.query.filter_by(control_lot=form.control3.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
+			comments = [(q.comment) for q in qc_res]
 		elif form.control2.data:
 			level2_data = True
 			if form.qcrf_reagent_lot.data == 0:
@@ -1152,18 +1173,49 @@ def saved_results(company_name):
 			else:
 				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).all()
 				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data,machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()				
+				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()	
+			comments = [(q.comment) for q in qc_res]				
 		elif form.control1.data:
 			level1_data = True
 			if form.qcrf_reagent_lot.data == 0:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).all()
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).order_by(QCResult.run_date.asc()).all()
 				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				print(qc_values1)
 			else:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).all()
+				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).order_by(QCResult.run_date.asc()).all()
 				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-				print(qc_values1, 2)
-	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values1=qc_values1, qc_values2=qc_values2, qc_values3=qc_values3, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data)
+			comments = [(q.comment) for q in qc_res]
+		else:
+			level1_data = True
+			level2_data = True
+			level3_data = True
+			qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).all()
+			for q in qc_res:				
+				qc_values1 = QCValues.query.filter_by(control_lot=q.lvl1_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
+				qc_values2 = QCValues.query.filter_by(control_lot=q.lvl2_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
+				qc_values3 = QCValues.query.filter_by(control_lot=q.lvl3_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
+				q.qc1_lot = ControlLot.query.filter_by(id=q.lvl1_lot).first()
+				qc_rgt_lot.append(q.reagent_lot)
+				if q.qc1_lot:
+					qc1_lot.append(q.qc1_lot)
+				q.qc2_lot = ControlLot.query.filter_by(id=q.lvl2_lot).first()
+				if q.qc2_lot:
+					qc2_lot.append(q.qc2_lot)
+				q.qc3_lot = ControlLot.query.filter_by(id=q.lvl3_lot).first()
+				if q.qc3_lot:
+					qc3_lot.append(q.qc3_lot)
+			qc_rgt_lot = set(qc_rgt_lot)
+			qc1_lot = (set(qc1_lot))
+			qc2_lot = (set(qc2_lot))
+			qc3_lot = (set(qc3_lot))
+			comments = [(q.run_date.strftime('%m/%d/%Y'), q.comment) for q in qc_res if q.comment is not None ]
+	comment_form = QCCommentForm()
+	if comment_form.validate_on_submit():
+		qc_res_query = QCResult.query.filter_by(run_date=comment_form.qccf_result_date.data, analyte_id=form.qcrf_analyte.data, machine_id=form.qcrf_machine.data, company_id=company.id).first()
+		if qc_res_query:
+			qc_res_query.comment = comment_form.qccf_comment.data
+			db.session.commit()
+			return redirect(url_for('saved_results', company_name=company_name))
+	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values1=qc_values1, qc_values2=qc_values2, qc_values3=qc_values3, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data, comment_form=comment_form, comments=comments, qc1_lot=qc1_lot, qc2_lot=qc2_lot, qc3_lot=qc3_lot, qc_rgt_lot=qc_rgt_lot)
 
 @app.route('/inventory_management_demo/overview', methods=['GET', 'POST'])	
 @login_required

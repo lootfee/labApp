@@ -1,4 +1,5 @@
 migrations
+migrations/
 app.db
 Procfile
 

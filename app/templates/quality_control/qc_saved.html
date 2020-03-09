@@ -72,8 +72,8 @@
 				<div class="col-md-6" style="margin-top:20px;">
 					<br>
 					{{ form.qcrf_submit (class_="btn btn-default")}}
-					<input id="calculate_meansd_btn" type="button" class="btn btn-default" value="Calculate Mean SD">
-					<input id="create_chart_btn" type="button" class="btn btn-default" value="Create Chart">
+					<input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean SD">
+					<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart">
 				</div>	
 			</div>	
 			
@@ -119,7 +119,6 @@
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
-			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
@@ -151,9 +150,10 @@
 					<label class="control-label">Control 3 CV:</label>
 					<input id="lvl3CVCalc" class="form-control decTostring" readonly>
 				</div>
+				<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			</div>
 		</div>
-		<div class="col-md-12" style="margin-top:20px;margin-bottom-20px;;font-size:11px;>
+		<div class="col-md-12" style="margin-top:20px;margin-bottom-20px;;font-size:11px;">
 			<input class="col-md-1" value="Run Date" readonly>
 			<input class="col-md-1" value="Control 1" readonly>
 			<input class="col-md-1" value="Control 2" readonly>
@@ -169,9 +169,21 @@
 			
 			{% for q in qc_res %}
 			<input class="col-md-1 run_date_data" value="{{ q.run_date }}" readonly>
-			<input class="col-md-1 decTostring control1_data" style="color:blue;" value="{{ q.lvl1 }}" readonly>
-			<input class="col-md-1 decTostring control2_data" style="color:red;" value="{{ q.lvl2 }}" readonly>
-			<input class="col-md-1 decTostring control3_data" style="color:yellow;" value="{{ q.lvl3 }}" readonly>
+			{% if q.lvl1|int or q.lvl1|int != 0 %}
+			<input class="col-md-1 decTostring control1_data" style="color:blue;" value="{{ q.lvl1 }}">
+			{% else %}
+			<input class="col-md-1 control1_data" value="">
+			{% endif %}
+			{% if q.lvl2|int or q.lvl2|int != 0 %}
+			<input class="col-md-1 decTostring control2_data" style="color:red;" value="{{ q.lvl2 }}">
+			{% else %}
+			<input class="col-md-1 control2_data" value="">
+			{% endif %}
+			{% if q.lvl3|int or q.lvl3|int != 0 %}
+			<input class="col-md-1 decTostring control3_data" style="color:yellow;" value="{{ q.lvl3 }}" >
+			{% else %}
+			<input class="col-md-1 control3_data" value="">
+			{% endif %}
 			{% endfor %}
 		</div>
 		
@@ -201,7 +213,6 @@
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
-			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
@@ -223,6 +234,7 @@
 					<label class="control-label">Control 2 CV:</label>
 					<input id="lvl2CVCalc" class="form-control decTostring" readonly>
 				</div>
+				<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			</div>
 		</div>
 		<div class="col-md-12" style="margin-top:20px;margin-bottom-20px;;font-size:11px;">
@@ -241,8 +253,16 @@
 			
 			{% for q in qc_res %}
 			<input class="col-md-1 run_date_data" value="{{ q.run_date }}">
+			{% if q.lvl1|int or q.lvl1|int != 0 %}
 			<input class="col-md-1 control1_data decTostring" style="color:blue;" value="{{ q.lvl1 }}">
+			{% else %}
+			<input class="col-md-1 control1_data" value="">
+			{% endif %}
+			{% if q.lvl2|int or q.lvl2|int != 0 %}
 			<input class="col-md-1 control2_data decTostring" style="color:red;" value="{{ q.lvl2 }}">
+			{% else %}
+			<input class="col-md-1 control2_data" value="">
+			{% endif %}
 			{% endfor %}
 		</div>
 		{% elif level1_data == True %}
@@ -261,7 +281,6 @@
 				</div>
 			</div>
 			<div class="col-md-6" id="calculted_mean_container">
-			<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			<span><h5><strong>Calculated Values</strong></h5></span>
 				<div class="col-md-4">
 					<label class="control-label">Control 1 Mean:</label>
@@ -273,6 +292,7 @@
 					<label class="control-label">Control 1 CV:</label>
 					<input id="lvl1CVCalc" class="form-control decTostring" readonly>
 				</div>
+				<span><input type="checkbox" id="use_calc_values"> Use calculated values for LJ chart</span>
 			</div>
 		</div>
 		<div class="col-md-12" style="margin-top:20px;margin-bottom-20px;;font-size:11px;">
@@ -286,23 +306,55 @@
 			<input class="col-md-1" value="Control 1" readonly>
 			
 			{% for q in qc_res %}
-			<input class="col-md-1 run_date_data" value="{{ q.run_date }}" readonly>
-			<input class="col-md-1 control1_data decTostring" style="color:blue;" value="{{ q.lvl1 }}" readonly>
+			<input class="col-md-1 run_date_data" value="{{ q.run_date }}">
+			{% if q.lvl1|int or q.lvl1|int != 0 %}
+			<input class="col-md-1 control1_data decTostring" style="color:blue;" value="{{ q.lvl1 }}">
+			{% else %}
+			<input class="col-md-1 control1_data" value="">
+			{% endif %}
 			{% endfor %}
 		</div>
 		{% endif %}
 </div>
 
 <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-4">
+			<br>
+			<p><strong>QC Lots</strong></p>
+			{% if qc1_lot %}<p>Control 1 Lot: {% for q in qc1_lot %}<span>{{ q.lot_no }}, </span>{% endfor %}</p>{% endif %}
+			{% if qc2_lot %}<p>Control 2 Lot: {% for q in qc2_lot %}<span>{{ q.lot_no }}, </span>{% endfor %}</p>{% endif %}
+			{% if qc3_lot %}<p>Control 3 Lot: {% for q in qc3_lot %}<span>{{ q.lot_no }}, </span>{% endfor %}</p>{% endif %}
+		</div>
+		<div class="col-md-4">
+			<br>
+			<p><strong>Reagent Lots</strong></p>
+			{% if qc_rgt_lot %}<p>Reagent Lot: {% for q in qc_rgt_lot %}<span>{{ q.lot_no }}, </span>{% endfor %}</p>{% endif %}
+		</div>
+	</div>
 	<div class="row text-center">
 		<div class="col-md-12 chart-container text-center" id="chartContainer">
 			<canvas id="chartjs" ></canvas>
 		</div>
+		
 	</div>
+	
+	<button id="add_comment_btn" class="btn btn-primary btn-sm no_print">Add comment</button>
+	<br>
 	<div class="row">
+		<div class="col-md-6" id="comment_form_container">
+			{{ wtf.quick_form(comment_form) }}
+		</div>
+		<br>
 		<div class="col-md-12">
+			{% if comments %}
 			<label>Comments:</label>
-			<textarea class="form-control" rows="3"></textarea>
+			<textarea class="form-control" rows="5">
+			{% for c in comments %}
+			{{ c[0] }}: {{ c[1] }}
+			{% endfor %}
+			</textarea>
+			{% endif %}
 		</div>
 	</div>
 </div>
@@ -423,6 +475,10 @@
 google.charts.load('current', {'packages':['line', 'corechart']});
 
 $(document).ready(function() {
+	$('#comment_form_container').css('display', 'none');
+	$('#add_comment_btn').click(function() {
+		$('#comment_form_container').css('display', 'block');
+	});
 	$('select#qcrf_machine option').addClass(function() {
 		{% for ma in machine_analyte_link %}
 			return this.value;

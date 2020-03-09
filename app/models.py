@@ -970,6 +970,7 @@ class QCValues(db.Model):
 class QCResult(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	run_date = db.Column(db.Date)
+	comment = db.Column(db.String(200))
 	lvl1 = db.Column(db.Numeric(10,4))
 	lvl2 = db.Column(db.Numeric(10,4))
 	lvl3 = db.Column(db.Numeric(10,4))

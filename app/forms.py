@@ -385,3 +385,10 @@ class QCResultForm(FlaskForm):
 	qc_data_lvl3 = DecimalField('Level 3')
 	qcrf_search = SubmitField('Search')
 	qcrf_submit = SubmitField('Submit')
+	
+	
+class QCCommentForm(FlaskForm):
+	qccf_result_date = DateField('Result Date:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	#qccf_comment = StringField('Comment', validators=[DataRequired()])
+	qccf_comment = TextAreaField('Comment:', validators=[Length(min=1, max=200)], render_kw={"rows": 3, "cols": 50})
+	qccf_submit = SubmitField('Submit')
