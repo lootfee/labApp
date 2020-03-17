@@ -77,6 +77,7 @@
 					{% endif %}
 				</ol>
 			</div>
+			{% if form4 %}
 			<div class="edit_mode" style="float:right;">
 				<form action method="post" class="form" role="form">
 					{{ form4.csrf_token() }}
@@ -87,6 +88,7 @@
 					{{ form4.submit (class_="btn btn-default") }}
 				</form>
 			</div>
+			{% endif %}
 			<div class="row" style="margin-bottom:60px;"></div>
 			{% if form2 %}
 			<div class="col-md-12">

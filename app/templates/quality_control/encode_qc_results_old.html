@@ -1,0 +1,275 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{% include 'quality_control/qc_nav.html' %}
+<hr class="inventory_hr">
+<div class="row">
+	<div class="col-md-12">
+		<form action method="post" class="form" role="form">
+			{{ form.csrf_token() }}
+			<div class="col-md-11">
+				<div class="col-md-4">
+					{{ form.qcrf_machine.label (class_="control-label")}}
+					{{ form.qcrf_machine (class_="form-control")}}
+					<br>
+					{{ form.control1.label (class_="control-label")}}
+					{{ form.control1 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control1_mean.label (class_="control-label")}}
+					{{ form.control1_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control1_sd.label (class_="control-label")}}
+					{{ form.control1_sd (class_="form-control")}}
+					</div-->
+				</div>
+				<div class="col-md-4">
+					{{ form.qcrf_analyte.label (class_="control-label")}}
+					{{ form.qcrf_analyte (class_="form-control")}}
+					<br>
+					{{ form.control2.label (class_="control-label")}}
+					{{ form.control2 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control2_mean.label (class_="control-label")}}
+					{{ form.control2_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control2_sd.label (class_="control-label")}}
+					{{ form.control2_sd (class_="form-control")}}
+					</div-->
+				</div>
+				<div class="col-md-4">
+					{{ form.qcrf_reagent_lot.label (class_="control-label")}}
+					{{ form.qcrf_reagent_lot (class_="form-control")}}
+					<br>
+					{{ form.control3.label (class_="control-label")}}
+					{{ form.control3 (class_="form-control")}}
+					<br>
+					<!--div class="col-md-6">
+					{{ form.control3_mean.label (class_="control-label")}}
+					{{ form.control3_mean (class_="form-control")}}
+					</div>
+					<div class="col-md-6">
+					{{ form.control3_sd.label (class_="control-label")}}
+					{{ form.control3_sd (class_="form-control")}}
+					</div-->
+				</div>
+			</div>
+			<!--div class="col-md-1">
+				<br>
+				{{ form.qcrf_search (class_="btn btn-default")}}
+			</div-->
+			<div class="col-md-3">
+				<br>
+				<label for="my_file_input">Upload QC values from Excel</label>
+				<input type="file" id="my_file_input">
+			</div>
+			<div class="col-md-12" id="my_file_output"></div>
+			<div style="float:right;">
+				<br>
+				{{ form.qcrf_submit (class_="btn btn-default")}}
+			</div>
+			
+		</form>
+	</div>
+	
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+	//    for updating select options   
+	
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	
+		
+	$('#qcrf_machine').change(function(){
+		$('#qcrf_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			$('#control1').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control2').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id :$('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+			$('#control3').empty();
+			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+				machine_id : $('#qcrf_machine').val(), 
+				company_id : {{ company.id }}, 
+				analyte_id : $('#qcrf_analyte').val()
+			}, function(data){
+				$.each(data.result, function(i, new_options){
+					$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				})
+				
+			});
+		});
+		return false;
+	});
+	
+	$('#qcrf_analyte').change(function(){
+		$('#qcrf_reagent_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	
+	/*$('#qcrf_analyte').change(function(){
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			machine_id : $('#qcrf_machine').val(), 
+			analyte_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});*/
+});
+
+
+
+function corDate(unixDate){
+	var incTime = document.getElementById('includeTime');
+	var unCorDate = new Date((unixDate - (25567 + 2))*86400*1000);
+	var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+	var year = unCorDate.getFullYear();
+	var month = months[unCorDate.getMonth()];
+	var day = unCorDate.getDate();
+	var hr = unCorDate.getHours();
+	
+	if (unCorDate.getHours() < 10){
+		hr = '0' + unCorDate.getHours();
+		}
+	var mins = unCorDate.getMinutes()
+		if (unCorDate.getMinutes() < 10) {
+			mins = '0' + unCorDate.getMinutes();
+			}
+	var dateTime = month + ' ' + day + ', ' + year + ' ' + hr + ':' + mins;
+	var date = month + ' ' + day + ', ' + year + ' ';
+		//if (incTime.checked == true){
+		 //  return dateTime;
+		//}
+		//else {
+			return dateTime;
+		//}
+}
+
+function handleFile(e) {
+	var files = e.target.files, f = files[0];
+	var reader = new FileReader();
+	reader.onload = function(e) {
+	var data = new Uint8Array(e.target.result);
+	var wb = XLSX.read(data, {type: 'array'});
+
+    wb.SheetNames.forEach(function(sheetName) {
+		//var sCSV = XLS.utils.make_csv(wb.Sheets[sheetName]);   
+		var data = XLS.utils.sheet_to_json(wb.Sheets[sheetName], {header:1, raw: true, defval: ''});   
+		
+		if ($("#control3").val() != 0) {
+			var rowHeader = "<input class='col-md-3 rowHeader' value='Date'><input class='col-md-1 rowHeader' value='Level 1'><input class='col-md-1 rowHeader' value='Level 2'><input class='col-md-1 rowHeader' value='Level 3'><input class='col-md-3 rowHeader' value='Date'><input class='col-md-1 rowHeader' value='Level 1'><input class='col-md-1 rowHeader' value='Level 2'><input class='col-md-1 rowHeader' value='Level 3'>";
+			
+			$("#my_file_output").append(rowHeader);
+			
+			$.each(data, function(indexR, valueR){
+						
+				var rows = "<input class='col-md-3 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 ' name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>" + "<input class='col-md-1 qcImportData3 ' name='qc_data_lvl3'" + "value='" + data[indexR][3] + "'>";
+					
+				$("#my_file_output").append(rows);
+				});	
+			}
+		else if ($("#control2").val() != 0){
+			var rowHeader = "<input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'><input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-1 ' value='Level 2'>";
+			$("#my_file_output").append(rowHeader);
+			$.each(data, function(indexR, valueR){
+				var rows = "<input class='col-md-2 cDate'  name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 '  name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" + "<input class='col-md-1 qcImportData2 '  name='qc_data_lvl2'" + "value='" + data[indexR][2] + "'>";
+						
+				$("#my_file_output").append(rows);
+			});
+		}
+		else {
+			var rowHeader = "<input class='col-md-2' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='Level 1'>";
+			$("#my_file_output").append(rowHeader);
+			$.each(data, function(indexR, valueR){
+				var rows = "<input class='col-md-2 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" ;
+						
+				$("#my_file_output").append(rows);
+			});
+		}
+		});
+	};
+	reader.readAsArrayBuffer(f);
+}
+document.getElementById('my_file_input').addEventListener('change', handleFile, false);
+</script>
+{% endblock %}

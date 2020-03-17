@@ -910,8 +910,9 @@ class ReagentLot(db.Model):
 	lot_no = db.Column(db.String(50))
 	expiry = db.Column(db.Date)
 	
-	result = db.relationship('QCResult', backref=db.backref('reagent_lot', lazy=True))
+	#result = db.relationship('QCResult', backref=db.backref('reagent_lot', lazy=True))
 	values = db.relationship('QCValues', backref=db.backref('reagent_lot', lazy=True))
+	result = db.relationship('QCResults', backref=db.backref('reagent_lot', lazy=True))
 	
 	company = db.relationship(
 		'Company', secondary='company_reagent_lot',
@@ -935,10 +936,12 @@ class ReagentLot(db.Model):
 class ControlLot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_no = db.Column(db.String(50))
+	level = db.Column(db.Integer)
 	expiry = db.Column(db.Date)
 	
 	values = db.relationship('QCValues', backref=db.backref('qc_lot', lazy=True))
 	#result = db.relationship('QCResult', backref=db.backref('qc_lot', lazy='dynamic'))
+	result = db.relationship('QCResults', backref=db.backref('control_lot', lazy=True))
 	
 	control = db.relationship(
 		'Control', secondary='control_control_lot',
@@ -983,6 +986,20 @@ class QCResult(db.Model):
 	lvl3_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
 	lvl3_mean = db.Column(db.Numeric(10,4))
 	lvl3_sd = db.Column(db.Numeric(10,4))
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
+	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	
+	
+class QCResults(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	run_date = db.Column(db.DateTime, index=True)
+	qc_result = db.Column(db.Numeric(10,4))
+	comment = db.Column(db.String(200))
+	rejected = db.Column(db.Boolean, default=False)
+	qc_lot = db.Column(db.Integer, db.ForeignKey('control_lot.id'))
 	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
 	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))

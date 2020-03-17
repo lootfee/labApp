@@ -361,15 +361,20 @@ class RegisterQCLotForm(FlaskForm):
 	rqclf_control = SelectField('Control', coerce=int, validators=[InputRequired()])
 	rqclf_control_lot_no = StringField('Lot No', validators=[DataRequired()])
 	rqclf_control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	rrlf_analyte = SelectField('Level', validators=[InputRequired()], choices=[('1', 'Level 1'), ('2', 'Level 2'), ('3', 'Level 3')])
 	rqclf_submit = SubmitField('Submit')
 	
 class QCResultForm(FlaskForm):
 	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
 	end_date = DateField('To:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	#start_date = DateField('From:', format='%Y-%m-%d', render_kw={"type": "date"})
+	#end_date = DateField('To:', format='%Y-%m-%d', render_kw={"type": "date"})
 	qcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
-	qcrf_unit = SelectField('Unit', coerce=int, validators=[InputRequired()])
+	#qcrf_analyte = SelectField('Analyte', coerce=int, validators=[DataRequired()])
+	#qcrf_unit = SelectField('Unit', coerce=int, validators=[InputRequired()])
 	qcrf_reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
 	qcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	#qcrf_machine = SelectField('Machine', coerce=int, validators=[DataRequired()])
 	control1 = SelectField('Control 1', coerce=int, validators=[InputRequired()])
 	control1_mean = DecimalField('Control 1 Mean')
 	control1_sd = DecimalField('Control 1 SD')
@@ -387,8 +392,25 @@ class QCResultForm(FlaskForm):
 	qcrf_submit = SubmitField('Submit')
 	
 	
+class EncodeQcResultForm(FlaskForm):
+	eqcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	eqcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	eqcrf_reagent_lot = SelectField('Reagent Lot (Optional)', coerce=int, validators=[InputRequired()])
+	eqcrf_control = SelectField('Control Lot', coerce=int, validators=[InputRequired()])
+	run_date = DateField('Date:', validators=[DataRequired()], format='%Y-%m-%d')
+	qc_data_lvl1 = DecimalField('Control Run', validators=[DataRequired()])
+	eqcrf_submit = SubmitField('Submit')
+	
+	
 class QCCommentForm(FlaskForm):
-	qccf_result_date = DateField('Result Date:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	#qccf_result_date = DateField('Result Date:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
+	qccf_result_date = StringField('Result Date:', validators=[DataRequired()], render_kw={'readonly': True})
 	#qccf_comment = StringField('Comment', validators=[DataRequired()])
 	qccf_comment = TextAreaField('Comment:', validators=[Length(min=1, max=200)], render_kw={"rows": 3, "cols": 50})
 	qccf_submit = SubmitField('Submit')
+	
+class ExcludeResultForm(FlaskForm):
+	erf_result_date = StringField('Result Date:', validators=[DataRequired()], render_kw={'readonly': True})
+	erf_result = HiddenField('Result:', validators=[DataRequired()])
+	erf_comment = TextAreaField('Comment:', validators=[Length(min=1, max=200)], render_kw={"rows": 3, "cols": 50})
+	erf_submit = SubmitField('Exclude')

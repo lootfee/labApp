@@ -3,8 +3,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm, EncodeQcResultForm, ExcludeResultForm
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending, QCResults
 from datetime import datetime, timedelta, time, date
 from dateutil import parser
 from app.email import send_password_reset_email
@@ -13,6 +13,7 @@ import requests
 import markdown2
 import stripe
 import json
+import statistics 
 
 stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
@@ -1059,18 +1060,28 @@ def encode_qc_results(company_name):
 	control_lot = company.qc_values.join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 	#ctrl_lot_list = [(0, '')] + [(c.id, n.control_name + " - " + str(c.lot_no) + " - " + str(c.expiry)) for c in control_lot for n in c.control]#having attribute error no c.lot_info
 	ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ")") for c in control_lot for n in c.qc_lot.control]
-	form = QCResultForm()
-	form.qcrf_analyte.choices = analyte_list
-	form.qcrf_reagent_lot.choices = rgt_lot_list
-	form.qcrf_machine.choices = machine_list
-	form.control1.choices = ctrl_lot_list
-	form.control2.choices = ctrl_lot_list
-	form.control3.choices = ctrl_lot_list
-	if form.qcrf_submit.data:
+	form = EncodeQcResultForm() #QCResultForm()
+	form.eqcrf_analyte.choices = analyte_list
+	form.eqcrf_reagent_lot.choices = rgt_lot_list
+	form.eqcrf_machine.choices = machine_list
+	form.eqcrf_control.choices = ctrl_lot_list
+	#form.control2.choices = ctrl_lot_list
+	#form.control3.choices = ctrl_lot_list
+	if form.eqcrf_submit.data:
 		#analyte = Analyte.query.filter_by(id=form.analyte.data).first()
-		analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
+		analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.eqcrf_analyte.data, company_id=company.id).first()
 		date_list = request.form.getlist('cDate')
-		if form.control3.data:
+		level1_list = request.form.getlist('qc_data_lvl1')
+		for i in range(0, len(date_list)):
+			date_list[i] = parser.parse(date_list[i])
+			if form.eqcrf_reagent_lot.data == 0:
+				qc_results = QCResults(run_date=date_list[i], qc_result=level1_list[i], qc_lot=form.eqcrf_control.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			else:
+				qc_results = QCResults(run_date=date_list[i], qc_result=level1_list[i], qc_lot=form.eqcrf_control.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, reagent_lot_id=form.eqcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+			db.session.add(qc_results)
+			db.session.commit()
+		return redirect(url_for('encode_qc_results', company_name=company_name))
+		'''if form.control3.data:
 			level3_list = request.form.getlist('qc_data_lvl3')
 			level2_list = request.form.getlist('qc_data_lvl2')
 			level1_list = request.form.getlist('qc_data_lvl1')
@@ -1100,14 +1111,16 @@ def encode_qc_results(company_name):
 			for i in range(0, len(date_list)):
 				#if date_list[i] is datetime.date:
 				#	print(date_list[i])
-				date_list[i] = parser.parse(date_list[i])
+				#date_list[i] = parser.parse(date_list[i])
 				if form.qcrf_reagent_lot.data == 0:
-					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+					#qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+					qc_results = QCResults(run_date=datetime(date_list[i]), qc_result=level1_list[i], qc_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 				else:
-					qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+					#qc_results = QCResult(run_date=datetime(date_list[i].year, date_list[i].month, date_list[i].day).date(), lvl1=level1_list[i], lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+					qc_results = QCResults(run_date=datetime(date_list[i]), qc_result=level1_list[i], qc_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
 				db.session.add(qc_results)
 				db.session.commit()
-		return redirect(url_for('encode_qc_results', company_name=company_name))
+		return redirect(url_for('encode_qc_results', company_name=company_name))'''
 	return render_template('quality_control/encode_qc_results.html', title='Encode Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
 	
 @app.route('/<company_name>/quality_control/saved_results', methods=['GET', 'POST'])
@@ -1137,85 +1150,130 @@ def saved_results(company_name):
 	form.control1.choices = ctrl_lot_list
 	form.control2.choices = ctrl_lot_list
 	form.control3.choices = ctrl_lot_list
-	qc_res = ''
+	if form.qcrf_submit.data:
+		start_date = form.start_date.data
+		end_date = form.end_date.data
+		qc_lot1 = form.control1.data
+		qc_lot2 = form.control2.data
+		qc_lot3 = form.control3.data
+		machine_id=form.qcrf_machine.data
+		analyte_id=form.qcrf_analyte.data
+		reagent_lot_id=form.qcrf_reagent_lot.data
+		return redirect(url_for('qc_results', company_name=company_name, start_date=start_date, end_date=end_date, qc_lot1=qc_lot1, qc_lot2=qc_lot2, qc_lot3=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id))
+	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
+	
+	
+@app.route('/<company_name>/quality_control/qc_results/<start_date>/<end_date>/<qc_lot1>&<qc_lot2>&<qc_lot3>&<machine_id>&<analyte_id>&<reagent_lot_id>', methods=['GET', 'POST'])
+@login_required
+def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, machine_id, analyte_id, reagent_lot_id):
+	company = Company.query.filter_by(company_name=company_name).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	affiliate = Affiliates.query.filter_by(user_id=user.id, company_id=company.id, accepted=True).first()
+	is_super_admin = company.is_super_admin(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	machine = company.machine.filter_by(id=machine_id).first()
+	analyte = company.analyte.filter_by(id=analyte_id).first()
+	reagent_lot = company.reagent_lot.filter_by(id=reagent_lot_id).first()
+	parsed_date = parser.parse(end_date)
+	end_date_ = datetime.combine(parsed_date.date(), time(23, 59, 59))
+	comments = []
 	qc_values1 = ''
 	qc_values2 = ''
 	qc_values3 = ''
-	level1_data = False
-	level2_data = False
-	level3_data = False
-	comments = ''
-	qc1_lot = []
-	qc2_lot = []
-	qc3_lot = []
-	qc_rgt_lot = []
-	if form.qcrf_submit.data:
-		end_date = datetime.combine(form.end_date.data, time(23, 59, 59))
-		if form.control3.data:
-			level3_data = True
-			if form.qcrf_reagent_lot.data == 0:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				qc_values3 = QCValues.query.filter_by(control_lot=form.control3.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-			else:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, lvl3_lot=form.control3.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data,machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-				qc_values3 = QCValues.query.filter_by(control_lot=form.control3.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-			comments = [(q.comment) for q in qc_res]
-		elif form.control2.data:
-			level2_data = True
-			if form.qcrf_reagent_lot.data == 0:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-			else:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, lvl2_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data,machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=form.control2.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()	
-			comments = [(q.comment) for q in qc_res]				
-		elif form.control1.data:
-			level1_data = True
-			if form.qcrf_reagent_lot.data == 0:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).order_by(QCResult.run_date.asc()).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-			else:
-				qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(lvl1_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).order_by(QCResult.run_date.asc()).all()
-				qc_values1 = QCValues.query.filter_by(control_lot=form.control1.data, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, reagent_lot_id=form.qcrf_reagent_lot.data, company_id=company.id).first()
-			comments = [(q.comment) for q in qc_res]
+	qc_res1 = ''
+	qc_res2 = ''
+	qc_res3 = ''
+	qc1_lot_list = []
+	qc2_lot_list = []
+	qc3_lot_list = []
+	rgt_lot_list = []
+	if reagent_lot_id == '0':		
+		qc_results = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+		for q in qc_results:
+			rgt_lot_list.append(q.reagent_lot.lot_no)
+			if q.comment is not None:
+				comments.append({q.run_date: q.comment})
+		rgt_lot_list = set(rgt_lot_list)
+		if qc_lot1 == '0':
+			qc_res1 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).join(ControlLot).filter_by(level = 1).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res1:
+				qc_values1 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+				qc1_lot_list.append(q.control_lot.lot_no)
+			qc1_lot_list = (set(qc1_lot_list))
 		else:
-			level1_data = True
-			level2_data = True
-			level3_data = True
-			qc_res = QCResult.query.filter(QCResult.run_date.between(form.start_date.data, end_date)).filter_by(machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).all()
-			for q in qc_res:				
-				qc_values1 = QCValues.query.filter_by(control_lot=q.lvl1_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				qc_values2 = QCValues.query.filter_by(control_lot=q.lvl2_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				qc_values3 = QCValues.query.filter_by(control_lot=q.lvl3_lot, machine_id=form.qcrf_machine.data, analyte_id=form.qcrf_analyte.data, company_id=company.id).first()
-				q.qc1_lot = ControlLot.query.filter_by(id=q.lvl1_lot).first()
-				qc_rgt_lot.append(q.reagent_lot)
-				if q.qc1_lot:
-					qc1_lot.append(q.qc1_lot)
-				q.qc2_lot = ControlLot.query.filter_by(id=q.lvl2_lot).first()
-				if q.qc2_lot:
-					qc2_lot.append(q.qc2_lot)
-				q.qc3_lot = ControlLot.query.filter_by(id=q.lvl3_lot).first()
-				if q.qc3_lot:
-					qc3_lot.append(q.qc3_lot)
-			qc_rgt_lot = set(qc_rgt_lot)
-			qc1_lot = (set(qc1_lot))
-			qc2_lot = (set(qc2_lot))
-			qc3_lot = (set(qc3_lot))
-			comments = [(q.run_date.strftime('%m/%d/%Y'), q.comment) for q in qc_res if q.comment is not None ]
+			qc_res1 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot1, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values1 = QCValues.query.filter_by(control_lot=qc_lot1, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+		if qc_lot2 == '0':
+			qc_res2 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).join(ControlLot).filter_by(level = 2).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res2:
+				qc_values2 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+				qc2_lot_list.append(q.control_lot.lot_no)
+			qc2_lot_list = (set(qc2_lot_list))
+		else:
+			qc_res2 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values2 = QCValues.query.filter_by(control_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+		if qc_lot3 == '0':
+			qc_res3 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).join(ControlLot).filter_by(level = 3).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res3:
+				qc_values3 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+				qc3_lot_list.append(q.control_lot.lot_no)
+			qc3_lot_list = (set(qc3_lot_list))
+		else:
+			qc_res3 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values3 = QCValues.query.filter_by(control_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, company_id=company.id).first()
+		excluded = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, company_id=company.id, rejected=True).order_by(QCResults.run_date.asc()).all()
+	else:
+		qc_results = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+		for q in qc_results:
+			run_dates = q.run_date
+			if q.comment is not None:
+				comments.append({q.run_date: q.comment})
+		if qc_lot1 == '0':
+			qc_res1 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res1:
+				qc_values1 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+				qc1_lot_list.append(q.control_lot.lot_no)
+			qc1_lot_list = (set(qc1_lot_list))
+		else:
+			qc_res1 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot1, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values1 = QCValues.query.filter_by(control_lot=qc_lot1, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+		if qc_lot2 == '0':
+			qc_res2 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res2:
+				qc_values2 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+				qc2_lot_list.append(q.control_lot.lot_no)
+			qc2_lot_list = (set(qc2_lot_list))
+		else:
+			qc_res2 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values2 = QCValues.query.filter_by(control_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+		if qc_lot3 == '0':
+			qc_res3 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			for q in qc_res3:
+				qc_values3 = QCValues.query.filter_by(control_lot=q.qc_lot, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+				qc3_lot_list.append(q.control_lot.lot_no)
+			qc3_lot_list = (set(qc3_lot_list))
+		else:
+			qc_res3 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
+			qc_values3 = QCValues.query.filter_by(control_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+		excluded = qc_results = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=True).order_by(QCResults.run_date.asc()).all()
 	comment_form = QCCommentForm()
 	if comment_form.validate_on_submit():
-		qc_res_query = QCResult.query.filter_by(run_date=comment_form.qccf_result_date.data, analyte_id=form.qcrf_analyte.data, machine_id=form.qcrf_machine.data, company_id=company.id).first()
+		qc_res_query = QCResults.query.filter_by(run_date=comment_form.qccf_result_date.data, analyte_id=analyte_id, machine_id=machine_id, company_id=company.id).first()
 		if qc_res_query:
 			qc_res_query.comment = comment_form.qccf_comment.data
 			db.session.commit()
-			return redirect(url_for('saved_results', company_name=company_name))
-	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot, qc_res=qc_res, qc_values1=qc_values1, qc_values2=qc_values2, qc_values3=qc_values3, level1_data=level1_data, level2_data=level2_data, level3_data=level3_data, comment_form=comment_form, comments=comments, qc1_lot=qc1_lot, qc2_lot=qc2_lot, qc3_lot=qc3_lot, qc_rgt_lot=qc_rgt_lot)
+		return redirect(url_for('qc_results', company_name=company_name, start_date=start_date, end_date=end_date, qc_lot1=qc_lot1, qc_lot2=qc_lot2, qc_lot3=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id))
+	exclude_form = ExcludeResultForm()
+	if exclude_form.validate_on_submit():
+		qc_res_query = QCResults.query.filter_by(run_date=exclude_form.erf_result_date.data, qc_result=exclude_form.erf_result.data, analyte_id=analyte_id, machine_id=machine_id, company_id=company.id).first()
+		qc_res_query.rejected = True
+		qc_res_query.comment = exclude_form.erf_comment.data
+		db.session.commit()
+		return redirect(url_for('qc_results', company_name=company_name, start_date=start_date, end_date=end_date, qc_lot1=qc_lot1, qc_lot2=qc_lot2, qc_lot3=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id))
+	return render_template('quality_control/qc_results.html', user=user, superuser=superuser, is_super_admin=is_super_admin, company=company, machine=machine, analyte=analyte, reagent_lot=reagent_lot, qc_res1=qc_res1, qc_res2=qc_res2, qc_res3=qc_res3, qc_values1=qc_values1, qc_values2=qc_values2, qc_values3=qc_values3, comment_form=comment_form, rgt_lot_list=rgt_lot_list, qc1_lot_list=qc1_lot_list, qc2_lot_list=qc2_lot_list, qc3_lot_list=qc3_lot_list, qc_results=qc_results, comments=comments, exclude_form=exclude_form, excluded=excluded)
 
 @app.route('/inventory_management_demo/overview', methods=['GET', 'POST'])	
 @login_required
