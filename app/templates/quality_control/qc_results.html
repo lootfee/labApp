@@ -5,131 +5,144 @@
 {% block app_content %}
 {% include 'quality_control/qc_nav.html' %}
 <hr class="inventory_hr">
-<div class="row">
-	<div class="col-md-12 visible-print-block">
-		<div class="col-md-3">
-			{% if company.logo %}
-			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
-			{% else %}
-			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
-			{% endif %}
-		</div>
-		<div class="col-md-6 text-center" >
-			<h1>{{ company.company_name }}</h1>
-		</div>
-		<div class="col-md-3" style="height:150px;">
-			<div style="bottom:0;">
-				<p>Address: {{ company.address }}</p>
-				<p>Email: {{ company.email }}</p>
-				<p>Contact: {{ company.contact_info }}</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12 visible-print-block">
+			<div class="col-md-3">
+				{% if company.logo %}
+				<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+				{% else %}
+				<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+				{% endif %}
+			</div>
+			<div class="col-md-6 text-center" >
+				<h1>{{ company.company_name }}</h1>
+			</div>
+			<div class="col-md-3" style="height:150px;">
+				<div style="bottom:0;">
+					<p>Address: {{ company.address }}</p>
+					<p>Email: {{ company.email }}</p>
+					<p>Contact: {{ company.contact_info }}</p>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-<br>
-<div class="row">
-	<div class="col-md-12">
-		<!--div class="row">
-			<div class="col-md-12" id="qc_title">
-				<input type="text" class="form-control qc-info text-center" style="font-size: 15px; font-weight: bold;" placeholder="Title">
-			</div>
-		</div-->
-		<div class="row">
-			<h5><strong>Run dates: {{ moment(qc_results[0].run_date).format('LLL') }} - {{ moment(qc_results[-1].run_date).format('LLL') }}</strong></h5>
-		</div>
-		<div class="row">
-			{% if machine %}
-			<div class="col-md-3">
-				<div><h5><strong>
+	<br>
+	<hr class="inventory_hr visible-print-block">
+	<br>
+	<div class="row">
+		<div class="col-md-12">
+			<!--div class="row">
+				<div class="col-md-12" id="qc_title">
+					<input type="text" class="form-control qc-info text-center" style="font-size: 15px; font-weight: bold;" placeholder="Title">
+				</div>
+			</div-->
+			
+			<div class="row">
+				{% if machine %}
+				<div class="col-md-3"><h5><strong>
 					<label>Machine:</label>
 					<span>{{ machine.machine_name }}</span></strong></h5>
 				</div>
 				{% endif %}
 				{% if analyte %}
-				<div><h5><strong>
+				<div class="col-md-3"><h5><strong>
 					<label>Analyte:</label>
-					<span>{{ analyte.analyte }}</span></strong></h5>
+					<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h5>
 				</div>
 				{% endif %}
-				{% if reagent_lot %}
-				<div><h5><strong>
-					<label>Reagent Lot:</label>
-					<span>{{ reagent_lot.lot_no }}</span></strong></h5>
+				{% if machine %}
+				<!--div class="col-md-3">
+					<div><h5><strong>
+						<label>Machine:</label>
+						<span>{{ machine.machine_name }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if analyte %}
+					<div><h5><strong>
+						<label>Analyte:</label>
+						<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if reagent_lot %}
+					<div><h5><strong>
+						<label>Reagent Lot:</label>
+						<span>{{ reagent_lot.lot_no }}</span></strong></h5>
+					</div>
+					{% endif %}
 				</div>
-				{% endif %}
+				<div class="col-md-3">
+					{% if qc_values1 %}
+					<div><h5><strong>
+						<label>Control 1 Lot:</label>
+						<span>{{ qc_values1.qc_lot.lot_no }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values2 %}
+					<div><h5><strong>
+						<label>Control 2 Lot:</label>
+						<span>{{ qc_values2.qc_lot.lot_no }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values3 %}
+					<div><h5><strong>
+						<label>Control 3 Lot:</label>
+						<span>{{ qc_values3.qc_lot.lot_no }}</span></strong></h5>
+					</div>
+					{% endif %}
+				</div>
+				<div class="col-md-3">
+					{% if qc_values1 %}
+					<div><h5><strong>
+						<label>Control 1 Mean:</label>
+						<span id="lvl1Mean">{{ qc_values1.control_mean }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values2 %}
+					<div><h5><strong>
+						<label>Control 2 Mean:</label>
+						<span id="lvl2Mean">{{ qc_values2.control_mean }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values3 %}
+					<div><h5><strong>
+						<label>Control 3 Mean:</label>
+						<span id="lvl3Mean">{{ qc_values3.control_mean }}</span></strong></h5>
+					</div>
+					{% endif %}
+				</div>
+				<div class="col-md-3">
+					{% if qc_values1 %}
+					<div><h5><strong>
+						<label>Control 1 SD:</label>
+						<span id="lvl1Stndev">{{ qc_values1.control_sd }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values2 %}
+					<div><h5><strong>
+						<label>Control 2 SD:</label>
+						<span id="lvl2Stndev">{{ qc_values2.control_sd }}</span></strong></h5>
+					</div>
+					{% endif %}
+					{% if qc_values3 %}
+					<div><h5><strong>
+						<label>Control 3 SD:</label>
+						<span id="lvl3Stndev">{{ qc_values3.control_sd }}</span></strong></h5>
+					</div>
+					{% endif %}
+				</div-->
 			</div>
-			<div class="col-md-3">
-				{% if qc_values1 %}
-				<div><h5><strong>
-					<label>Control 1 Lot:</label>
-					<span>{{ qc_values1.qc_lot.lot_no }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values2 %}
-				<div><h5><strong>
-					<label>Control 2 Lot:</label>
-					<span>{{ qc_values2.qc_lot.lot_no }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values3 %}
-				<div><h5><strong>
-					<label>Control 3 Lot:</label>
-					<span>{{ qc_values3.qc_lot.lot_no }}</span></strong></h5>
-				</div>
-				{% endif %}
-			</div>
-			<div class="col-md-3">
-				{% if qc_values1 %}
-				<div><h5><strong>
-					<label>Control 1 Mean:</label>
-					<span id="lvl1Mean">{{ qc_values1.control_mean }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values2 %}
-				<div><h5><strong>
-					<label>Control 2 Mean:</label>
-					<span id="lvl2Mean">{{ qc_values2.control_mean }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values3 %}
-				<div><h5><strong>
-					<label>Control 3 Mean:</label>
-					<span id="lvl3Mean">{{ qc_values3.control_mean }}</span></strong></h5>
-				</div>
-				{% endif %}
-			</div>
-			<div class="col-md-3">
-				{% if qc_values1 %}
-				<div><h5><strong>
-					<label>Control 1 SD:</label>
-					<span id="lvl1Stndev">{{ qc_values1.control_sd }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values2 %}
-				<div><h5><strong>
-					<label>Control 2 SD:</label>
-					<span id="lvl2Stndev">{{ qc_values2.control_sd }}</span></strong></h5>
-				</div>
-				{% endif %}
-				{% if qc_values3 %}
-				<div><h5><strong>
-					<label>Control 3 SD:</label>
-					<span id="lvl3Stndev">{{ qc_values3.control_sd }}</span></strong></h5>
-				</div>
-				{% endif %}
-			</div>
+			
 		</div>
-		
-	</div>
-</div>	
-
+	</div>	
+</div>
 <div class="row text-center">
 	<div class="col-md-12 chart-container text-center" id="chartContainer">
 		<canvas id="chartjs" ></canvas>
 	</div>
 </div>
 
-<div class="row">
+<!--div class="row">
 	<div class="col-md-4">
 		<br>
 		<p><strong>QC Lots</strong></p>
@@ -141,7 +154,167 @@
 		<br>
 		{% if rgt_lot_list %}<p><strong>Reagent Lots:</strong> {% for q in rgt_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
 	</div>
+</div-->
+<div class="row">
+	<h5><strong>Run dates: {% if qc_results %}{{ moment(qc_results[0].run_date).format('LLL') }} - {{ moment(qc_results[-1].run_date).format('LLL') }}{% endif %}</strong></h5>
 </div>
+<h5><strong>Current Mean/SD</strong></h5>
+<div class="row">
+	{% if res1_group_val %}
+	<h5>Control 1</h5>
+	{% for i in res1_group_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control mean: {{ i['ctrl1_mean'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control SD: {{ i['ctrl1_sd'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control CV: {{ i['ctrl1_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+<div class="row">
+	{% if res2_group_val %}
+	<h5>Control 2</h5>
+	{% for i in res2_group_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control mean: {{ i['ctrl2_mean'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control SD: {{ i['ctrl2_sd'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control CV: {{ i['ctrl2_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+
+<div class="row">
+	{% if res3_group_val %}
+	<h5>Control 3</h5>
+	{% for i in res3_group_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control mean: {{ i['ctrl3_mean'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control SD: {{ i['ctrl3_sd'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control SD: {{ i['ctrl3_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+
+
+<h5><strong>Laboratory Mean/SD</strong></h5>
+<div class="row">
+	{% if res1_lab_val %}
+	<h5>Control 1</h5>
+	{% for i in res1_lab_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl1_lab_mean'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl1_lab_sd'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab CV: {{ i['ctrl1_lab_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl1_lab_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+<div class="row">
+	{% if res2_lab_val %}
+	<h5>Control 2</h5>
+	{% for i in res2_lab_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl2_lab_mean'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl2_lab_sd'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab CV: {{ i['ctrl2_lab_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl2_lab_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+<div class="row">
+	{% if res3_lab_val %}
+	<h5>Control 3</h5>
+	{% for i in res3_lab_val %}
+	<div class="col-md-2">
+		<p><strong>Control lot: {{ i['ctrl_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl3_lab_mean'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl3_lab_sd'] }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control lab CV: {{ i['ctrl3_lab_cv'] }} </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Control runs: {{ i['ctrl3_lab_run'] }} </strong></p>
+	</div>
+	{% endfor %}
+	{% endif %}
+</div>
+
+
 <div class="row">
 	<br>
 	<div class="col-md-12">
@@ -155,19 +328,19 @@
 			{% endfor %}
 		</ol>
 		
-		<!--------------
+		<!--------------p
 		{% for c in comments %}
 		{% for i, j in c.items() %}
-		<p>{{ moment(i).format('LLL') }}: {{ j}}</p>
+		<p>{{ moment(i).format('LLL') }}: {{ j}}</p------------------>>
 		{% endfor %}
 		{% endfor %}
 		{% endif %}
-		------------------>
+		
 		{% if excluded %}
 		<label>Excluded:</label>
 		<ol>
 			{% for e in excluded %}
-			<li>{{ moment(e.run_date).format('LLL') }} <strong>({{ e.qc_result }}) - {{e.comment}}</strong></li>
+			<li>{{ moment(e.run_date).format('LLL') }} <strong><span class="decTostringText">{{ e.qc_result }}</span> - {{e.comment}}</strong></li>
 			{% endfor %}
 		</ol>
 		{% endif %}
@@ -175,11 +348,11 @@
 </div>
 
 <div class="row">
-	<input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean-SD-CV">
+	<!--input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean-SD-CV"-->
 	<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart">
 </div>
 <br>
-<div id="calc_val_container">
+<!--div id="calc_val_container">
 	<h5><strong>Calculated Values</strong></h5>
 	<div class="row">
 		<div class="col-md-2">
@@ -225,8 +398,9 @@
 			{% endif %}
 		</div>
 	</div>
-	<div><input type="checkbox" id="use_calc_values" checked> Use calculated values for LJ chart</div>
-</div>
+	<div><input type="checkbox" id="use_calc_values" class="no_print" checked> Use calculated values for LJ chart</div>
+</div-->
+
 
 {% if qc_res1 %}
 <div class="row">
@@ -539,6 +713,59 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$('#qcrf_reagent_lot').change(function(){
+		/*$('#eqcrf_control').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#eqcrf_analyte').val(),
+			machine_id : $('#eqcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});*/
+		
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $('#qcrf_reagent_lot').val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+				
+		return false;
+	});
+	
 	<!-------------- for comments modal ----------------------------------------->
 	$('#comment_modal').on('show.bs.modal', function (event) {
 		var button = $(event.relatedTarget) // Button that triggered the modal
@@ -569,13 +796,17 @@ $(document).ready(function() {
 		modal.find('#em_target_r_lot').text(target_rlot)
 		modal.find('#em_target_c_lot').text(target_clot)
 		modal.find('#em_target_res').text(target_result)
-		modal.find('#erf_result_').val(target_result)
+		modal.find('#erf_result').val(target_result)
 	});
 });
 
 $(document).ready(function() {
 	$(".decTostring").each(function() {
 		$(this).val(parseFloat($(this).val()));
+	});
+	
+	$(".decTostringText").each(function() {
+		$(this).text(parseFloat($(this).text()));
 	});
 	
 	function N(id, places) { 
@@ -815,22 +1046,28 @@ $(document).ready(function() {
 //----for lj chart
 $("#create_chart_btn").click(function(){
 	var ctx = document.getElementById('chartContainer');
-	var gbtn = document.getElementById("use_calc_values").checked;//$("#use_calc_values").checked;
-	var ctrl1_mean = $("#lvl1Mean").text();
+	//var gbtn = document.getElementById("use_calc_values").checked;//$("#use_calc_values").checked;
+	/*var ctrl1_mean = $("#lvl1Mean").text();
 	var ctrl2_mean = $("#lvl2Mean").text();
 	var ctrl3_mean = $("#lvl3Mean").text();
 	var ctrl1_stdv = $("#lvl1Stndev").text();
 	var ctrl2_stdv = $("#lvl2Stndev").text();
-	var ctrl3_stdv = $("#lvl3Stndev").text();
+	var ctrl3_stdv = $("#lvl3Stndev").text();*/
+	var ctrl1_mean = $("#ctrl1_lab_mean").text();
+	var ctrl2_mean = $("#ctrl2_lab_mean").text();
+	var ctrl3_mean = $("#ctrl3_lab_mean").text();
+	var ctrl1_stdv = $("#ctrl1_lab_sd").text();
+	var ctrl2_stdv = $("#ctrl2_lab_sd").text();
+	var ctrl3_stdv = $("#ctrl3_lab_sd").text();
 	
-	if (gbtn == true) {
+	/*if (gbtn == true) {
 		ctrl1_mean = $("#lvl1MeanCalc").text();
 		ctrl2_mean = $("#lvl2MeanCalc").text();
 		ctrl3_mean = $("#lvl3MeanCalc").text();
 		ctrl1_stdv = $("#lvl1StndevCalc").text();
 		ctrl2_stdv = $("#lvl2StndevCalc").text();
 		ctrl3_stdv = $("#lvl3StndevCalc").text();
-	}
+	}*/
 	
 	
 	var arr1 = [];
@@ -881,16 +1118,19 @@ $("#create_chart_btn").click(function(){
 		
 		{% for r in qc_res1 %}
 			{% if r.run_date == q.run_date and r.qc_result == q.qc_result %}
+			
 				data.addRows([
-					 ['{{q.run_date }}' , {{r.qc_result}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}'), ,'' , , '']
+					 ['{{q.run_date }}' , {{r.z_score}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result|string}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}'), ,'' , , '']
 				]);
-				
+		
 			{% endif %}
 		{% endfor %}
+		
 		{% for r in qc_res2 %}
 			{% if r.run_date == q.run_date and r.qc_result == q.qc_result %}
+			console.log({{r.z_score}}, {{ q.qc_result|float}})
 				data.addRows([
-					 ['{{q.run_date }}' , , '', {{r.qc_result}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}'), , '']
+					 ['{{q.run_date }}' , , '', {{r.z_score}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result|string}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}'), , '']
 				]);
 				
 			{% endif %}
@@ -899,7 +1139,7 @@ $("#create_chart_btn").click(function(){
 		{% for r in qc_res3 %}
 			{% if r.run_date == q.run_date and r.qc_result == q.qc_result %}
 				data.addRows([
-					 ['{{q.run_date }}' , , '', , '', {{r.qc_result}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}')]
+					 ['{{q.run_date }}' , , '', , '', {{r.z_score}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result|string}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}')]
 				]);
 				
 			{% endif %}
@@ -908,7 +1148,7 @@ $("#create_chart_btn").click(function(){
 	{% endfor %}
 	
 	function custom_tooltips(run_date, result, r_lot, c_lot){
-		return '<div style="width: 200px;" align="left"><div>Run date: <strong>' + run_date + '</strong></div><div>Result: <strong>' + result + '</strong></div><div>Reagent Lot: <strong>' + r_lot + '</strong></div><div>Control Lot: <strong>' + c_lot + '</strong><span style="float:right;padding:2px;"><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#comment_modal" data-target_date="' + run_date + '" data-target_rlot="' + r_lot + '" data-target_clot="' + c_lot + '" data-target_result="' + result + '" style="float:right;"><span title="Add comment" class="glyphicon glyphicon-comment" aria-hidden="true"></span></button><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#exclude_modal" data-target_date="' + run_date + '" data-target_rlot="' + r_lot + '" data-target_clot="' + c_lot + '" data-target_result="' + result + '"><span title="Exclude" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></button></span></div></div>';
+		return '<div style="width: 200px;" align="left"><div>Run date: <strong>' + run_date + '</strong></div><div>Result: <strong><span class="decTostringText">' + result + '</span></strong></div><div>Reagent Lot: <strong>' + r_lot + '</strong></div><div>Control Lot: <strong>' + c_lot + '</strong><span style="float:right;padding:2px;"><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#comment_modal" data-target_date="' + run_date + '" data-target_rlot="' + r_lot + '" data-target_clot="' + c_lot + '" data-target_result="' + result + '" style="float:right;"><span title="Add comment" class="glyphicon glyphicon-comment" aria-hidden="true"></span></button><button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#exclude_modal" data-target_date="' + run_date + '" data-target_rlot="' + r_lot + '" data-target_clot="' + c_lot + '" data-target_result="' + result + '"><span title="Exclude" class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span></button></span></div></div>';
 	}
 	
 	var options = {
@@ -923,36 +1163,36 @@ $("#create_chart_btn").click(function(){
 				},
 				vAxes: {
 					0: {title: '',
-						baseline: ctrl1_mean,
-						ticks: [{v: p3sd1, f: '+3sd'}, {v: p2sd1, f: '+2sd'}, {v: p1sd1, f: '+1sd'}, {v: ctrl1_mean, f: 'mean'}, {v: n1sd1, f: '-1sd'}, {v: n2sd1, f: '-2sd'}, {v: n3sd1, f: '-3sd'}],
+						baseline: 0,
+						ticks: [{v: 3, f: ''}, {v: 2, f: ''}, {v: 1, f: ''}, {v: 0, f: 'mean'}, {v: -1, f: ''}, {v: -2, f: ''}, {v: -3, f: ''}],
 						/*minValue: n3sd1,
 						maxValue: p3sd1,*/
 						//viewWindowMode: 'maximized',
 						viewWindow: {
-							max: p3sd1,
-							min: n3sd1
+							max: 3,
+							min: -3
 						}
 					},
 					1: {title: '',
-						baseline: ctrl2_mean,
-						ticks: [{v: p3sd2, f: ''}, {v: p2sd2, f: ''}, {v: p1sd2, f: ''}, {v: ctrl2_mean, f: ''}, {v: n1sd2, f: ''}, {v: n2sd2, f: ''}, {v: n3sd2, f: ''}],
+						baseline: 0,
+						ticks: [{v: 3, f: ''}, {v: 2, f: ''}, {v: 1, f: ''}, {v: 0, f: ''}, {v: -1, f: ''}, {v: -2, f: ''}, {v: -3, f: ''}],
 						/*minValue: n3sd2,
 						maxValue: p3sd2,*/
 						//viewWindowMode: 'maximized',
 						viewWindow: {
-							max: p3sd2,
-							min: n3sd2,
+							max: 3,
+							min: -3,
 						}
 					},
 					2: {title: '',
-						baseline: ctrl3_mean,
-						ticks: [{v: p3sd3, f: ''}, {v: p2sd3, f: ''}, {v: p1sd3, f: ''}, {v: ctrl3_mean, f: ''}, {v: n1sd3, f: ''}, {v: n2sd3, f: ''}, {v: n3sd3, f: ''}],
+						baseline: 0,
+						ticks: [{v: 3, f: ''}, {v: 2, f: ''}, {v: 1, f: ''}, {v: 0, f: ''}, {v: -1, f: ''}, {v: -2, f: ''}, {v: -3, f: ''}],
 						/*minValue: n3sd3,
 						maxValue: p3sd3,*/
 						//viewWindowMode: 'maximized',
 						viewWindow: {
-							max: p3sd3,
-							min: n3sd3,
+							max: 3,
+							min: -3,
 						}
 					}
 				},
@@ -1057,5 +1297,11 @@ $(document).ready(function() {
 	cv3 = N(cv3, dp3);
 	$("#lvl3CV").val(cv3);
 });
+</script>
+<script>
+$(window).load(function() {
+	$("#create_chart_btn").click();
+});
+
 </script>
 {% endblock %}

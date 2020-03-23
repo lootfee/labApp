@@ -831,7 +831,7 @@ class Machine(db.Model):
 	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
 	values = db.relationship('QCValues', backref=db.backref('machine', lazy=True))
-	result = db.relationship('QCResult', backref=db.backref('machine', lazy=True))
+	result = db.relationship('QCResults', backref=db.backref('machine', lazy=True))
 	
 	company = db.relationship(
 		'Company', secondary='company_machine',
@@ -846,7 +846,7 @@ class Analyte(db.Model):
 	analyte = db.Column(db.String(200))
 	
 	values = db.relationship('QCValues', backref=db.backref('analyte', lazy=True))
-	result = db.relationship('QCResult', backref=db.backref('analyte', lazy=True))
+	result = db.relationship('QCResults', backref=db.backref('analyte', lazy=True))
 	#unit = db.Column(db.String(50))
 	#machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
 	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
@@ -872,7 +872,7 @@ class Unit(db.Model):
 	unit = db.Column(db.String(50))
 	
 	values = db.relationship('QCValues', backref=db.backref('unit', lazy=True))
-	result = db.relationship('QCResult', backref=db.backref('unit', lazy=True))
+	result = db.relationship('QCResults', backref=db.backref('unit', lazy=True))
 	
 	'''analyte = db.relationship(
 		'Analyte', secondary='analyte_unit',

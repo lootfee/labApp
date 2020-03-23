@@ -72,8 +72,8 @@
 				<div class="col-md-6" style="margin-top:20px;">
 					<br>
 					{{ form.qcrf_submit (class_="btn btn-default")}}
-					<input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean SD">
-					<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart">
+					<!--input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean SD">
+					<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart"-->
 				</div>	
 			</div>	
 			
@@ -137,7 +137,8 @@ $(document).ready(function() {
 		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
 			machine_id : $('#qcrf_machine').val(), 
 			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
+			analyte_id : $(this).val(),
+			rlot_id : "0"
 		}, function(data){
 			$.each(data.result, function(i, new_options){
 				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
@@ -148,7 +149,8 @@ $(document).ready(function() {
 		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
 			machine_id : $('#qcrf_machine').val(), 
 			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
+			analyte_id : $(this).val(),
+			rlot_id : "0"
 		}, function(data){
 			$.each(data.result, function(i, new_options){
 				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
@@ -159,13 +161,67 @@ $(document).ready(function() {
 		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
 			machine_id : $('#qcrf_machine').val(), 
 			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
+			analyte_id : $(this).val(),
+			rlot_id : "0"
 		}, function(data){
 			$.each(data.result, function(i, new_options){
 				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 			
 		});
+		return false;
+	});
+	
+	$('#qcrf_reagent_lot').change(function(){
+		/*$('#eqcrf_control').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#eqcrf_analyte').val(),
+			machine_id : $('#eqcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});*/
+		
+		$('#control1').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control2').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		$('#control3').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcrf_analyte').val(),
+			machine_id : $('#qcrf_machine').val(), 
+			rlot_id : $(this).val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+				
 		return false;
 	});
 });

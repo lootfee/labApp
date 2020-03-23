@@ -1,0 +1,63 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{% include 'quality_control/qc_nav.html' %}
+<hr class="inventory_hr">
+<div class="row">
+	<div class="col-md-12 visible-print-block">
+		<div class="col-md-3">
+			{% if company.logo %}
+			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+			{% else %}
+			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+			{% endif %}
+		</div>
+		<div class="col-md-6 text-center" >
+			<h1>{{ company.company_name }}</h1>
+		</div>
+		<div class="col-md-3" style="height:150px;">
+			<div style="bottom:0;">
+				<p>Address: {{ company.address }}</p>
+				<p>Email: {{ company.email }}</p>
+				<p>Contact: {{ company.contact_info }}</p>
+			</div>
+		</div>
+	</div>
+</div>
+<br>
+<div class="col-md-12">
+	<table class="tanle table-bordered table-hover">
+		<thead>
+			<th>Analyte</th>
+			<th>Jan</th>
+			<th>Feb</th>
+			<th>Mar</th>
+			<th>Apr</th>
+			<th>May</th>
+			<th>Jun</th>
+			<th>Cumm CV</th>
+			<th>PV</th>
+			<th>MOU</th>
+			<th>Jul</th>
+			<th>Aug</th>
+			<th>Sept</th>
+			<th>Oct</th>
+			<th>Nov</th>
+			<th>Dec</th>
+			<th>Cumm CV</th>
+			<th>PV</th>
+			<th>MOU</th>
+		</thead>
+		<tbody>
+			{% for a in analytes %}
+			<tr>
+				<td>{{a.analyte}}</td>
+				<td>{% for r in results %}{{ r.qc_result }}{% endfor %}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
