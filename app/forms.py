@@ -5,6 +5,7 @@ from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Le
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from app.models import User, Product, Item, Department, Supplier, Type, Order, Company, Delivery
 from flask_pagedown.fields import PageDownField
+from datetime import datetime
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -361,7 +362,7 @@ class RegisterQCLotForm(FlaskForm):
 	rqclf_control = SelectField('Control', coerce=int, validators=[InputRequired()])
 	rqclf_control_lot_no = StringField('Lot No', validators=[DataRequired()])
 	rqclf_control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
-	rrlf_analyte = SelectField('Level', validators=[InputRequired()], choices=[('1', 'Level 1'), ('2', 'Level 2'), ('3', 'Level 3')])
+	rqclf_analyte = SelectField('Level', validators=[InputRequired()], choices=[('1', 'Level 1'), ('2', 'Level 2'), ('3', 'Level 3')])
 	rqclf_submit = SubmitField('Submit')
 	
 class QCResultForm(FlaskForm):
@@ -414,3 +415,8 @@ class ExcludeResultForm(FlaskForm):
 	erf_result = HiddenField('Result:', validators=[DataRequired()])
 	erf_comment = TextAreaField('Comment:', validators=[Length(min=1, max=200)], render_kw={"rows": 3, "cols": 50})
 	erf_submit = SubmitField('Exclude')
+	
+
+class PublishChartForm(FlaskForm):
+	pcf_result_date = DateField('', validators=[DataRequired()], format='%Y-%m', render_kw={"type": "month"})
+	pcf_submit = SubmitField('Publish')

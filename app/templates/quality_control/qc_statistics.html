@@ -5,59 +5,272 @@
 {% block app_content %}
 {% include 'quality_control/qc_nav.html' %}
 <hr class="inventory_hr">
-<div class="row">
-	<div class="col-md-12 visible-print-block">
-		<div class="col-md-3">
-			{% if company.logo %}
-			<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
-			{% else %}
-			<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
-			{% endif %}
-		</div>
-		<div class="col-md-6 text-center" >
-			<h1>{{ company.company_name }}</h1>
-		</div>
-		<div class="col-md-3" style="height:150px;">
-			<div style="bottom:0;">
-				<p>Address: {{ company.address }}</p>
-				<p>Email: {{ company.email }}</p>
-				<p>Contact: {{ company.contact_info }}</p>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12 visible-print-block">
+			<div class="col-md-3">
+				{% if company.logo %}
+				<div width="180px"><img src="{{ company.logo }}" alt="{{ company.company_name }}" style="width:180px;height:150px;"></div>
+				{% else %}
+				<div width="180px"><img src="{{ company.company_avatar(150) }}"></div>
+				{% endif %}
+			</div>
+			<div class="col-md-6 text-center" >
+				<h2>{{ company.company_name }}</h2>
+			</div>
+			<div class="col-md-3" style="height:150px;">
+				<div style="bottom:0;">
+					<p>Address: {{ company.address }}</p>
+					<p>Email: {{ company.email }}</p>
+					<p>Contact: {{ company.contact_info }}</p>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <br>
-<div class="col-md-12">
-	<table class="tanle table-bordered table-hover">
-		<thead>
-			<th>Analyte</th>
-			<th>Jan</th>
-			<th>Feb</th>
-			<th>Mar</th>
-			<th>Apr</th>
-			<th>May</th>
-			<th>Jun</th>
-			<th>Cumm CV</th>
-			<th>PV</th>
-			<th>MOU</th>
-			<th>Jul</th>
-			<th>Aug</th>
-			<th>Sept</th>
-			<th>Oct</th>
-			<th>Nov</th>
-			<th>Dec</th>
-			<th>Cumm CV</th>
-			<th>PV</th>
-			<th>MOU</th>
-		</thead>
-		<tbody>
-			{% for a in analytes %}
-			<tr>
-				<td>{{a.analyte}}</td>
-				<td>{% for r in results %}{{ r.qc_result }}{% endfor %}</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+<div class="row">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+	{% for r in run_years %}
+    <li role="presentation"><a href="#year_{{r.run_date.year}}" aria-controls="home" role="tab" data-toggle="tab">{{r.run_date.year}}</a></li>
+	{% endfor %}
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+	{% for r in run_years %}
+    <div role="tabpanel" class="tab-pane" id="year_{{r.run_date.year}}">
+		<div class="col-md-12">
+			<table class="tanle table-bordered table-hover">
+				<thead>
+					<th>Analyte</th>
+					<th>Jan</th>
+					<th>Feb</th>
+					<th>Mar</th>
+					<th>Apr</th>
+					<th>May</th>
+					<th>Jun</th>
+					<th>Cumm CV</th>
+					<th>PV</th>
+					<th>MOU</th>
+					<th>Jul</th>
+					<th>Aug</th>
+					<th>Sept</th>
+					<th>Oct</th>
+					<th>Nov</th>
+					<th>Dec</th>
+					<th>Cumm CV</th>
+					<th>PV</th>
+					<th>MOU</th>
+				</thead>
+				<tbody>
+					{% for a in analytes %}
+					<tr>
+						<td>{{a.analyte}} (Lv1)</td>
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==1 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jan1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jan1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==2 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_feb1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_feb1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==3 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_mar1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_mar1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==4 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_apr1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_apr1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==5 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_may1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_may1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==6 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jun1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jun1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<!--td>{% set cv_list = [] %}{% set cumm_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month<=6 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %}{% for i in range(0, cv_list|count)%}{% set cumm_cv.value = cumm_cv.value|float + cv_list[i]**2 %}{% endfor %}{{ cumm_cv.value|sqrt|round(2) }}</td-->
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+						
+						
+						
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==7 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jul1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jul1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==8 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_aug1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_aug1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==9 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_sep1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_sep1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==10 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_oct1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_oct1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==11 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_nov1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_nov1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==12 and c.level==1 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_dec1_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_dec1_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+					</tr>
+					
+					<tr>
+						<td>{{a.analyte}} (Lv2)</td>
+						
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==1 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jan2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jan2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==2 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_feb2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_feb2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==3 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_mar2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_mar2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==4 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_apr2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_apr2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==5 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_may2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_may2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==6 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jun2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jun2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+						
+						
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==7 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_jul2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_jul2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==8 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_aug2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_aug2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==9 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_sep2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_sep2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==10 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_oct2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_oct2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==11 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_nov2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_nov2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==12 and c.level==2 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="{{r.run_date.year}}_dec2_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span><span id="{{r.run_date.year}}_dec2_len" hidden>{{ wieghted_cv_down.value }}</span>{% endif %}</td>
+						
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+						
+						
+					</tr>
+					{% for c in a.calc %}
+					{% if c.level==3 %}
+					<tr>
+						<td>{{a.analyte}} (Lv3)</td>
+						
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==1 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="jan3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==2 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="feb3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==3 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="mar3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==4 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="apr3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==5 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="may3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==6 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="jun3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+						
+						{% set wighted_cv_list= [] %}{% set wighted_cv_len_list = [] %}
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==7 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="jul3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==8 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="aug3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==9 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="sep3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==10 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="oct3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==11 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="nov3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cv_list = [] %}{% set len_list = [] %}{% set wieghted_cv_up = namespace(value=0) %}{% set wieghted_cv_down = namespace(value=0) %}{% set wieghted_cv = namespace(value=0) %}{% for c in a.calc %}{% if c.run_date.year==r.run_date.year and c.run_date.month==12 and c.level==3 %}{% if c.cv is not none %}{{ cv_list.append(c.cv)|default("", True)  }}{{ len_list.append(c.len)|default("", True)  }} {% endif %}{% else %}{% endif %}{% endfor %} {% for i in range(0, cv_list|count)%}{% set wieghted_cv_up.value = wieghted_cv_up.value|float + ((cv_list[i]*len_list[i]))  %} {% set wieghted_cv_down.value = wieghted_cv_down.value|float + len_list[i]  %}{% endfor %}{% if wieghted_cv_up.value and wieghted_cv_down.value != 0 %}<span id="dec3_cv">{{wighted_cv_list.append((wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp))|default("", True) }}{{wighted_cv_len_list.append(wieghted_cv_down.value)|default("", True) }}{{ (wieghted_cv_up.value/wieghted_cv_down.value)|round(a.dp) }}</span>{% endif %}</td>
+						
+						<td>{% set cumm_cv = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %} {% set cumm_cv.value = cumm_cv.value + wighted_cv_list[i]**2 %}{% endfor %}{% if cumm_cv.value != 0 %} {{ cumm_cv.value|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% set pv_up = namespace(value=0) %}{% set pv_down = namespace(value=0) %}{% for i in range(0, wighted_cv_list|count) %}{% set pv_up.value = pv_up.value + (wighted_cv_list[i]**2)*(wighted_cv_len_list[i]-1) %}{% set pv_down.value = pv_down.value + (wighted_cv_len_list[i]-1) %}{% endfor %}{% if pv_up.value and pv_down.value != 0 %}{{ (pv_up.value/pv_down.value)|sqrt|round(a.dp) }}{% endif %}</td>
+						<td>{% if pv_up.value and pv_down.value != 0 %}{{ ((pv_up.value/pv_down.value)|sqrt|round(1))*2 }}{% endif %}</td>
+						
+					</tr>
+					{% endif %}
+					{% endfor %}
+					
+					
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	
+	</div>
+    {% endfor %}
+  </div>
 </div>
+
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<style>
+@media print {
+	body {
+		font-size: 10px;
+	}
+
+	.no_print {
+		display: none;
+	}
+	#qc_title {
+		margin-top: 40px;
+	}
+	
+	.col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+        float: left;
+   }
+   .col-md-12 {
+        width: 100%;
+   }
+   .col-md-11 {
+        width: 91.66666667%;
+   }
+   .col-md-10 {
+        width: 83.33333333%;
+   }
+   .col-md-9 {
+        width: 75%;
+   }
+   .col-md-8 {
+        width: 66.66666667%;
+   }
+   .col-md-7 {
+        width: 58.33333333%;
+   }
+   .col-md-6 {
+        width: 50%;
+   }
+   .col-md-5 {
+        width: 41.66666667%;
+   }
+   .col-md-4 {
+        width: 33.33333333%;
+   }
+   .col-md-3 {
+        width: 25%;
+   }
+   .col-md-2 {
+        width: 16.66666667%;
+   }
+   .col-md-1 {
+        width: 8.33333333%;
+   }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(document).ready(function() {
+cv = $('.to_sqrt').text();
+$('.to_sqrt').text(Math.sqrt(parseFloat($('.to_sqrt').text())));
+});
+</script>
 {% endblock %}

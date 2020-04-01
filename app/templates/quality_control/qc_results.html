@@ -40,15 +40,15 @@
 			
 			<div class="row">
 				{% if machine %}
-				<div class="col-md-3"><h5><strong>
+				<div class="col-md-3"><h4><strong>
 					<label>Machine:</label>
-					<span>{{ machine.machine_name }}</span></strong></h5>
+					<span>{{ machine.machine_name }}</span></strong></h4>
 				</div>
 				{% endif %}
 				{% if analyte %}
-				<div class="col-md-3"><h5><strong>
+				<div class="col-md-3"><h4><strong>
 					<label>Analyte:</label>
-					<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h5>
+					<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h4>
 				</div>
 				{% endif %}
 				{% if machine %}
@@ -158,7 +158,7 @@
 <div class="row">
 	<h5><strong>Run dates: {% if qc_results %}{{ moment(qc_results[0].run_date).format('LLL') }} - {{ moment(qc_results[-1].run_date).format('LLL') }}{% endif %}</strong></h5>
 </div>
-<h5><strong>Current Mean/SD</strong></h5>
+<h5><strong>Run Mean/SD</strong></h5>
 <div class="row">
 	{% if res1_group_val %}
 	<h5>Control 1</h5>
@@ -170,13 +170,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control mean: {{ i['ctrl1_mean'] }} </strong></p>
+		<p><strong>Run mean: {{ i['ctrl1_mean'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control SD: {{ i['ctrl1_sd'] }} </strong></p>
+		<p><strong>Run SD: {{ i['ctrl1_sd'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control CV: {{ i['ctrl1_cv'] }} </strong></p>
+		<p><strong>Run CV: {{ i['ctrl1_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
@@ -195,13 +195,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control mean: {{ i['ctrl2_mean'] }} </strong></p>
+		<p><strong>Run mean: {{ i['ctrl2_mean'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control SD: {{ i['ctrl2_sd'] }} </strong></p>
+		<p><strong>Run SD: {{ i['ctrl2_sd'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control CV: {{ i['ctrl2_cv'] }} </strong></p>
+		<p><strong>Run CV: {{ i['ctrl2_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
@@ -221,13 +221,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control mean: {{ i['ctrl3_mean'] }} </strong></p>
+		<p><strong>Run mean: {{ i['ctrl3_mean'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control SD: {{ i['ctrl3_sd'] }} </strong></p>
+		<p><strong>Run SD: {{ i['ctrl3_sd'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control SD: {{ i['ctrl3_cv'] }} </strong></p>
+		<p><strong>Run CV: {{ i['ctrl3_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
@@ -249,13 +249,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl1_lab_mean'] }}</span> </strong></p>
+		<p><strong>Lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl1_lab_mean'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl1_lab_sd'] }}</span> </strong></p>
+		<p><strong>Lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl1_lab_sd'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab CV: {{ i['ctrl1_lab_cv'] }} </strong></p>
+		<p><strong>Lab CV: {{ i['ctrl1_lab_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl1_lab_run'] }} </strong></p>
@@ -274,13 +274,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl2_lab_mean'] }}</span> </strong></p>
+		<p><strong>Lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl2_lab_mean'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl2_lab_sd'] }}</span> </strong></p>
+		<p><strong>Lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl2_lab_sd'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab CV: {{ i['ctrl2_lab_cv'] }} </strong></p>
+		<p><strong>Lab CV: {{ i['ctrl2_lab_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl2_lab_run'] }} </strong></p>
@@ -299,13 +299,13 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl3_lab_mean'] }}</span> </strong></p>
+		<p><strong>Lab mean: <span id="ctrl1_lab_mean">{{ i['ctrl3_lab_mean'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl3_lab_sd'] }}</span> </strong></p>
+		<p><strong>Lab SD: <span id="ctrl1_lab_sd">{{ i['ctrl3_lab_sd'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control lab CV: {{ i['ctrl3_lab_cv'] }} </strong></p>
+		<p><strong>Lab CV: {{ i['ctrl3_lab_cv'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Control runs: {{ i['ctrl3_lab_run'] }} </strong></p>
@@ -347,10 +347,10 @@
 	</div>
 </div>
 
-<div class="row">
-	<!--input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean-SD-CV"-->
+<!--div class="row">
+	<input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean-SD-CV">
 	<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart">
-</div>
+</div-->
 <br>
 <!--div id="calc_val_container">
 	<h5><strong>Calculated Values</strong></h5>
@@ -469,27 +469,15 @@
 {% endif %}
 <br>
 
+<div class="row">
+	<div class="col-md-12">
+		<input style="float:right;" id="publish_btn" type="button" class="btn btn-primary no_print" data-toggle="modal" data-target="#publish_modal" value="Publish">
+	</div>
+	
+</div>
 	
 
 <div class="container-fluid">
-	<!--div class="row">
-		<div class="col-md-4">
-			<br>
-			<p><strong>QC Lots</strong></p>
-			{% if qc1_lot_list %}<p>Control 1 Lot: {% for q in qc1_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-			{% if qc2_lot_list %}<p>Control 2 Lot: {% for q in qc2_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-			{% if qc3_lot_list %}<p>Control 3 Lot: {% for q in qc3_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-		</div>
-		<div class="col-md-4">
-			<br>
-			{% if rgt_lot_list %}<p><strong>Reagent Lots:</strong> {% for q in rgt_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-		</div>
-	</div>
-	<div class="row text-center">
-		<div class="col-md-12 chart-container text-center" id="chartContainer">
-			<canvas id="chartjs" ></canvas>
-		</div>
-	</div-->
 	
 	<div class="modal fade" id="comment_modal" tabindex="-1" role="dialog" aria-labelledby="comment_modal_label"style="z-index:10000;">
 	  <div class="modal-dialog" role="document">
@@ -520,6 +508,20 @@
 		  </div>
 		  <div class="modal-body">
 			{{ wtf.quick_form(exclude_form) }}
+		  </div>
+		</div>
+	  </div>
+	</div>
+	
+	<div class="modal fade" id="publish_modal" tabindex="-1" role="dialog" aria-labelledby="publish_modal_label" style="z-index:10000;">
+	  <div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4 class="modal-title" id="exclude_modal_label">Publish chart for the month of:</h4>
+			<div class="col-md-12">
+				{{wtf.quick_form(publish_form)}}
+			</div>
 		  </div>
 		</div>
 	  </div>
@@ -798,6 +800,11 @@ $(document).ready(function() {
 		modal.find('#em_target_res').text(target_result)
 		modal.find('#erf_result').val(target_result)
 	});
+	
+	
+	$('#pcf_result_date').val(moment().format('YYYY-MM'));
+	
+	
 });
 
 $(document).ready(function() {
@@ -1044,7 +1051,8 @@ $(document).ready(function() {
 
 
 //----for lj chart
-$("#create_chart_btn").click(function(){
+//$("#create_chart_btn").click(function(){
+$(window).load(function() {
 	var ctx = document.getElementById('chartContainer');
 	//var gbtn = document.getElementById("use_calc_values").checked;//$("#use_calc_values").checked;
 	/*var ctrl1_mean = $("#lvl1Mean").text();
@@ -1165,8 +1173,8 @@ $("#create_chart_btn").click(function(){
 					0: {title: '',
 						baseline: 0,
 						ticks: [{v: 3, f: ''}, {v: 2, f: ''}, {v: 1, f: ''}, {v: 0, f: 'mean'}, {v: -1, f: ''}, {v: -2, f: ''}, {v: -3, f: ''}],
-						/*minValue: n3sd1,
-						maxValue: p3sd1,*/
+						minValue: -3,
+						maxValue: 3,
 						//viewWindowMode: 'maximized',
 						viewWindow: {
 							max: 3,
@@ -1298,10 +1306,10 @@ $(document).ready(function() {
 	$("#lvl3CV").val(cv3);
 });
 </script>
-<script>
+<!--script>
 $(window).load(function() {
 	$("#create_chart_btn").click();
 });
 
-</script>
+</script-->
 {% endblock %}
