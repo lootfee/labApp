@@ -17,17 +17,14 @@ import statistics
 import math
 from sqlalchemy import extract
 from sqlalchemy.sql import func
-#import jinja2
 
-#loader = jinja2.FileSystemLoader('/tmp')
-#env = jinja2.Environment(autoescape=True, loader=loader)
 
 stripe.api_key = app.config['STRIPE_SECRET_KEY']
 
 # TO DO
 # - reaffiliate/rehire code
 # - improve user search algo
-# - verify reset password
+
 
 @app.before_request
 def before_request():

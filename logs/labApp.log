@@ -109,3 +109,4 @@ Traceback (most recent call last):
     <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
 jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
 2019-12-24 20:27:00,398 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2020-04-02 09:33:20,158 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
