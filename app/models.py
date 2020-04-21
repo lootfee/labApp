@@ -828,44 +828,37 @@ class DocumentVersion(db.Model):
 class Machine(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	machine_name = db.Column(db.String(100))
-	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
 	values = db.relationship('QCValues', backref=db.backref('machine', lazy=True))
 	result = db.relationship('QCResults', backref=db.backref('machine', lazy=True))
+	company = db.relationship('Company', backref=db.backref('machine', lazy='dynamic'))
 	
-	company = db.relationship(
+	'''company = db.relationship(
 		'Company', secondary='company_machine',
 		backref=db.backref('machine', lazy='dynamic'), lazy='dynamic'
-	)
+	)'''
 	
-	#company = db.relationship('Company', backref=db.backref('machine', lazy='dynamic'))
-	#department = db.relationship('DocumentationDepartment', backref=db.backref('machine', lazy='dynamic'))
 	
 class Analyte(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	analyte = db.Column(db.String(200))
+	unit = db.Column(db.String(50))
+	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))#for delete
+	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	
 	values = db.relationship('QCValues', backref=db.backref('analyte', lazy=True))
 	result = db.relationship('QCResults', backref=db.backref('analyte', lazy=True))
-	#unit = db.Column(db.String(50))
-	#machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
-	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	#department_id = db.Column(db.Integer, db.ForeignKey('documentation_department.id'))
-	company = db.relationship(
+	units = db.relationship('Unit', backref=db.backref('analyte', lazy=True))
+	machine = db.relationship('Machine', backref=db.backref('analyte', lazy=True))
+	company = db.relationship('Company', backref=db.backref('analyte', lazy='dynamic'))
+
+	'''company = db.relationship(
 		'Company', secondary='company_analyte',
 		backref=db.backref('analyte', lazy='dynamic'), lazy='dynamic'
-	)
+	)'''
 	
-	
-'''class CompanyMachineAnalyte(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	machine_id = db.Column(db.Integer, db.ForeignKey('machine.id'))
-	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
-	
-	company = db.relationship('Company', backref=db.backref('machine_analyte_link', lazy='dynamic'))
-	machine = db.relationship('Machine', backref=db.backref('company_analyte_link', lazy='dynamic'))
-	analyte = db.relationship('Analyte', backref=db.backref('company_machine_link', lazy='dynamic'))'''
 
 class Unit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -874,11 +867,7 @@ class Unit(db.Model):
 	values = db.relationship('QCValues', backref=db.backref('unit', lazy=True))
 	result = db.relationship('QCResults', backref=db.backref('unit', lazy=True))
 	
-	'''analyte = db.relationship(
-		'Analyte', secondary='analyte_unit',
-		backref=db.backref('unit', lazy='dynamic'), lazy='dynamic'
-	)'''
-	
+#for delete	
 class CompanyAnalyteVariables(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
@@ -890,67 +879,66 @@ class CompanyAnalyteVariables(db.Model):
 		backref=db.backref('company_analyte', lazy='dynamic'), lazy='dynamic'
 	)
 	
-	unit = db.relationship('Unit', backref=db.backref('analyte', lazy='dynamic'))
+	unit = db.relationship('Unit', backref=db.backref('unit_analyte_link', lazy='dynamic'))
 	company = db.relationship('Company', backref=db.backref('machine_analyte_link', lazy='dynamic'))
 	machine = db.relationship('Machine', backref=db.backref('company_analyte_link', lazy='dynamic'))
 	analyte = db.relationship('Analyte', backref=db.backref('company_machine_link', lazy='dynamic'))
 	
+	
 class Control(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	control_name = db.Column(db.String(100))
-	#company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	company = db.relationship(
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	'''company = db.relationship(
 		'Company', secondary='company_control',
 		backref=db.backref('control', lazy='dynamic'), lazy='dynamic'
-	)
-	#company = db.relationship('Company', backref=db.backref('control', lazy='dynamic'))
+	)'''
+	company = db.relationship('Company', backref=db.backref('control', lazy='dynamic'))
 	
 class ReagentLot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_no = db.Column(db.String(50))
 	expiry = db.Column(db.Date)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
 	
-	#result = db.relationship('QCResult', backref=db.backref('reagent_lot', lazy=True))
 	values = db.relationship('QCValues', backref=db.backref('reagent_lot', lazy=True))
 	result = db.relationship('QCResults', backref=db.backref('reagent_lot', lazy=True))
+	analyte = db.relationship('Analyte', backref=db.backref('reagent_lot', lazy=True))
+	company = db.relationship('Company', backref=db.backref('reagent_lot', lazy='dynamic'))
 	
-	company = db.relationship(
+	'''company = db.relationship(
 		'Company', secondary='company_reagent_lot',
 		backref=db.backref('reagent_lot', lazy='dynamic'), lazy='dynamic'
-	)
-	analyte = db.relationship(
+	)'''
+	'''analyte = db.relationship(
 		'Analyte', secondary='analyte_reagent_lot',
 		backref=db.backref('reagent_lot', lazy='dynamic'), lazy='dynamic'
-	)
+	)'''
 	
-'''class CompanyReagentLot(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	analyte_id = db.Column(db.Integer, db.ForeignKey('analyte.id'))
-	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
-	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
-	
-	company = db.relationship('Company', backref=db.backref('reagent', lazy='joined'))
-	analyte = db.relationship('Analyte', backref=db.backref('reagent_lot', lazy='joined'))
-	lot = db.relationship('ReagentLot', backref=db.backref('company', lazy='joined'))'''
 	
 class ControlLot(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	lot_no = db.Column(db.String(50))
 	level = db.Column(db.Integer)
 	expiry = db.Column(db.Date)
+	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+	control_id = db.Column(db.Integer, db.ForeignKey('control.id'))
 	
 	values = db.relationship('QCValues', backref=db.backref('qc_lot', lazy=True))
 	#result = db.relationship('QCResult', backref=db.backref('qc_lot', lazy='dynamic'))
 	result = db.relationship('QCResults', backref=db.backref('control_lot', lazy=True))
+	control = db.relationship('Control', backref=db.backref('control_lot', lazy=True))
+	company = db.relationship('Company', backref=db.backref('control_lot', lazy='dynamic'))
 	
-	control = db.relationship(
+	'''control = db.relationship(
 		'Control', secondary='control_control_lot',
 		backref=db.backref('lot', lazy='dynamic'), lazy='dynamic'
 	)
 	company = db.relationship(
 		'Company', secondary='company_control_lot',
 		backref=db.backref('control_lot', lazy='dynamic'), lazy='dynamic'
-	)
+	)'''
 	
 	
 class QCValues(db.Model):
@@ -964,9 +952,6 @@ class QCValues(db.Model):
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
 	
-	#lot_no = db.relationship('ControlLot', backref=db.backref('qc_values', lazy='dynamic'))
-	#machine = db.relationship('Machine', backref=db.backref('qc_values', lazy='dynamic'))
-	#analyte = db.relationship('Analyte', backref=db.backref('qc_values', lazy='dynamic'))
 	company = db.relationship('Company', backref=db.backref('qc_values', lazy='dynamic'))
 	
 

@@ -36,72 +36,453 @@
 <div class="row">
 	<div class="col-md-12">
 		<h4>Encode QC Values</h4>
-		<form action method="post" class="form" role="form">
-			{{ form6.csrf_token() }}
-				<div class="col-md-4">
-					{{ form6.qcrf_machine.label (class_="control-label")}}
-					{{ form6.qcrf_machine (class_="form-control")}}
-					<br>
-					{{ form6.control1.label (class_="control-label")}}
-					{{ form6.control1 (class_="form-control")}}
-					<br>
-					<div class="col-md-6">
-					{{ form6.control1_mean.label (class_="control-label")}}
-					{{ form6.control1_mean (class_="form-control")}}
-					</div>
-					<div class="col-md-6">
-					{{ form6.control1_sd.label (class_="control-label")}}
-					{{ form6.control1_sd (class_="form-control")}}
-					</div>
-				</div>
-				<div class="col-md-4">
-					{{ form6.qcrf_analyte.label (class_="control-label")}}
-					{{ form6.qcrf_analyte (class_="form-control")}}
-					<br>
-					{{ form6.control2.label (class_="control-label")}}
-					{{ form6.control2 (class_="form-control")}}
-					<br>
-					<div class="col-md-6">
-					{{ form6.control2_mean.label (class_="control-label")}}
-					{{ form6.control2_mean (class_="form-control")}}
-					</div>
-					<div class="col-md-6">
-					{{ form6.control2_sd.label (class_="control-label")}}
-					{{ form6.control2_sd (class_="form-control")}}
-					</div>
-				</div>
-				<div class="col-md-4">
-					{{ form6.qcrf_reagent_lot.label (class_="control-label")}}
-					{{ form6.qcrf_reagent_lot (class_="form-control")}}
-					<br>
-					{{ form6.control3.label (class_="control-label")}}
-					{{ form6.control3 (class_="form-control")}}
-					<br>
-					<div class="col-md-6">
-					{{ form6.control3_mean.label (class_="control-label")}}
-					{{ form6.control3_mean (class_="form-control")}}
-					</div>
-					<div class="col-md-6">
-					{{ form6.control3_sd.label (class_="control-label")}}
-					{{ form6.control3_sd (class_="form-control")}}
-					</div>
-				</div>
-			<br>
-			<div style="float:right;margin-top:10px;margin-bottom:40px;">
-				{{ form6.qcrf_submit (class_="btn btn-default")}}
-			</div>
-			
-		</form>
+			{{ wtf.quick_form(form6)}}
+		
 	</div>
 	
 </div>
 
+<div class="modal fade" id="delete_machine_modal" tabindex="-1" role="dialog" aria-labelledby="delete_machine_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete_machine_modal_label">Select machine to be deleted:</h4>
+      </div>
+      <div class="modal-body">
+		<select id="select_for_machine_del" class="form-control">
+			{% for m in comp_machine %}
+			<option value="{{m.id}}">{{ m.machine_name}}</option>
+			{% endfor %}
+		</select>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-danger" id="delete_machine">Delete</button>
+	   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_machine_modal" tabindex="-1" role="dialog" aria-labelledby="edit_machine_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_machine_modal_label">Edit machine name:</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<select id="select_for_machine_edit" class="form-control">
+				<option value=""></option>
+				{% for m in comp_machine %}
+				<option value="{{m.id}}">{{ m.machine_name}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>New machine name:</label>
+			<input class="form-control" id="new_machine_name">
+		</div>
+		
+      </div>
+      <div class="modal-footer">
+		 <button type="button" class="btn btn-primary" id="save_machine_edit">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete_control_modal" tabindex="-1" role="dialog" aria-labelledby="delete_control_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete_control_modal_label">Are you sure you want to delete control:</h4>
+      </div>
+      <div class="modal-body">
+		<select id="select_for_control_del" class="form-control">
+			{% for c in comp_controls %}
+			<option value="{{c.id}}">{{ c.control_name }}</option>
+			{% endfor %}
+		</select>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-danger" id="delete_control">Delete</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_control_modal" tabindex="-1" role="dialog" aria-labelledby="edit_control_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_control_modal_label">Edit control name:</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<select id="select_for_control_edit" class="form-control">
+				<option value=""></option>
+				{% for c in comp_controls %}
+				<option value="{{c.id}}">{{ c.control_name }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>New control name:</label>
+			<input class="form-control" id="new_control_name">
+		</div>
+		
+      </div>
+      <div class="modal-footer">
+		 <button type="button" class="btn btn-primary" id="save_control_edit">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_analyte_modal" tabindex="-1" role="dialog" aria-labelledby="edit_analyte_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_analyte_modal_label">Edit analyte variables:</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<label class="control-label">Analyte:</label>
+			<select id="select_for_analyte_edit" class="form-control">
+				<option value="0"></option>
+				{% for c in comp_analyte %}
+				<option value="{{c.id}}">{{ c.analyte }}</option>
+				{% endfor %}
+			</select>
+			<div style="float:right;">
+				<span>Edit analyte name:</span>
+				<input type="checkbox" id="edit_analyte_name_checkbox" aria-label="edit_analyte_name_checkbox">
+			</div>
+		</div>
+		<div class="form-group" id="new_analyte_name_container">
+			<label>New analyte name:</label>
+			<input class="form-control" id="new_analyte_name">
+		</div>
+		<div class="form-group">
+			<label class="control-label">Unit:</label>
+			<input class="form-control" id="unit_var">
+		</div>
+		<div class="form-group">
+			<label class="control-label">Machine:</label>
+			<select id="machine_var" class="form-control">
+				<option value="0"></option>
+				{% for m in comp_machine %}
+				<option value="{{m.id}}">{{ m.machine_name}}</option>
+				{% endfor %}
+			</select>
+			<!--input class="form-control" id="machine_var"-->
+		</div>		
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-primary" id="save_analyte_edit">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="delete_analyte_modal" tabindex="-1" role="dialog" aria-labelledby="delete_analyte_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete_analyte_modal_label">Are you sure you want to delete analyte:</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<label class="control-label">Analyte:</label>
+			<select id="select_for_analyte_edit" class="form-control">
+				<option value="0"></option>
+				{% for c in comp_analyte %}
+				<option value="{{c.id}}">{{ c.analyte }}</option>
+				{% endfor %}
+			</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" id="delete_analyte">Delete</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_reagent_lot_modal" tabindex="-1" role="dialog" aria-labelledby="edit_reagent_lot_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_reagent_lot_modal_label">Edit reagent lot variables:</h4>
+      </div>
+      <div class="modal-body ui-front">
+		<div class="form-group">
+			<label class="control-label">Lot No:</label>
+			<select id="select_rlot_for_rlot_edit" class="form-control">
+				<option value="0"></option>
+				{% for r in comp_rgt_lot %}
+				<option value="{{r.id}}">{{ r.lot_no }}</option>
+				{% endfor %}
+			</select>
+			<div style="float:right;">
+				<span>Edit reagent lot no:</span>
+				<input type="checkbox" id="edit_reagent_lot_no_checkbox" aria-label="edit_reagent_lot_no_checkbox">
+			</div>
+		</div>
+		<div class="form-group" id="new_reagent_lot_no_container">
+			<label>New reagent lot no:</label>
+			<input class="form-control" id="new_reagent_lot_no">
+		</div>
+		<div class="form-group">
+			<label class="control-label">Expiry:</label>
+			<input class="form-control" id="expiry_rlot_edit" type="date" >
+		</div>
+		<div class="form-group">
+			<label class="control-label">Analyte:</label>
+			<select id="select_analyte_for_rlot_edit" class="form-control">
+				<option value="0"></option>
+				{% for c in comp_analyte %}
+				<option value="{{c.id}}">{{ c.analyte }}</option>
+				{% endfor %}
+			</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-primary" id="save_rlot_edit">Save</button>
+		 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete_reagent_lot_modal" tabindex="-1" role="dialog" aria-labelledby="delete_reagent_lot_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete_reagent_lot_modal_label">Are you sure you want to delete reagent lot:</h4>
+      </div>
+      <div class="modal-body ui-front">
+		<div class="form-group">
+			<label class="control-label">Reagent Lot No:</label>
+			<select id="select_rlot_for_rlot_delete" class="form-control">
+				<option value="0"></option>
+				{% for r in comp_rgt_lot %}
+				<option value="{{r.id}}">{{ r.lot_no }} - {{r.expiry}} - {{ r.analyte.analyte }}</option>
+				{% endfor %}
+			</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-danger" id="delete_rlot">Delete</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="delete_control_lot_modal" tabindex="-1" role="dialog" aria-labelledby="delete_control_lot_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="delete_control_lot_modal_label">Are you sure you want to delete control lot:</h4>
+      </div>
+      <div class="modal-body ui-front">
+		<div class="form-group">
+			<label class="control-label">Control Lot No:</label>
+			<select id="select_ctrl_lot_for_delete" class="form-control">
+				<option value="0"></option>
+				{% for c in comp_control_lot %}
+				<option value="{{c.id}}">{{ c.lot_no }}(Lvl {{c.level}}) - {{c.expiry}} - {{ c.control.control_name }}</option>
+				{% endfor %}
+			</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-danger" id="delete_control_lot">Delete</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_control_lot_modal" tabindex="-1" role="dialog" aria-labelledby="edit_control_lot_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_control_lot_modal_label">Edit control lot variables:</h4>
+      </div>
+      <div class="modal-body ui-front">
+		<div class="form-group">
+			<label class="control-label">Control Lot No:</label>
+			<select id="select_ctrl_lot_for_edit" class="form-control">
+				<option value="0"></option>
+				{% for c in comp_control_lot %}
+				<option value="{{c.id}}">{{ c.lot_no }}</option>
+				{% endfor %}
+			</select>
+			<div style="float:right;">
+				<span>Edit control lot no:</span>
+				<input type="checkbox" id="edit_control_lot_no_checkbox" aria-label="edit_control_lot_no_checkbox">
+			</div>
+		</div>
+		<div class="form-group" id="new_control_lot_no_container">
+			<label>New control lot no:</label>
+			<input class="form-control" id="new_control_lot_no">
+		</div>
+		<div class="form-group">
+			<label class="control-label">Level:</label>
+			<input class="form-control" id="level_ctrl_lot_edit">
+		</div>
+		<div class="form-group">
+			<label class="control-label">Expiry:</label>
+			<input class="form-control" id="expiry_ctrl_lot_edit" type="date" >
+		</div>
+		<div class="form-group">
+			<label class="control-label">Control name:</label>
+			<select id="select_control_ctrl_lot_edit" class="form-control">
+			{% for c in comp_controls %}
+			<option value="{{c.id}}">{{ c.control_name }}</option>
+			{% endfor %}
+		</select>
+		</div>
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-primary" id="save_control_lot_edit">Save</button>
+		 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="edit_qc_values_modal" tabindex="-1" role="dialog" aria-labelledby="edit_qc_values_modal_label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="edit_qc_values_modal_label">Edit QC values:</h4>
+      </div>
+      <div class="modal-body">
+		<div class="form-group">
+			<span id="qc_val_id" hidden></span>
+			<label>Machine:</label>
+			<select class="form-control" id="edit_qc_val_machine">
+				<option value=""></option>
+				{% for m in comp_machine %}
+				<option value="{{m.id}}">{{m.machine_name}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Analyte:</label>
+			<select class="form-control" id="edit_qc_val_analyte">
+				<option value=""></option>
+				{% for a in comp_analyte %}
+				<option value="{{a.id}}">{{a.analyte}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Reagent lot no:</label>
+			<select class="form-control" id="edit_qc_val_rlot">
+				<option value=""></option>
+				{% for r in comp_rlot %}
+				<option value="{{r.id}}">{{r.lot_no}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Control lot no:</label>
+			<select class="form-control" id="edit_qc_val_control_lot">
+				<option value=""></option>
+				{% for c in comp_control_lot %}
+				<option value="{{c.id}}">{{c.lot_no}}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label>Control lot mean:</label>
+			<input class="form-control" id="edit_qc_val_control_mean">
+		</div>
+		<div class="form-group">
+			<label>Control lot sd:</label>
+			<input class="form-control" id="edit_qc_val_control_sd">
+		</div>
+		
+      </div>
+      <div class="modal-footer">
+		<button type="button" class="btn btn-primary" id="save_qc_val_edit">Save</button>
+		 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+ #new_reagent_lot_no_container {
+	display: none;
+ }
+ #new_control_lot_no_container {
+	display: none;
+ }
+ #new_analyte_name_container {
+	display: none;
+ }
+ #qcvf_edit {
+	display: none;
+ }
+</style>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 <script>
+
+
+
+
 $(document).ready(function() {
+	var new_csrf_id = ''
+	$.each($('input[name=csrf_token]'), function(i, val) {
+		new_csrf_id = 'csrf_token' + i;
+		$(this).attr('id', new_csrf_id)
+	});
+	
+	$('#qcvf_analyte, #qcvf_reagent_lot, #qcvf_machine, #qcvf_control_lot, #qcvf_control_mean, #qcvf_control_sd').parent().addClass('col-md-4');
+	
+	
+	var control_name_tags = [
+		{% for control in controls %}
+			{
+				label: "{{ control.control_name}}",
+				
+			},
+		{% endfor %}
+	  ]
+	  
+	$( "#rcf_control_name" ).autocomplete({
+		  source: control_name_tags
+		});
+	
+	
 	var control_tags = [
 		{% for control in control_lots %}
 			{
@@ -110,6 +491,7 @@ $(document).ready(function() {
 			},
 		{% endfor %}
 	  ]
+	  
 	  
 	$( "#rqclf_control_lot_no" ).autocomplete({
 	  source: control_tags,
@@ -187,7 +569,7 @@ $(document).ready(function() {
 		
 	//    for updating select options   
 	
-	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for but for jquery
 	
 	$('#rrlf_machine').change(function(){
 		$('#rrlf_analyte').empty();
@@ -203,99 +585,462 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$('#qcrf_machine').change(function(){
-		$('#qcrf_analyte').empty();
+	$('#qcvf_machine').change(function(){
+		$('#qcvf_analyte').empty();
+		$('#qcvf_reagent_lot').empty();
+		$('#qcvf_control_mean').val('');
+		$('#qcvf_control_sd').val('');
+		$('#qcvf_edit').css('display', 'none');
 		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
 			company_id : {{ company.id }}, 
 			machine_id : $(this).val()
 		}, function(data){
 			$.each(data.result, function(i, new_options){
-				$('#qcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				$('#qcvf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-			/*$('#control1').empty();   --------------cannot use qcvalues only company controls
-			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-				machine_id : $('#qcrf_machine').val(), 
-				company_id : {{ company.id }}, 
-				analyte_id : $('#qcrf_analyte').val()
-			}, function(data){
-				$.each(data.result, function(i, new_options){
-					$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-				})
-				
-			});
-			$('#control2').empty();
-			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-				machine_id : $('#qcrf_machine').val(), 
-				company_id : {{ company.id }}, 
-				analyte_id :$('#qcrf_analyte').val()
-			}, function(data){
-				$.each(data.result, function(i, new_options){
-					$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-				})
-				
-			});
-			$('#control3').empty();
-			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-				machine_id : $('#qcrf_machine').val(), 
-				company_id : {{ company.id }}, 
-				analyte_id : $('#qcrf_analyte').val()
-			}, function(data){
-				$.each(data.result, function(i, new_options){
-					$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-				})
-				
-			});*/
+			
+		});
+		$('#qcvf_control_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : "0",
+			machine_id : $(this).val(), 
+			rlot_id : $('#qcvf_reagent_lot').val()
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
 		});
 		
 		return false;
 	});
 	
-	$('#qcrf_analyte').change(function(){
-		$('#qcrf_reagent_lot').empty();
+	$('#qcvf_analyte').change(function(){
+		$('#qcvf_reagent_lot').empty();
+		$('#qcvf_control_mean').val('');
+		$('#qcvf_control_sd').val('');
+		$('#qcvf_edit').css('display', 'none');
 		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $(this).val()
 		}, function(data){
 			$.each(data.result, function(i, new_options){
-				$('#qcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				$('#qcvf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
-		/*$('#control1').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-			machine_id : $('#qcrf_machine').val(), 
+		$('#qcvf_control_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
+			analyte_id : $(this).val(),
+			machine_id : $('#qcvf_machine').val(), 
+			rlot_id : "0" 
+			
 		}, function(data){
 			$.each(data.result, function(i, new_options){
-				$('#control1').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-			
 		});
-		$('#control2').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-			machine_id : $('#qcrf_machine').val(), 
-			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
-		}, function(data){
-			$.each(data.result, function(i, new_options){
-				$('#control2').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-			})
-			
-		});
-		$('#control3').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-			machine_id : $('#qcrf_machine').val(), 
-			company_id : {{ company.id }}, 
-			analyte_id : $(this).val()
-		}, function(data){
-			$.each(data.result, function(i, new_options){
-				$('#control3').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-			})
-			
-		});*/
 		return false;
 	});
 	
+	$('#qcvf_reagent_lot').change(function() {
+		$('#qcvf_control_lot').empty();
+		$('#qcvf_control_mean').val('');
+		$('#qcvf_control_sd').val('');
+		$('#qcvf_edit').css('display', 'none');
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#qcvf_analyte').val(),
+			machine_id : $('#qcvf_machine').val(), 
+			rlot_id : $(this).val() 
+			
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+		});
+		return false;
+	});
+	
+	$('#qcvf_control_lot').change(function(){
+		$.getJSON($SCRIPT_ROOT + '/show_qc_values', {
+			company_id : {{ company.id }},
+			analyte_id : $('#qcvf_analyte').val(),
+			machine_id : $('#qcvf_machine').val(),
+			rlot_id :  $('#qcvf_reagent_lot').val(),
+			control_lot_id : $(this).val()
+		}, function(data){
+			$('#qcvf_control_mean').val(data.result.mean);
+			$('#qcvf_control_sd').val(data.result.sd);
+			if (data.result.id){
+				$('#qcvf_edit').css('display', 'block');
+				$('#qcvf_edit').attr('data-qc_val_id', data.result.id);
+			}
+		});
+		return false;
+	});
+	
+		
+	<!------------ editing variables ------------------------->
+	$('.modal-content').css('margin-top', '20%');
+	
+	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_delete, #dmf_close ').css('float', 'right');
+	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit, #dmf_delete').css('margin-right', '5px');
+	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit').removeClass('btn-default').addClass('btn-warning');
+	$('#rmf_delete, #rcf_delete, #raf_delete, #rrlf_delete, #rqclf_delete, #dmf_delete').removeClass('btn-default').addClass('btn-danger');
+	
+	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit').attr('data-toggle', 'modal');
+	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_close').attr('type', 'button');
+	$('#dmf_close').attr('data-dismiss', 'modal');
+	$('input[type=submit]').removeClass('btn-default').addClass('btn btn-primary');
+	
+	$('#rmf_edit').attr('data-target', '#edit_machine_modal');
+	$('#rmf_delete').attr('data-target', '#delete_machine_modal');
+	$('#rcf_edit').attr('data-target', '#edit_control_modal');
+	$('#rcf_delete').attr('data-target', '#delete_control_modal');
+	$('#raf_edit').attr('data-target', '#edit_analyte_modal');
+	$('#raf_delete').attr('data-target', '#delete_analyte_modal');
+	$('#rrlf_edit').attr('data-target', '#edit_reagent_lot_modal');
+	$('#rrlf_delete').attr('data-target', '#delete_reagent_lot_modal');
+	$('#rqclf_edit').attr('data-target', '#edit_control_lot_modal');
+	$('#rqclf_delete').attr('data-target', '#delete_control_lot_modal');
+	//$('#qcvf_edit').attr('data-target', '#edit_qc_values_modal');
+	
+		
+	<!-----edit machine ----------------------------------------------->
+	$('#delete_machine').click(function(){
+		var	mch_id = $('#select_for_machine_del').val();
+		
+		//var url = "{{url_for('delete_qc_machine', company_name=company.company_name, m_id='')}}" + mch_id;
+		//window.location.href = url;
+	});
+	
+	$('#select_for_machine_edit').change(function() {
+		$('#new_machine_name').val($('#select_for_machine_edit option:selected').html());
+	});
+
+	$('#save_machine_edit').click(function() {
+		var	machine_id = $('#select_for_machine_edit').val();
+		var new_machine_name = $('#new_machine_name').val();
+		$.getJSON($SCRIPT_ROOT + '/edit_qc_machine', {
+			company_id : {{ company.id }}, 
+			machine_id : machine_id,
+			new_machine_name : new_machine_name,
+		}, function(data){
+			window.location.href = data.result;
+		});		
+	});
+	
+	
+	<!------ edit control ------------------------------------>
+	$('#delete_control').click(function(){
+		var	ctrl_id = $('#select_for_control_del').val();
+		var url = "{{url_for('delete_comp_control', company_name=company.company_name, c_id='')}}" + ctrl_id;
+		window.location.href = url;
+		
+	});
+	
+	$('#select_for_control_edit').change(function() {
+		$('#new_control_name').val($('#select_for_control_edit option:selected').html());
+	});
+
+	$('#save_control_edit').click(function() {
+		var	control_id = $('#select_for_control_edit').val();
+		var new_control_name = $('#new_control_name').val();
+		$.getJSON($SCRIPT_ROOT + '/edit_comp_control', {
+			company_id : {{ company.id }}, 
+			control_id : control_id,
+			new_control_name : new_control_name,
+		}, function(data){
+			window.location.href = data.result;
+		});		
+	});
+	
+	
+	<!---- edit analyte -------------------------------------------------------->
+	$('#delete_analyte').click(function(){
+		var	analyte_id = $('#select_for_analyte_edit').val();
+		var url = "{{url_for('delete_comp_analyte', company_name=company.company_name, a_id='')}}" + analyte_id;
+		window.location.href = url;
+		
+	});	
+	
+	$('#select_for_analyte_edit').change(function(){
+		$('#new_analyte_name').val($('#select_for_analyte_edit option:selected').html() );
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_variables', {
+			company_id : {{ company.id }}, 
+			analyte_id : $(this).val()
+		}, function(data){
+			$('#unit_var').val(data.result.unit);
+			$('#machine_var').val(data.result.machine);
+		});
+		return false;
+	});
+	
+	$('#edit_analyte_name_checkbox').change(function() {
+		if ($(this).is(':checked')){
+			$('#new_analyte_name_container').css('display', 'block');
+			$('#new_analyte_name').val($('#select_for_analyte_edit option:selected').html() );
+			
+		}
+		else {
+			$('#new_analyte_name_container').css('display', 'none');
+			$('#new_analyte_name').val('')
+			
+		}
+	});
+	
+	$('#save_analyte_edit').click(function(){
+		if ($('#edit_analyte_name_checkbox').is(':checked')){
+			var	analyte_id = $('#select_for_analyte_edit').val();
+			var	machine_id = $('#machine_var').val();
+			var	unit = $('#unit_var').val();
+			var new_analyte_name = $('#new_analyte_name').val();
+			$.getJSON($SCRIPT_ROOT + '/save_analyte_edit', {
+				company_id : {{ company.id }}, 
+				analyte_id : analyte_id,
+				new_analyte_name : new_analyte_name,
+				unit : unit,
+				machine_id : machine_id
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+		else {
+			var	analyte_id = $('#select_for_analyte_edit').val();
+			var	machine_id = $('#machine_var').val();
+			var	unit = $('#unit_var').val();
+			$.getJSON($SCRIPT_ROOT + '/save_analyte_edit', {
+				company_id : {{ company.id }}, 
+				analyte_id : analyte_id,
+				unit : unit,
+				machine_id : machine_id
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+		
+					
+	});
+	
+	
+	<!---- edit reagent lot ----------------------->
+	$('#delete_rlot').click(function(){
+		var	rlot_id = $('#select_rlot_for_rlot_delete').val();
+		var url = "{{url_for('delete_comp_rlot', company_name=company.company_name, r_id='')}}" + rlot_id;
+		window.location.href = url;
+		
+	});
+	
+	$('#select_rlot_for_rlot_edit').change(function() {
+		$('#new_reagent_lot_no').val($('#select_rlot_for_rlot_edit option:selected').html() );
+		$.getJSON($SCRIPT_ROOT + '/get_rlot_var', {
+			company_id : {{ company.id }}, 
+			reagent_lot : $(this).val()
+		}, function(data) {
+			$('#expiry_rlot_edit').val(moment(data.result['expiry']).format('YYYY-MM-DD'));
+			$('#select_analyte_for_rlot_edit').val(data.result['analyte']);
+		});
+	});	
+	
+	$('#edit_reagent_lot_no_checkbox').change(function() {
+		if ($(this).is(':checked')){
+			$('#new_reagent_lot_no_container').css('display', 'block');
+			$('#new_reagent_lot_no').val($('#select_rlot_for_rlot_edit option:selected').html() );
+		}
+		else {
+			$('#new_reagent_lot_no_container').css('display', 'none');
+			$('#new_reagent_lot_no').val('')
+			
+		}
+	});
+	
+	$('#save_rlot_edit').click(function(){
+		if ($('#edit_reagent_lot_no_checkbox').is(':checked')){
+			var rgt_lot_id = $( "#select_rlot_for_rlot_edit" ).val();
+			var	analyte_id = $('#select_analyte_for_rlot_edit').val();
+			var expiry = $('#expiry_rlot_edit').val();
+			var new_rlot_no = $('#new_reagent_lot_no').val();
+			$.getJSON($SCRIPT_ROOT + '/save_rlot_edit', {
+				company_id : {{ company.id }}, 
+				analyte_id : analyte_id,
+				expiry: expiry,
+				rgt_lot_id : rgt_lot_id,
+				new_rlot_no : new_rlot_no
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+		else {
+			var rgt_lot_id = $( "#select_rlot_for_rlot_edit" ).val();
+			var	analyte_id = $('#select_analyte_for_rlot_edit').val();
+			var expiry = $('#expiry_rlot_edit').val();
+			$.getJSON($SCRIPT_ROOT + '/save_rlot_edit', {
+				company_id : {{ company.id }}, 
+				analyte_id : analyte_id,
+				expiry: expiry,
+				rgt_lot_id : rgt_lot_id
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+				
+	});
+	
+	<!---- edit control lot ------------------------->
+	$('#delete_control_lot').click(function(){
+		var	ctrl_lot_id = $('#select_ctrl_lot_for_delete').val();
+		var url = "{{url_for('delete_comp_control_lot', company_name=company.company_name, ctrl_lot_id='')}}" + ctrl_lot_id;
+		window.location.href = url;
+		
+	});
+	
+	$('#select_ctrl_lot_for_edit').change(function() {
+		$('#new_control_lot_no').val($('#select_ctrl_lot_for_edit option:selected').html() );
+		$.getJSON($SCRIPT_ROOT + '/get_ctrl_lot_var', {
+			company_id : {{ company.id }}, 
+			ctrl_lot : $(this).val()
+		}, function(data) {
+			$('#expiry_ctrl_lot_edit').val(moment(data.result['expiry']).format('YYYY-MM-DD'));
+			$('#level_ctrl_lot_edit').val(data.result['level']);
+			$('#select_control_ctrl_lot_edit').val(data.result['control']);
+		});
+	});
+	
+	$('#edit_control_lot_no_checkbox').change(function() {
+		if ($(this).is(':checked')){
+			$('#new_control_lot_no_container').css('display', 'block');
+			$('#new_control_lot_no').val($('#select_ctrl_lot_for_edit option:selected').html() );
+		}
+		else {
+			$('#new_control_lot_no_container').css('display', 'none');
+			$('#new_control_lot_no').val('')
+		}
+	});
+	
+	$('#save_control_lot_edit').click(function(){
+		if ($('#edit_control_lot_no_checkbox').is(':checked')){
+			var ctrl_lot_id = $( "#select_ctrl_lot_for_edit" ).val();
+			var	control_id = $('#select_control_ctrl_lot_edit').val();
+			var expiry = $('#expiry_rlot_edit').val();
+			var level = $('#level_ctrl_lot_edit').val();
+			var new_ctrl_lot_no = $('#new_control_lot_no').val();
+			$.getJSON($SCRIPT_ROOT + '/save_ctrl_lot_edit', {
+				company_id : {{ company.id }}, 
+				ctrl_lot_id : ctrl_lot_id,
+				expiry: expiry,
+				level : level,
+				control_id : control_id,
+				new_ctrl_lot_no : new_ctrl_lot_no
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+		else {
+			var ctrl_lot_id = $( "#select_ctrl_lot_for_edit" ).val();
+			var	control_id = $('#select_control_ctrl_lot_edit').val();
+			var expiry = $('#expiry_ctrl_lot_edit').val();
+			var level = $('#level_ctrl_lot_edit').val();
+			$.getJSON($SCRIPT_ROOT + '/save_ctrl_lot_edit', {
+				company_id : {{ company.id }}, 
+				ctrl_lot_id : ctrl_lot_id,
+				expiry: expiry,
+				level : level,
+				control_id : control_id,
+			}, function(data) {
+				window.location.href = data.result;
+			});		
+			return false;
+		}
+				
+	});
+	
+	<!-- edit qc values ----------
+	$('#qcvf_edit').click(function() {
+		$('#edit_qc_values_modal').modal('show');
+		$.getJSON($SCRIPT_ROOT + '/get_qc_values_data', {
+			company_id : {{ company.id }}, 
+			qc_val_id : $(this).data('qc_val_id'),
+		}, function(data){
+			$('#edit_qc_val_machine').val(data.result.machine);
+			$('#edit_qc_val_analyte').val(data.result.analyte);
+			$('#edit_qc_val_rlot').val(data.result.reagent_lot);
+			$('#edit_qc_val_control_lot').val(data.result.control_lot);
+			$('#edit_qc_val_control_mean').val(data.result.mean);
+			$('#edit_qc_val_control_sd').val(data.result.sd);
+		});
+		return false;
+	});
+	
+	$('#save_qc_val_edit').click(function() {
+	
+	});
+	
+	
+	<!-----------------------for delete-------------------->
+	$('#sort_machine').change(function() {
+		$('#sort_analyte').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $('#sort_machine option:selected').data('machine_val')
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#sort_analyte').append($('<option></option>').attr({value: new_options[1], "data-analyte_val":new_options[0] }).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#sort_analyte').change(function() {
+		$('#sort_rlot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#sort_analyte option:selected').data('analyte_val')
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#sort_rlot').append($('<option></option>').attr({value: new_options[1], "data-rlot_val":new_options[0] }).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#sort_rlot').change(function() {
+		$('#sort_control_lot').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list_simple', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#sort_analyte option:selected').data('analyte_val'),
+			machine_id : $('#sort_machine option:selected').data('machine_val'),
+			rlot_id :  $('#sort_rlot option:selected').data('rlot_val')
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#sort_control_lot').append($('<option></option>').attr({value: new_options[1], "data-control_lot_val":new_options[0] }).text(new_options[1]) );
+			})
+		});
+		return false;
+	});
+	
+	$('#sort_control_lot').change(function() {
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#sort_analyte option:selected').data('analyte_val')
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#sort_rlot').append($('<option></option>').attr({value: new_options[1], "data-rlot_val":new_options[0] }).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	
 });
+
 </script>
 {% endblock %}

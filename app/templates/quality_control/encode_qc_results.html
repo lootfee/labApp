@@ -70,7 +70,7 @@ $(document).ready(function() {
 				$('#eqcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 			$('#eqcrf_control').empty();
-			$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+			$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 				machine_id : $('#eqcrf_machine').val(), 
 				company_id : {{ company.id }}, 
 				analyte_id : $('#eqcrf_analyte').val()
@@ -96,7 +96,7 @@ $(document).ready(function() {
 			})
 		});
 		$('#eqcrf_control').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			machine_id : $('#eqcrf_machine').val(), 
 			company_id : {{ company.id }}, 
 			analyte_id : $(this).val(),
@@ -113,7 +113,7 @@ $(document).ready(function() {
 	
 	$('#eqcrf_reagent_lot').change(function(){
 		$('#eqcrf_control').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $('#eqcrf_analyte').val(),
 			machine_id : $('#eqcrf_machine').val(), 
@@ -130,8 +130,9 @@ $(document).ready(function() {
 	
 });
 
+</script>
 
-
+<!--script>
 function corDate(unixDate){
 	var incTime = document.getElementById('includeTime');
 	var unCorDate = new Date((unixDate - (25567 + 2))*86400*1000);
@@ -180,6 +181,6 @@ function handleFile(e) {
 		}
 	reader.readAsArrayBuffer(f);
 }
-document.getElementById('my_file_input').addEventListener('change', handleFile, false);
-</script>
+document.getElementById('my_file_input').addEventListener('change', handleFile, false);-->
+</script-->
 {% endblock %}

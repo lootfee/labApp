@@ -339,6 +339,14 @@ class RegisterMachineForm(FlaskForm):
 	rmf_machine_name = StringField('Machine name', validators=[DataRequired()])
 	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
 	rmf_submit = SubmitField('Submit')
+	rmf_delete = SubmitField('Delete machine')
+	rmf_edit = SubmitField('Edit machine')
+	
+class DeleteMachineForm(FlaskForm):
+	dmf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	dmf_validate = BooleanField('Are you sure you want to delete this machine?', validators=[InputRequired()])
+	dmf_close = SubmitField('Close')
+	dmf_delete = SubmitField('Delete machine')
 	
 class RegisterAnalyteForm(FlaskForm):
 	raf_analyte = StringField('Analyte', validators=[DataRequired()], render_kw={"placeholder": "ex. GLUC3, ALB2, etc."})
@@ -346,6 +354,9 @@ class RegisterAnalyteForm(FlaskForm):
 	raf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
 	#department = SelectField('Department', coerce=int, validators=[InputRequired()])
 	raf_submit = SubmitField('Submit')
+	raf_delete = SubmitField('Delete analyte')
+	raf_edit = SubmitField('Edit analyte')
+	
 	
 class RegisterReagentLotForm(FlaskForm):
 	rrlf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
@@ -353,10 +364,14 @@ class RegisterReagentLotForm(FlaskForm):
 	rrlf_reagent_lot_no = StringField('Lot No', validators=[DataRequired()])
 	rrlf_reagent_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
 	rrlf_submit = SubmitField('Submit')
+	rrlf_delete = SubmitField('Delete reagent lot')
+	rrlf_edit = SubmitField('Edit reagent lot')
 	
 class RegisterControlForm(FlaskForm):
 	rcf_control_name = StringField('Control name', validators=[DataRequired()])
 	rcf_submit = SubmitField('Submit')
+	rcf_delete = SubmitField('Delete Control')
+	rcf_edit = SubmitField('Edit Control')
 	
 class RegisterQCLotForm(FlaskForm):
 	rqclf_control = SelectField('Control', coerce=int, validators=[InputRequired()])
@@ -364,6 +379,9 @@ class RegisterQCLotForm(FlaskForm):
 	rqclf_control_expiry = DateField('Expiry:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
 	rqclf_analyte = SelectField('Level', validators=[InputRequired()], choices=[('1', 'Level 1'), ('2', 'Level 2'), ('3', 'Level 3')])
 	rqclf_submit = SubmitField('Submit')
+	rqclf_delete = SubmitField('Delete control lot')
+	rqclf_edit = SubmitField('Edit control lot')
+
 	
 class QCResultForm(FlaskForm):
 	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
@@ -393,6 +411,18 @@ class QCResultForm(FlaskForm):
 	qcrf_submit = SubmitField('Submit')
 	
 	
+	
+class QCValuesForm(FlaskForm):
+	qcvf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
+	qcvf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
+	qcvf_reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
+	qcvf_control_lot = SelectField('Control lot', coerce=int, validators=[InputRequired()])
+	qcvf_control_mean = DecimalField('Control Mean')
+	qcvf_control_sd = DecimalField('Control SD')
+	qcvf_submit = SubmitField('Submit')
+	qcvf_edit = SubmitField('Edit QC values')
+	
+		
 class EncodeQcResultForm(FlaskForm):
 	eqcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
 	eqcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])

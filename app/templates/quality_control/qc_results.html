@@ -51,86 +51,8 @@
 					<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h4>
 				</div>
 				{% endif %}
-				{% if machine %}
-				<!--div class="col-md-3">
-					<div><h5><strong>
-						<label>Machine:</label>
-						<span>{{ machine.machine_name }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if analyte %}
-					<div><h5><strong>
-						<label>Analyte:</label>
-						<span>{{ analyte.analyte }} ({{unit[0]}})</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if reagent_lot %}
-					<div><h5><strong>
-						<label>Reagent Lot:</label>
-						<span>{{ reagent_lot.lot_no }}</span></strong></h5>
-					</div>
-					{% endif %}
-				</div>
-				<div class="col-md-3">
-					{% if qc_values1 %}
-					<div><h5><strong>
-						<label>Control 1 Lot:</label>
-						<span>{{ qc_values1.qc_lot.lot_no }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values2 %}
-					<div><h5><strong>
-						<label>Control 2 Lot:</label>
-						<span>{{ qc_values2.qc_lot.lot_no }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values3 %}
-					<div><h5><strong>
-						<label>Control 3 Lot:</label>
-						<span>{{ qc_values3.qc_lot.lot_no }}</span></strong></h5>
-					</div>
-					{% endif %}
-				</div>
-				<div class="col-md-3">
-					{% if qc_values1 %}
-					<div><h5><strong>
-						<label>Control 1 Mean:</label>
-						<span id="lvl1Mean">{{ qc_values1.control_mean }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values2 %}
-					<div><h5><strong>
-						<label>Control 2 Mean:</label>
-						<span id="lvl2Mean">{{ qc_values2.control_mean }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values3 %}
-					<div><h5><strong>
-						<label>Control 3 Mean:</label>
-						<span id="lvl3Mean">{{ qc_values3.control_mean }}</span></strong></h5>
-					</div>
-					{% endif %}
-				</div>
-				<div class="col-md-3">
-					{% if qc_values1 %}
-					<div><h5><strong>
-						<label>Control 1 SD:</label>
-						<span id="lvl1Stndev">{{ qc_values1.control_sd }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values2 %}
-					<div><h5><strong>
-						<label>Control 2 SD:</label>
-						<span id="lvl2Stndev">{{ qc_values2.control_sd }}</span></strong></h5>
-					</div>
-					{% endif %}
-					{% if qc_values3 %}
-					<div><h5><strong>
-						<label>Control 3 SD:</label>
-						<span id="lvl3Stndev">{{ qc_values3.control_sd }}</span></strong></h5>
-					</div>
-					{% endif %}
-				</div-->
+				
+				
 			</div>
 			
 		</div>
@@ -142,19 +64,7 @@
 	</div>
 </div>
 
-<!--div class="row">
-	<div class="col-md-4">
-		<br>
-		<p><strong>QC Lots</strong></p>
-		{% if qc1_lot_list %}<p>Control 1 Lot: {% for q in qc1_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-		{% if qc2_lot_list %}<p>Control 2 Lot: {% for q in qc2_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-		{% if qc3_lot_list %}<p>Control 3 Lot: {% for q in qc3_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-	</div>
-	<div class="col-md-4">
-		<br>
-		{% if rgt_lot_list %}<p><strong>Reagent Lots:</strong> {% for q in rgt_lot_list %}<span>{{ q }} </span>{% endfor %}</p>{% endif %}
-	</div>
-</div-->
+
 <div class="row">
 	<h5><strong>Run dates: {% if qc_results %}{{ moment(qc_results[0].run_date).format('LLL') }} - {{ moment(qc_results[-1].run_date).format('LLL') }}{% endif %}</strong></h5>
 </div>
@@ -328,12 +238,7 @@
 			{% endfor %}
 		</ol>
 		
-		<!--------------p
-		{% for c in comments %}
-		{% for i, j in c.items() %}
-		<p>{{ moment(i).format('LLL') }}: {{ j}}</p------------------>>
-		{% endfor %}
-		{% endfor %}
+		
 		{% endif %}
 		
 		{% if excluded %}
@@ -347,59 +252,8 @@
 	</div>
 </div>
 
-<!--div class="row">
-	<input id="calculate_meansd_btn" type="button" class="btn btn-default no_print" value="Calculate Mean-SD-CV">
-	<input id="create_chart_btn" type="button" class="btn btn-default no_print" value="Create Chart">
-</div-->
+
 <br>
-<!--div id="calc_val_container">
-	<h5><strong>Calculated Values</strong></h5>
-	<div class="row">
-		<div class="col-md-2">
-			{% if qc_res1 %}
-			<label>Control 1 Mean: </label>
-			<span id="lvl1MeanCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res2 %}
-			<label>Control 2 Mean: </label>
-			<span id="lvl2MeanCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res3 %}
-			<label>Control 3 Mean: </label>
-			<span id="lvl3MeanCalc" class="decTostring"></span>
-			{% endif %}
-		</div>
-		<div class="col-md-2">
-			{% if qc_res1 %}
-			<label>Control 1 SD: </label>
-			<span id="lvl1StndevCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res2 %}
-			<label>Control 2 SD: </label>
-			<span id="lvl2StndevCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res3 %}
-			<label>Control 3 SD: </label>
-			<span id="lvl3StndevCalc" class="decTostring"></span>
-			{% endif %}
-		</div>
-		<div class="col-md-2">
-			{% if qc_res1 %}
-			<label>Control 1 CV: </label>
-			<span id="lvl1CVCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res2 %}
-			<label>Control 2 CV: </label>
-			<span id="lvl2CVCalc" class="decTostring"></span>
-			{% endif %}
-			{% if qc_res3 %}
-			<label>Control 3 CV: </label>
-			<span id="lvl3CVCalc" class="decTostring"></span>
-			{% endif %}
-		</div>
-	</div>
-	<div><input type="checkbox" id="use_calc_values" class="no_print" checked> Use calculated values for LJ chart</div>
-</div-->
 
 
 {% if qc_res1 %}
@@ -716,18 +570,7 @@ $(document).ready(function() {
 	});
 	
 	$('#qcrf_reagent_lot').change(function(){
-		/*$('#eqcrf_control').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
-			company_id : {{ company.id }}, 
-			analyte_id : $('#eqcrf_analyte').val(),
-			machine_id : $('#eqcrf_machine').val(), 
-			rlot_id : $(this).val()
-		}, function(data){
-			$.each(data.result, function(i, new_options){
-				$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
-			})
-		});*/
-		
+				
 		$('#control1').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_control_list', {
 			company_id : {{ company.id }}, 
@@ -832,7 +675,7 @@ $(document).ready(function() {
 	}
 	
 	
-	/* ---------------------------calculate mean sd cv on pageload------------------------------------------------------------------*/
+	/* ---------------------------calculate mean sd cv on pageload------no longer used------------------------------------------------------------*/
 	//control 1
 		var sum1 = 0;
 		var totSqrd1 = 0;
@@ -1051,31 +894,14 @@ $(document).ready(function() {
 
 
 //----for lj chart
-//$("#create_chart_btn").click(function(){
 $(window).load(function() {
 	var ctx = document.getElementById('chartContainer');
-	//var gbtn = document.getElementById("use_calc_values").checked;//$("#use_calc_values").checked;
-	/*var ctrl1_mean = $("#lvl1Mean").text();
-	var ctrl2_mean = $("#lvl2Mean").text();
-	var ctrl3_mean = $("#lvl3Mean").text();
-	var ctrl1_stdv = $("#lvl1Stndev").text();
-	var ctrl2_stdv = $("#lvl2Stndev").text();
-	var ctrl3_stdv = $("#lvl3Stndev").text();*/
 	var ctrl1_mean = $("#ctrl1_lab_mean").text();
 	var ctrl2_mean = $("#ctrl2_lab_mean").text();
 	var ctrl3_mean = $("#ctrl3_lab_mean").text();
 	var ctrl1_stdv = $("#ctrl1_lab_sd").text();
 	var ctrl2_stdv = $("#ctrl2_lab_sd").text();
 	var ctrl3_stdv = $("#ctrl3_lab_sd").text();
-	
-	/*if (gbtn == true) {
-		ctrl1_mean = $("#lvl1MeanCalc").text();
-		ctrl2_mean = $("#lvl2MeanCalc").text();
-		ctrl3_mean = $("#lvl3MeanCalc").text();
-		ctrl1_stdv = $("#lvl1StndevCalc").text();
-		ctrl2_stdv = $("#lvl2StndevCalc").text();
-		ctrl3_stdv = $("#lvl3StndevCalc").text();
-	}*/
 	
 	
 	var arr1 = [];
@@ -1306,10 +1132,5 @@ $(document).ready(function() {
 	$("#lvl3CV").val(cv3);
 });
 </script>
-<!--script>
-$(window).load(function() {
-	$("#create_chart_btn").click();
-});
 
-</script-->
 {% endblock %}
