@@ -1,112 +1,124 @@
-2019-12-24 20:24:38,231 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+2020-04-22 14:16:48,622 ERROR: Exception on /labApp/quality_control [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1892]
 Traceback (most recent call last):
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1030, in __call__
+    return self.registry[key]
+KeyError: 14572
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2447, in wsgi_app
     response = self.full_dispatch_request()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
     rv = self.handle_user_exception(e)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_cors\extension.py", line 161, in wrapped_function
     return cors_after_request(app.make_response(f(*args, **kwargs)))
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
     reraise(exc_type, exc_value, tb)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 39, in reraise
     raise value
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
-    return self.view_functions[rule.endpoint](**req.view_args)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
-    return func(*args, **kwargs)
-  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
-    return render_template('inventory_management/orders.html', title='Orders', user=user, superuser=superuser, company=company, form=form, form1=form1, orders=orders, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
-    context, ctx.app)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
-    rv = template.render(context)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
-    return original_render(self, *args, **kwargs)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
-    return self.environment.handle_exception(exc_info, True)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
-    reraise(exc_type, exc_value, tb)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
-    raise value.with_traceback(tb)
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
-    {% import 'bootstrap/wtf.html' as wtf %}
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
-    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
-    {% block doc -%}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
-    {%- block html %}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
-    {% block body -%}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
-    {% block content -%}
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
-    {% block app_content %}
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
-    {% include 'inventory_management/inventory_manager_nav.html' %}
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
-    {{ nav_link('orders', 'Orders', 'orders', 'pending_order') }}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
-    rv = self._func(*arguments)
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
-    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}<span class="badge">{{ x.y(company) }}</span></a></li>
-jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
-2019-12-24 20:26:55,027 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1948, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2242, in preprocess_request
+    rv = func()
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 31, in before_request
+    if current_user.is_authenticated:
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\werkzeug\local.py", line 348, in __getattr__
+    return getattr(self._get_current_object(), name)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\werkzeug\local.py", line 307, in _get_current_object
+    return self.__local()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 26, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 335, in _get_user
+    current_app.login_manager._load_user()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\login_manager.py", line 359, in _load_user
+    return self.reload_user()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\login_manager.py", line 321, in reload_user
+    user = self.user_callback(user_id)
+  File "C:\MAMP\htdocs\labApp\app\models.py", line 337, in load_user
+    return User.query.get(int(id))
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 514, in __get__
+    return type.query_class(mapper, session=self.sa.session())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\orm\scoping.py", line 78, in __call__
+    return self.registry()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1032, in __call__
+    return self.registry.setdefault(key, self.createfunc())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\orm\session.py", line 3254, in __call__
+    return self.class_(**local_kw)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 143, in __init__
+    bind = options.pop('bind', None) or db.engine
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 877, in engine
+    return self.get_engine()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 896, in get_engine
+    return connector.get_engine()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 559, in get_engine
+    self._engine = rv = sqlalchemy.create_engine(info, **options)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\engine\__init__.py", line 479, in create_engine
+    return strategy.create(*args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\engine\strategies.py", line 87, in create
+    dbapi = dialect_cls.dbapi(**dbapi_args)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\dialects\mysql\pymysql.py", line 62, in dbapi
+    return __import__("pymysql")
+ModuleNotFoundError: No module named 'pymysql'
+2020-04-22 14:16:53,481 ERROR: Exception on /favicon.ico [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1892]
 Traceback (most recent call last):
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1030, in __call__
+    return self.registry[key]
+KeyError: 14628
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2447, in wsgi_app
     response = self.full_dispatch_request()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
     rv = self.handle_user_exception(e)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_cors\extension.py", line 161, in wrapped_function
     return cors_after_request(app.make_response(f(*args, **kwargs)))
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
     reraise(exc_type, exc_value, tb)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 39, in reraise
     raise value
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
-    return self.view_functions[rule.endpoint](**req.view_args)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
-    return func(*args, **kwargs)
-  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
-    db.session.commit()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
-    context, ctx.app)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
-    rv = template.render(context)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
-    return original_render(self, *args, **kwargs)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
-    return self.environment.handle_exception(exc_info, True)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
-    reraise(exc_type, exc_value, tb)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
-    raise value.with_traceback(tb)
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
-    {% import 'bootstrap/wtf.html' as wtf %}
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
-    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
-    {% block doc -%}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
-    {%- block html %}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
-    {% block body -%}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
-    {% block content -%}
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
-    {% block app_content %}
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
-    {% include 'inventory_management/inventory_manager_nav.html' %}
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
-    {{ nav_link('orders', 'Orders') }}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
-    rv = self._func(*arguments)
-  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
-    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
-jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
-2019-12-24 20:27:00,398 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2020-04-02 09:33:20,158 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1948, in full_dispatch_request
+    rv = self.preprocess_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2242, in preprocess_request
+    rv = func()
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 31, in before_request
+    if current_user.is_authenticated:
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\werkzeug\local.py", line 348, in __getattr__
+    return getattr(self._get_current_object(), name)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\werkzeug\local.py", line 307, in _get_current_object
+    return self.__local()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 26, in <lambda>
+    current_user = LocalProxy(lambda: _get_user())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 335, in _get_user
+    current_app.login_manager._load_user()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\login_manager.py", line 359, in _load_user
+    return self.reload_user()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\login_manager.py", line 321, in reload_user
+    user = self.user_callback(user_id)
+  File "C:\MAMP\htdocs\labApp\app\models.py", line 337, in load_user
+    return User.query.get(int(id))
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 514, in __get__
+    return type.query_class(mapper, session=self.sa.session())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\orm\scoping.py", line 78, in __call__
+    return self.registry()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\util\_collections.py", line 1032, in __call__
+    return self.registry.setdefault(key, self.createfunc())
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\orm\session.py", line 3254, in __call__
+    return self.class_(**local_kw)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 143, in __init__
+    bind = options.pop('bind', None) or db.engine
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 877, in engine
+    return self.get_engine()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 896, in get_engine
+    return connector.get_engine()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_sqlalchemy\__init__.py", line 559, in get_engine
+    self._engine = rv = sqlalchemy.create_engine(info, **options)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\engine\__init__.py", line 479, in create_engine
+    return strategy.create(*args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\engine\strategies.py", line 87, in create
+    dbapi = dialect_cls.dbapi(**dbapi_args)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\dialects\mysql\pymysql.py", line 62, in dbapi
+    return __import__("pymysql")
+ModuleNotFoundError: No module named 'pymysql'

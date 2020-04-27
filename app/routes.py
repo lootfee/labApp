@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm,  DeleteMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, QCValuesForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm, EncodeQcResultForm, ExcludeResultForm, PublishChartForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm,  DeleteMachineForm, EditMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, QCValuesForm, EditQCValuesForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm, EncodeQcResultForm, ExcludeResultForm, PublishChartForm
 from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending, QCResults
 from datetime import datetime, timedelta, time, date
 from dateutil import parser
@@ -887,6 +887,7 @@ def update_control_lot_list():
 		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " + str(c.reagent_lot.lot_no) + ")") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id, reagent_lot_id=rlot_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+	print(ctrl_lot_list)
 	return jsonify(result = ctrl_lot_list)
 	
 
@@ -1005,13 +1006,11 @@ def qc_variables(company_name):
 	comp_controls = company.control.order_by(Control.control_name.asc())
 	control_list = [(0, '')] + [(c.id, c.control_name) for c in comp_controls]
 	comp_machine = company.machine.order_by(Machine.machine_name.asc())
-	machine_list = [(0, '')] + [(m.id, m.machine_name) for m in comp_machine]
+	machine_list = [('', '')] + [(str(m.id), m.machine_name) for m in comp_machine]
 	comp_rgt_lot = company.reagent_lot.order_by(ReagentLot.expiry.desc())
 	rgt_lot_list = [(0, '')] + [(c.id, c.lot_no) for c in comp_rgt_lot]
 	
 	# register machines
-	dmf = DeleteMachineForm()
-	dmf.dmf_machine.choices = machine_list
 	form1 = RegisterMachineForm()
 	if form1.validate_on_submit():
 		machine_query = Machine.query.filter_by(machine_name=form1.rmf_machine_name.data, company_id=company.id).first()
@@ -1024,7 +1023,23 @@ def qc_variables(company_name):
 		else:
 			flash('Machine ' + machine.machine_name + ' already registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
-			
+	#delete machine
+	dmf = DeleteMachineForm()
+	dmf.dmf_machine.choices = machine_list
+	if dmf.validate_on_submit():
+		machine_for_delete = company.machine.filter_by(id=dmf.dmf_machine.data).first()
+		db.session.delete(machine)
+		db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+	#edit machine
+	emf = EditMachineForm()
+	emf.emf_machine.choices = machine_list
+	if emf.validate_on_submit():
+		machine = company.machine.filter_by(id=emf.emf_machine.data).first()
+		machine.machine_name = emf.emf_new_name.data
+		db.session.commit()
+		return redirect(url_for('qc_variables', company_name=company.company_name))
+		
 	#register analytes		
 	form2 = RegisterAnalyteForm()
 	form2.raf_machine.choices = machine_list
@@ -1032,7 +1047,7 @@ def qc_variables(company_name):
 		analyte_query = Analyte.query.filter_by(analyte=form2.raf_analyte.data, company_id=company.id).first()
 		#unit_query = Unit.query.filter_by(unit=form2.raf_unit.data).first()
 		if analyte_query is None:
-			analyte = Analyte(analyte=form2.raf_analyte.data, company_id=company.id, unit=form2.raf_unit.data)
+			analyte = Analyte(analyte=form2.raf_analyte.data, company_id=company.id, machine_id=form2.raf_machine.data, unit=form2.raf_unit.data)
 			db.session.add(analyte)
 			#company.analyte.append(analyte)
 			db.session.commit()
@@ -1116,7 +1131,7 @@ def qc_variables(company_name):
 		raw_control_lot = form5.rqclf_control_lot_no.data
 		alnum_control_lot = ''.join(e for e in raw_control_lot if e.isalnum())
 		clot_query = ControlLot.query.filter_by(lot_no=alnum_control_lot).first()
-		control = Control.query.filter_by(id=form5.rqclf_control.data).first()
+		#control = Control.query.filter_by(id=form5.rqclf_control.data).first()
 		if clot_query is None:
 			control_lot = ControlLot(lot_no=alnum_control_lot, expiry=form5.rqclf_control_expiry.data, level=form5.rqclf_analyte.data, company_id=company.id, control_id=form5.rqclf_control.data)
 			db.session.add(control_lot)
@@ -1150,7 +1165,7 @@ def qc_variables(company_name):
 	level3_data = False'''
 	#Control 1 2 3 are not control levels and should not be treated as such, only the number of controls that you want to encode. Do not set it as contol levels
 	if form6.qcvf_submit.data:
-		if form6.qcrf_reagent_lot.data:
+		if form6.qcvf_reagent_lot.data:
 			values = QCValues(control_lot=form6.qcvf_control_lot.data, control_mean=form6.qcvf_control_mean.data, control_sd=form6.qcvf_control_sd.data, machine_id=form6.qcvf_machine.data, analyte_id=form6.qcvf_analyte.data, reagent_lot_id=form6.qcvf_reagent_lot.data, company_id=company.id)
 		else:
 			values = QCValues(control_lot=form6.qcvf_control_lot.data, control_mean=form6.qcvf_control_mean.data, control_sd=form6.qcvf_control_sd.data,  machine_id=form6.qcvf_machine.data, analyte_id=form6.qcvf_analyte.data, company_id=company.id)
@@ -1198,9 +1213,24 @@ def qc_variables(company_name):
 			db.session.add(values)
 			db.session.commit()
 			return redirect(url_for('qc_variables', company_name=company.company_name))'''
-			
+	eqcv_form = EditQCValuesForm()
+	eqcv_form.eqcvf_analyte.choices = analyte_list
+	eqcv_form.eqcvf_reagent_lot.choices = rgt_lot_list
+	eqcv_form.eqcvf_machine.choices = machine_list
+	eqcv_form.eqcvf_control_lot.choices = ctrl_lot_list
+	if eqcv_form.eqcvf_save.data and eqcv_form.validate_on_submit():
+		qc_val = company.qc_values.filter_by(id=eqcv_form.eqcvf_qc_id.data).first()
+		qc_val.control_mean = eqcv_form.eqcvf_control_mean.data
+		qc_val.control_sd = eqcv_form.eqcvf_control_sd.data
+		qc_val.machine_id = eqcv_form.eqcvf_machine.data
+		qc_val.analyte_id = eqcv_form.eqcvf_analyte.data
+		qc_val.reagent_lot_id = eqcv_form.eqcvf_reagent_lot.data
+		qc_val.control_lot = eqcv_form.eqcvf_control_lot.data
+		db.session.commit()
+		flash('Edited QC Values have been saved.')
+		return redirect(url_for('qc_variables', company_name=company.company_name))
 	#company_analyte_variable = CompanyAnalyteVariables.query.filter_by(company_id=company.id).all()
-	return render_template('quality_control/qc_variables.html', title='Variables', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form1=form1, form2=form2, form3=form3, form4=form4, form5=form5, form6=form6, dmf=dmf, controls=controls, control_lots=control_lots, reagent_lots=reagent_lots, machines=machines, analytes=analytes, units=units, comp_machine=comp_machine, comp_controls=comp_controls, comp_analyte=comp_analyte, comp_rgt_lot=comp_rgt_lot, comp_control_lot=comp_control_lot, comp_qc_values=comp_qc_values)
+	return render_template('quality_control/qc_variables.html', title='Variables', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form1=form1, form2=form2, form3=form3, form4=form4, form5=form5, form6=form6, dmf=dmf, emf=emf, eqcv_form=eqcv_form, controls=controls, control_lots=control_lots, reagent_lots=reagent_lots, machines=machines, analytes=analytes, units=units, comp_machine=comp_machine, comp_controls=comp_controls, comp_analyte=comp_analyte, comp_rgt_lot=comp_rgt_lot, comp_control_lot=comp_control_lot, comp_qc_values=comp_qc_values)
 	
 	
 @app.route ('/<company_name>/delete_qc_machine/<string:m_id>', methods=['GET', 'POST'])

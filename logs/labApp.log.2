@@ -1,6 +1,4 @@
-2019-12-24 19:22:28,463 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:24:44,027 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:24:48,941 ERROR: Exception on /Proficiency Healthcare Diagnostics LLC (Abu Dhabi)/inventory_management/purchases [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+2019-12-24 19:51:19,526 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
 Traceback (most recent call last):
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
     response = self.full_dispatch_request()
@@ -18,76 +16,94 @@ Traceback (most recent call last):
     return self.view_functions[rule.endpoint](**req.view_args)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
     return func(*args, **kwargs)
-  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1681, in purchases
-    return render_template('inventory_management/purchases.html', title='Purchases', user=user, superuser=superuser, company=company, purchases=purchases, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 134, in render_template
-    return _render(ctx.app.jinja_env.get_or_select_template(template_name_or_list),
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 869, in get_or_select_template
-    return self.get_template(template_name_or_list, parent, globals)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 830, in get_template
-    return self._load_template(name, self.make_globals(globals))
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 804, in _load_template
-    template = self.loader.load(self, name, globals)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\loaders.py", line 125, in load
-    code = environment.compile(source, name, filename)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 591, in compile
-    self.handle_exception(exc_info, source_hint=source_hint)
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
+    return render_template('inventory_management/orders.html', title='Orders', user=user, superuser=superuser, company=company, form=form, form1=form1, orders=orders, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
+    context, ctx.app)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
+    rv = template.render(context)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
     reraise(exc_type, exc_value, tb)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
     raise value.with_traceback(tb)
-  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\purchases.html", line 50, in template
-    {% endfor %}
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 497, in _parse
-    return Parser(self, source, name, encode_filename(filename)).parse()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 901, in parse
-    result = nodes.Template(self.subparse(), lineno=1)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 883, in subparse
-    rv = self.parse_statement()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 130, in parse_statement
-    return getattr(self, 'parse_' + self.stream.current.value)()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 268, in parse_block
-    node.body = self.parse_statements(('name:endblock',), drop_needle=True)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 165, in parse_statements
-    result = self.subparse(end_tokens)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 883, in subparse
-    rv = self.parse_statement()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 130, in parse_statement
-    return getattr(self, 'parse_' + self.stream.current.value)()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 212, in parse_if
-    node.body = self.parse_statements(('name:elif', 'name:else',
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 165, in parse_statements
-    result = self.subparse(end_tokens)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 883, in subparse
-    rv = self.parse_statement()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 130, in parse_statement
-    return getattr(self, 'parse_' + self.stream.current.value)()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 199, in parse_for
-    body = self.parse_statements(('name:endfor', 'name:else'))
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 165, in parse_statements
-    result = self.subparse(end_tokens)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 883, in subparse
-    rv = self.parse_statement()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 130, in parse_statement
-    return getattr(self, 'parse_' + self.stream.current.value)()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 223, in parse_if
-    drop_needle=True)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 165, in parse_statements
-    result = self.subparse(end_tokens)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 883, in subparse
-    rv = self.parse_statement()
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 144, in parse_statement
-    self.fail_unknown_tag(token.value, token.lineno)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 97, in fail_unknown_tag
-    return self._fail_ut_eof(name, self._end_token_stack, lineno)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 90, in _fail_ut_eof
-    self.fail(' '.join(message), lineno)
-  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\parser.py", line 59, in fail
-    raise exc(msg, lineno, self.name, self.filename)
-jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'endfor'. You probably made a nesting mistake. Jinja is expecting this tag, but currently looking for 'endif'. The innermost block that needs to be closed is 'if'.
-2019-12-24 19:25:41,166 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:26:10,658 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:28:28,613 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:29:59,357 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:31:23,872 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 19:51:14,116 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
+    {% import 'bootstrap/wtf.html' as wtf %}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
+    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
+    {% block doc -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
+    {%- block html %}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
+    {% block body -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
+    {% block content -%}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
+    {% block app_content %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
+    {% include 'inventory_management/inventory_manager_nav.html' %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
+    {{ nav_link('orders', 'Orders', 'orders.pending_order()') }}
+TypeError: macro 'nav_link' takes not more than 2 argument(s)
+2019-12-24 20:07:14,224 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+Traceback (most recent call last):
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_cors\extension.py", line 161, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\_compat.py", line 35, in reraise
+    raise value
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
+    return func(*args, **kwargs)
+  File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
+    return render_template('inventory_management/orders.html', title='Orders', user=user, superuser=superuser, company=company, form=form, form1=form1, orders=orders, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
+    context, ctx.app)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
+    rv = template.render(context)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\asyncsupport.py", line 76, in render
+    return original_render(self, *args, **kwargs)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 1008, in render
+    return self.environment.handle_exception(exc_info, True)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\environment.py", line 780, in handle_exception
+    reraise(exc_type, exc_value, tb)
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\_compat.py", line 37, in reraise
+    raise value.with_traceback(tb)
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 2, in top-level template code
+    {% import 'bootstrap/wtf.html' as wtf %}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 10, in top-level template code
+    <li><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 1, in top-level template code
+    {% block doc -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 4, in block "doc"
+    {%- block html %}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 20, in block "html"
+    {% block body -%}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_bootstrap\templates\bootstrap\base.html", line 23, in block "body"
+    {% block content -%}
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 72, in block "content"
+    {% block app_content %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
+    {% include 'inventory_management/inventory_manager_nav.html' %}
+  File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
+    {{ nav_link('orders', 'Orders', 'orders.pending_order()') }}
+TypeError: macro 'nav_link' takes not more than 2 argument(s)
+2019-12-24 20:07:21,251 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:16:13,241 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:18:19,228 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:18:48,365 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:20:45,981 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:21:15,250 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2019-12-24 20:24:33,435 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]

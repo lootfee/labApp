@@ -1,4 +1,4 @@
-2019-12-24 19:51:19,526 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+2019-12-24 20:24:38,231 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
 Traceback (most recent call last):
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
     response = self.full_dispatch_request()
@@ -47,9 +47,13 @@ Traceback (most recent call last):
   File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
     {% include 'inventory_management/inventory_manager_nav.html' %}
   File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
-    {{ nav_link('orders', 'Orders', 'orders.pending_order()') }}
-TypeError: macro 'nav_link' takes not more than 2 argument(s)
-2019-12-24 20:07:14,224 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
+    {{ nav_link('orders', 'Orders', 'orders', 'pending_order') }}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
+    rv = self._func(*arguments)
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
+    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}<span class="badge">{{ x.y(company) }}</span></a></li>
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
+2019-12-24 20:26:55,027 ERROR: Exception on /soss/inventory_management/orders [GET] [in c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py:1761]
 Traceback (most recent call last):
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\app.py", line 2292, in wsgi_app
     response = self.full_dispatch_request()
@@ -68,7 +72,7 @@ Traceback (most recent call last):
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask_login\utils.py", line 261, in decorated_view
     return func(*args, **kwargs)
   File "C:\MAMP\htdocs\labApp\app\routes.py", line 1569, in orders
-    return render_template('inventory_management/orders.html', title='Orders', user=user, superuser=superuser, company=company, form=form, form1=form1, orders=orders, is_super_admin=is_super_admin, is_inv_admin=is_inv_admin, is_inv_supervisor=is_inv_supervisor, purchases=purchases)
+    db.session.commit()
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 135, in render_template
     context, ctx.app)
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\flask\templating.py", line 117, in _render
@@ -98,12 +102,14 @@ Traceback (most recent call last):
   File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\orders.html", line 5, in block "app_content"
     {% include 'inventory_management/inventory_manager_nav.html' %}
   File "C:\MAMP\htdocs\labApp\app\templates\inventory_management\inventory_manager_nav.html", line 6, in top-level template code
-    {{ nav_link('orders', 'Orders', 'orders.pending_order()') }}
-TypeError: macro 'nav_link' takes not more than 2 argument(s)
-2019-12-24 20:07:21,251 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:16:13,241 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:18:19,228 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:18:48,365 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:20:45,981 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:21:15,250 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
-2019-12-24 20:24:33,435 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+    {{ nav_link('orders', 'Orders') }}
+  File "c:\mamp\htdocs\labapp\venv\lib\site-packages\jinja2\runtime.py", line 579, in _invoke
+    rv = self._func(*arguments)
+  File "C:\MAMP\htdocs\labApp\app\templates\company_base.html", line 8, in template
+    <li class="active"><a href="{{ url_for(endpoint, company_name=company.company_name) }}">{{name}}</a></li>
+jinja2.exceptions.UndefinedError: 'str object' has no attribute 'y'
+2019-12-24 20:27:00,398 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2020-04-02 09:33:20,158 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2020-04-22 14:15:30,712 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2020-04-22 14:16:08,871 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]
+2020-04-22 14:16:37,198 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]

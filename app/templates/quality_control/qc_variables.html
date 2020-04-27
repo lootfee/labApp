@@ -50,15 +50,16 @@
         <h4 class="modal-title" id="delete_machine_modal_label">Select machine to be deleted:</h4>
       </div>
       <div class="modal-body">
-		<select id="select_for_machine_del" class="form-control">
+		{{ wtf.quick_form(dmf) }}
+		<!--select id="select_for_machine_del" class="form-control">
 			{% for m in comp_machine %}
 			<option value="{{m.id}}">{{ m.machine_name}}</option>
 			{% endfor %}
-		</select>
+		</select-->
       </div>
       <div class="modal-footer">
-		<button type="button" class="btn btn-danger" id="delete_machine">Delete</button>
-	   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		<!--button type="button" class="btn btn-danger" id="delete_machine">Delete</button>
+	   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button-->
       </div>
     </div>
   </div>
@@ -72,7 +73,7 @@
         <h4 class="modal-title" id="edit_machine_modal_label">Edit machine name:</h4>
       </div>
       <div class="modal-body">
-		<div class="form-group">
+		<!--div class="form-group">
 			<select id="select_for_machine_edit" class="form-control">
 				<option value=""></option>
 				{% for m in comp_machine %}
@@ -83,12 +84,12 @@
 		<div class="form-group">
 			<label>New machine name:</label>
 			<input class="form-control" id="new_machine_name">
-		</div>
-		
+		</div-->
+		{{ wtf.quick_form(emf)}}
       </div>
       <div class="modal-footer">
-		 <button type="button" class="btn btn-primary" id="save_machine_edit">Save</button>
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		<!--button type="button" class="btn btn-primary" id="save_machine_edit">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button-->
       </div>
     </div>
   </div>
@@ -377,7 +378,8 @@
         <h4 class="modal-title" id="edit_qc_values_modal_label">Edit QC values:</h4>
       </div>
       <div class="modal-body">
-		<div class="form-group">
+		{{ wtf.quick_form(eqcv_form)}}
+		<!--div class="form-group">
 			<span id="qc_val_id" hidden></span>
 			<label>Machine:</label>
 			<select class="form-control" id="edit_qc_val_machine">
@@ -400,7 +402,7 @@
 			<label>Reagent lot no:</label>
 			<select class="form-control" id="edit_qc_val_rlot">
 				<option value=""></option>
-				{% for r in comp_rlot %}
+				{% for r in comp_rgt_lot %}
 				<option value="{{r.id}}">{{r.lot_no}}</option>
 				{% endfor %}
 			</select>
@@ -423,10 +425,10 @@
 			<input class="form-control" id="edit_qc_val_control_sd">
 		</div>
 		
-      </div>
+      </div-->
       <div class="modal-footer">
-		<button type="button" class="btn btn-primary" id="save_qc_val_edit">Save</button>
-		 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		<!--button type="button" class="btn btn-primary" id="save_qc_val_edit">Save</button>
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button-->
       </div>
     </div>
   </div>
@@ -600,7 +602,7 @@ $(document).ready(function() {
 			})
 			
 		});
-		$('#qcvf_control_lot').empty();
+		/*$('#qcvf_control_lot').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : "0",
@@ -610,7 +612,7 @@ $(document).ready(function() {
 			$.each(data.result, function(i, new_options){
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-		});
+		});*/
 		
 		return false;
 	});
@@ -628,7 +630,7 @@ $(document).ready(function() {
 				$('#qcvf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
-		$('#qcvf_control_lot').empty();
+		/*$('#qcvf_control_lot').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $(this).val(),
@@ -639,11 +641,11 @@ $(document).ready(function() {
 			$.each(data.result, function(i, new_options){
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-		});
+		});*/
 		return false;
 	});
 	
-	$('#qcvf_reagent_lot').change(function() {
+	/*$('#qcvf_reagent_lot').change(function() {
 		$('#qcvf_control_lot').empty();
 		$('#qcvf_control_mean').val('');
 		$('#qcvf_control_sd').val('');
@@ -655,12 +657,13 @@ $(document).ready(function() {
 			rlot_id : $(this).val() 
 			
 		}, function(data){
+			console.log(data.result)
 			$.each(data.result, function(i, new_options){
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
 		return false;
-	});
+	});*/
 	
 	$('#qcvf_control_lot').change(function(){
 		$.getJSON($SCRIPT_ROOT + '/show_qc_values', {
@@ -684,14 +687,14 @@ $(document).ready(function() {
 	<!------------ editing variables ------------------------->
 	$('.modal-content').css('margin-top', '20%');
 	
-	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_delete, #dmf_close ').css('float', 'right');
-	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit, #dmf_delete').css('margin-right', '5px');
-	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit').removeClass('btn-default').addClass('btn-warning');
+	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_delete, #dmf_close, #emf_close, #emf_save, #eqcvf_close, #eqcvf_save ').css('float', 'right');
+	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit, #dmf_delete, #emf_save, #eqcvf_save').css('margin-right', '5px');
+	$('#rmf_edit, #rcf_edit, #raf_edit, #rrlf_edit, #rqclf_edit, #qcvf_edit, #emf_edit').removeClass('btn-default').addClass('btn-warning');
 	$('#rmf_delete, #rcf_delete, #raf_delete, #rrlf_delete, #rqclf_delete, #dmf_delete').removeClass('btn-default').addClass('btn-danger');
 	
 	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit').attr('data-toggle', 'modal');
-	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_close').attr('type', 'button');
-	$('#dmf_close').attr('data-dismiss', 'modal');
+	$('#rmf_edit, #rmf_delete, #rcf_edit, #rcf_delete, #raf_edit, #raf_delete, #rrlf_edit, #rrlf_delete, #rqclf_delete, #rqclf_edit, #qcvf_edit, #dmf_close, #emf_close, #eqcvf_close').attr('type', 'button');
+	$('#dmf_close, #emf_close, #eqcvf_close').attr('data-dismiss', 'modal');
 	$('input[type=submit]').removeClass('btn-default').addClass('btn btn-primary');
 	
 	$('#rmf_edit').attr('data-target', '#edit_machine_modal');
@@ -961,7 +964,7 @@ $(document).ready(function() {
 	});
 	
 	<!-- edit qc values ----------
-	$('#qcvf_edit').click(function() {
+	/*$('#qcvf_edit').click(function() {
 		$('#edit_qc_values_modal').modal('show');
 		$.getJSON($SCRIPT_ROOT + '/get_qc_values_data', {
 			company_id : {{ company.id }}, 
@@ -975,11 +978,24 @@ $(document).ready(function() {
 			$('#edit_qc_val_control_sd').val(data.result.sd);
 		});
 		return false;
+	});*/
+	$('#qcvf_edit').click(function() {
+		$('#edit_qc_values_modal').modal('show');
+		$('#eqcvf_qc_id').val($(this).data('qc_val_id'));
+		$.getJSON($SCRIPT_ROOT + '/get_qc_values_data', {
+			company_id : {{ company.id }}, 
+			qc_val_id : $(this).data('qc_val_id'),
+		}, function(data){
+			$('#eqcvf_machine').val(data.result.machine);
+			$('#eqcvf_analyte').val(data.result.analyte);
+			$('#eqcvf_reagent_lot').val(data.result.reagent_lot);
+			$('#eqcvf_control_lot').val(data.result.control_lot);
+			$('#eqcvf_control_mean').val(data.result.mean);
+			$('#eqcvf_control_sd').val(data.result.sd);
+		});
+		return false;
 	});
 	
-	$('#save_qc_val_edit').click(function() {
-	
-	});
 	
 	
 	<!-----------------------for delete-------------------->
