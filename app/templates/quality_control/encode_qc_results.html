@@ -25,8 +25,8 @@
 			{{ form.eqcrf_reagent_lot (class_="form-control")}}
 		</div>
 		<div class="col-md-4 col-sm-6 col-xs-6">
-			{{ form.eqcrf_control.label (class_="control-label")}}
-			{{ form.eqcrf_control (class_="form-control")}}
+			{{ form.eqcrf_control_lot.label (class_="control-label")}}
+			{{ form.eqcrf_control_lot (class_="form-control")}}
 		</div>
 		<div class="col-md-4 col-sm-6 col-xs-6">
 		</div>
@@ -132,7 +132,7 @@ $(document).ready(function() {
 
 </script>
 
-<!--script>
+<script>
 function corDate(unixDate){
 	var incTime = document.getElementById('includeTime');
 	var unCorDate = new Date((unixDate - (25567 + 2))*86400*1000);
@@ -173,7 +173,7 @@ function handleFile(e) {
 			var rowHeader = "<input class='col-md-2' value='Date'><input class='col-md-1 ' value='QC Result'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='QC Result'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='QC Result'><input class='col-md-2 ' value='Date'><input class='col-md-1 ' value='QC Result'>";
 			$("#my_file_output").append(rowHeader);
 			$.each(data, function(indexR, valueR){
-				var rows = "<input class='col-md-2 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_data_lvl1'" + "value='" + data[indexR][1] + "'>" ;
+				var rows = "<input class='col-md-2 cDate' name='cDate'" + "value='" + corDate(data[indexR][0]) + "'>" + "<input class='col-md-1 qcImportData1 ' name='qc_results'" + "value='" + data[indexR][1] + "'>" ;
 						
 				$("#my_file_output").append(rows);
 			});
@@ -181,6 +181,6 @@ function handleFile(e) {
 		}
 	reader.readAsArrayBuffer(f);
 }
-document.getElementById('my_file_input').addEventListener('change', handleFile, false);-->
-</script-->
+document.getElementById('my_file_input').addEventListener('change', handleFile, false);
+</script>
 {% endblock %}

@@ -122,3 +122,4 @@ Traceback (most recent call last):
   File "c:\mamp\htdocs\labapp\venv\lib\site-packages\sqlalchemy\dialects\mysql\pymysql.py", line 62, in dbapi
     return __import__("pymysql")
 ModuleNotFoundError: No module named 'pymysql'
+2020-04-29 12:31:19,016 INFO: labApp startup [in C:\MAMP\htdocs\labApp\app\__init__.py:58]

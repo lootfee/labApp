@@ -392,30 +392,13 @@ class RegisterQCLotForm(FlaskForm):
 class QCResultForm(FlaskForm):
 	start_date = DateField('From:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
 	end_date = DateField('To:', validators=[DataRequired()], format='%Y-%m-%d', render_kw={"type": "date"})
-	#start_date = DateField('From:', format='%Y-%m-%d', render_kw={"type": "date"})
-	#end_date = DateField('To:', format='%Y-%m-%d', render_kw={"type": "date"})
 	qcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
-	#qcrf_analyte = SelectField('Analyte', coerce=int, validators=[DataRequired()])
-	#qcrf_unit = SelectField('Unit', coerce=int, validators=[InputRequired()])
 	qcrf_reagent_lot = SelectField('Reagent Lot', coerce=int, validators=[InputRequired()])
 	qcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
-	#qcrf_machine = SelectField('Machine', coerce=int, validators=[DataRequired()])
 	control1 = SelectField('Control 1', coerce=int, validators=[InputRequired()])
-	control1_mean = DecimalField('Control 1 Mean')
-	control1_sd = DecimalField('Control 1 SD')
 	control2 = SelectField('Control 2', coerce=int, validators=[InputRequired()])
-	control2_mean = DecimalField('Control 2 Mean')
-	control2_sd = DecimalField('Control 2 SD')
 	control3 = SelectField('Control 3', coerce=int, validators=[InputRequired()])
-	control3_mean = DecimalField('Control 3 Mean')
-	control3_sd = DecimalField('Control 3 SD')
-	run_date = DateField('Date:', validators=[DataRequired()], format='%Y-%m-%d')
-	qc_data_lvl1 = DecimalField('Level 1')
-	qc_data_lvl2 = DecimalField('Level 2')
-	qc_data_lvl3 = DecimalField('Level 3')
-	qcrf_search = SubmitField('Search')
 	qcrf_submit = SubmitField('Submit')
-	
 	
 	
 class QCValuesForm(FlaskForm):
@@ -442,12 +425,15 @@ class EditQCValuesForm(FlaskForm):
 	
 		
 class EncodeQcResultForm(FlaskForm):
+	eqcrf_qc_result_id = HiddenField('QC Res ID', validators=[DataRequired()])
 	eqcrf_machine = SelectField('Machine', coerce=int, validators=[InputRequired()])
 	eqcrf_analyte = SelectField('Analyte', coerce=int, validators=[InputRequired()])
 	eqcrf_reagent_lot = SelectField('Reagent Lot (Optional)', coerce=int, validators=[InputRequired()])
-	eqcrf_control = SelectField('Control Lot', coerce=int, validators=[InputRequired()])
-	run_date = DateField('Date:', validators=[DataRequired()], format='%Y-%m-%d')
-	qc_data_lvl1 = DecimalField('Control Run', validators=[DataRequired()])
+	eqcrf_control_lot = SelectField('Control Lot', coerce=int, validators=[InputRequired()])
+	run_date = StringField('Date:', validators=[DataRequired()])
+	qc_results = DecimalField('Control Run', validators=[DataRequired()])
+	eqcrf_validate_delete = BooleanField('Delete this control result.')
+	eqcrf_delete = SubmitField('Delete')
 	eqcrf_submit = SubmitField('Submit')
 	
 	

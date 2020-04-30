@@ -990,3 +990,5 @@ class QCResults(db.Model):
 	reagent_lot_id = db.Column(db.Integer, db.ForeignKey('reagent_lot.id'))
 	company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 	unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'))
+	
+	company = db.relationship('Company', backref=db.backref('qc_results', lazy='dynamic'))

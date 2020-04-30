@@ -1,0 +1,258 @@
+{% extends "company_base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+{% include 'quality_control/qc_nav.html' %}
+<hr class="inventory_hr">
+<div class="row">
+	<div class="col-md-12">
+		<div class="col-md-3">
+			<label>Filter by: Machine</label>
+			<select id="machine_select" class="form-control">
+				<option value=""></option>
+				{% for m in comp_machine %}
+				<option value="{{ m.machine_name }}" data-machine_id="{{ m.id }}">{{ m.machine_name }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="col-md-3">
+			<label>Filter by: Analyte</label>
+			<select id="analyte_select" class="form-control">
+				<option value=""></option>
+				{% for a in comp_analyte %}
+				<option value="{{ a.analyte }}" data-analyte_id="{{ a.id }}">{{ a.analyte }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="col-md-3">
+			<label>Filter by: Reagent lot</label>
+			<select id="rgt_lot_select" class="form-control">
+				<option value=""></option>
+				{% for r in comp_rgt_lot %}
+				<option value="{{ r.lot_no }}" data-rgt_lot_id="{{ r.id }}">{{ r.lot_no }} - {{ r.expiry }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="col-md-3">
+			<label>Filter by: Control lot</label>
+			<select id="ctrl_lot_select" class="form-control">
+				<option value=""></option>
+				{% for c in comp_control_lot %}
+				<option value="{{ c.lot_no }}" data-ctrl_lot_id="{{ c.id }}">{{ c.lot_no }} - {{ c.expiry }}</option>
+				{% endfor %}
+			</select>
+		</div>
+	</div>
+</div>
+
+<br>
+<div class="row">
+	<div class="col-md-12">
+		<table class="table table-bordered table-hover" id="edit_qc_results_table">
+			<thead>
+				<tr>
+					<th>Run date</th>
+					<th>Result</th>
+					<th>Machine</th>
+					<th>Analyte</th>
+					<th>Rgt Lot</th>
+					<th>QC Lot</th>
+					<th class="col-md-1">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for qc in comp_qc_results %}
+				<tr class="qc_results_data_row">
+					<td>{{ qc.run_date }}</td>
+					<td>{{ qc.qc_result }}</td>
+					<td>{{ qc.machine.machine_name }}</td>
+					<td>{{ qc.analyte.analyte }}</td>
+					<td>{{ qc.reagent_lot.lot_no }} - {{ qc.reagent_lot.expiry }}</td>
+					<td>{{ qc.control_lot.lot_no }} - {{ qc.control_lot.expiry }}</td>
+					<td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="{{ qc.id }}" data-run-date="{{ qc.run_date }}" data-qc-result="{{ qc.qc_result }}" data-machine="{{ qc.machine.id }}" data-analyte="{{ qc.analyte.id }}" data-reagent-lot="{{ qc.reagent_lot.id }}" data-control-lot="{{ qc.control_lot.id }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="modal fade" id="edit_qc_results_modal" tabindex="-1" role="dialog" aria-labelledby="edit_qc_results_modal_label">
+	  <div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="edit_qc_results_modal_label">Edit/Delete QC results:</h4>
+			</div>
+			<div class="modal-body">
+				{{ wtf.quick_form(form) }}
+			</div>
+	  </div>
+	</div>
+</div>
+
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<style>
+#eqcrf_delete {
+	display: none;
+}
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+
+$(document).ready(function() {
+	$('select#machine_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
+	$('select#analyte_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
+	$('select#rgt_lot_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
+	$('select#ctrl_lot_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
+
+	$('#eqcrf_submit').removeClass('btn-default').addClass('btn-primary');
+	$('#eqcrf_delete').removeClass('btn-default').addClass('btn-danger');
+	
+	/*if ($('#eqcrf_validate').is('checked' == 'true') ){
+		$('#eqcrf_delete').css('display', 'inline-block');
+	}*/
+	$('#eqcrf_validate_delete').change(function() {
+		if ($(this).is(':checked')) {
+			$('#eqcrf_delete').css('display', 'inline-block');
+			$('#eqcrf_submit').css('display', 'none');
+			$('#eqcrf_qc_result_id').attr('readonly', 'true');
+			$('#eqcrf_machine').attr('readonly', 'true');
+			$('#eqcrf_analyte').attr('readonly', 'true');
+			$('#eqcrf_reagent_lot').attr('readonly', 'true');
+			$('#eqcrf_control_lot').attr('readonly', 'true');
+			$('#run_date').attr('readonly', 'true');
+			$('#qc_results').attr('readonly', 'true');
+			}
+		else {
+			$('#eqcrf_delete').css('display', 'none');
+			$('#eqcrf_submit').css('display', 'inline-block');
+		}
+	});
+	
+	if (sessionStorage.length > 0 ){
+		var machine = sessionStorage.getItem("machine");
+		var analyte = sessionStorage.getItem("analyte");
+		var rgt_lot = sessionStorage.getItem("rgt_lot");
+		var ctrl_lot = sessionStorage.getItem("ctrl_lot");
+		$('#machine_select').val(machine);
+		$('#analyte_select').val(analyte);
+		$('#rgt_lot_select').val(rgt_lot);
+		$('#ctrl_lot_select').val(ctrl_lot);
+	}
+	
+	$('#edit_qc_results_modal').on('show.bs.modal', function (event) {
+		var button = $(event.relatedTarget)
+		var result_id = button.data('result-id')
+		var run_date = button.data('run-date')
+		var qc_result = button.data('qc-result')
+		var machine_id = button.data('machine')
+		var analyte_id = button.data('analyte')	
+		var rgt_lot_id = button.data('reagent-lot')
+		var ctrl_lot_id = button.data('control-lot')
+		
+		$('#eqcrf_qc_result_id').val(result_id);
+		$('#eqcrf_machine').val(machine_id);
+		$('#eqcrf_analyte').val(analyte_id);
+		$('#eqcrf_reagent_lot').val(rgt_lot_id);
+		$('#eqcrf_control_lot').val(ctrl_lot_id);
+		$('#run_date').val(run_date);
+		$('#qc_results').val(qc_result);
+	});
+	
+		
+	
+	$('#eqcrf_submit').click(function() {
+		var machine = $('#machine_select').val();
+		var analyte = $('#analyte_select').val();
+		var rgt_lot = $('#rgt_lot_select').val();
+		var ctrl_lot = $('#ctrl_lot_select').val();
+		sessionStorage.setItem("machine", machine);
+		sessionStorage.setItem("analyte", analyte);
+		sessionStorage.setItem("rgt_lot", rgt_lot);
+		sessionStorage.setItem("ctrl_lot", ctrl_lot);
+	});
+	
+	
+	//    for updating select options   
+	
+	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
+	
+		
+	$('#machine_select').change(function(){
+		$('#analyte_select').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
+			company_id : {{ company.id }}, 
+			machine_id : $('#machine_select option:selected').data('machine_id'),
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#analyte_select').append($('<option></option>').attr({value: new_options[1], "data-analyte_id":new_options[0]}).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#analyte_select').change(function(){
+		$('#rgt_lot_select').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#rgt_lot_select').append($('<option></option>').attr({value: new_options[1], "data-rgt_lot_id":new_options[0]}).text(new_options[1]) );
+			})
+		});
+		$('#ctrl_lot_select').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list_simple', {
+			machine_id : $('#machine_select option:selected').data('machine_id'),
+			company_id : {{ company.id }}, 
+			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
+			rlot_id : "0"
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#ctrl_lot_select').append($('<option></option>').attr({value: new_options[1], "data-ctrl_lot_id":new_options[0]}).text(new_options[1]) );
+			})
+			
+		});
+		return false;
+	});
+	
+	$('#rgt_lot_select').change(function(){
+		$('#ctrl_lot_select').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list_simple', {
+			machine_id : $('#machine_select option:selected').data('machine_id'),
+			company_id : {{ company.id }}, 
+			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
+			rlot_id : $('#rgt_lot_select option:selected').data('rgt_lot_id'),
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#ctrl_lot_select').append($('<option></option>').attr({value: new_options[1], "data-ctrl_lot_id":new_options[0]}).text(new_options[1]) );
+			})
+		});
+		return false;
+	});
+	
+	$('#ctrl_lot_select').change(function() {
+		$('#rgt_lot_select').empty();
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#rgt_lot_select').append($('<option></option>').attr({value: new_options[1], "data-rgt_lot_id":new_options[0]}).text(new_options[1]) );
+			})
+		});
+	});
+});
+</script>
+{% endblock %}
