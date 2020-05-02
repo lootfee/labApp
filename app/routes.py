@@ -2056,11 +2056,11 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 		if qc_lot2 != '0':
 			qc_res2 = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
 			
-			qc_res2_grouped = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).group_by(QCResults.qc_lot, QCResults.reagent_lot_id).all()
-			
-			qc_res2_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).group_by(QCResults.qc_lot, QCResults.reagent_lot_id).all()
+			qc_res2_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
 			#print(qc_res2_lab)
 			#qc_values2 = QCValues.query.filter_by(control_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
+			
+			qc_res2_grouped = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).group_by(QCResults.qc_lot, QCResults.reagent_lot_id).all()
 			
 			weighted_cv_avr_up = 0
 			weighted_cv_avr_down = 0
@@ -2070,6 +2070,7 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 				
 			for q in qc_res2_grouped:
 				q.res2_group = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id,  company_id=company.id, rejected=False).join(ControlLot).filter_by(level = 2).order_by(QCResults.run_date.asc()).all()
+				q.res2_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot2, machine_id=machine_id, analyte_id=analyte_id,  reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).join(ControlLot).order_by(QCResults.run_date.asc()).all()
 				
 				if len(q.res2_group) > 1:
 					q.res2_group_mean = statistics.mean([(q.qc_result) for q in qc_res2])
@@ -2101,7 +2102,7 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 			
 			qc_res3_grouped = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).group_by(QCResults.qc_lot, QCResults.reagent_lot_id).all()
 			
-			qc_res3_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).group_by(QCResults.qc_lot, QCResults.reagent_lot_id).all()
+			qc_res3_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).order_by(QCResults.run_date.asc()).all()
 			
 			qc_values3 = QCValues.query.filter_by(control_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id, company_id=company.id).first()
 			
@@ -2113,6 +2114,7 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 				
 			for q in qc_res3_grouped:
 				q.res3_group = QCResults.query.filter(QCResults.run_date.between(start_date, end_date_)).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id,  reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).join(ControlLot).filter_by(level = 3).order_by(QCResults.run_date.asc()).all()
+				q.res3_lab = QCResults.query.filter(QCResults.run_date <= end_date_).filter_by(qc_lot=qc_lot3, machine_id=machine_id, analyte_id=analyte_id,  reagent_lot_id=reagent_lot_id, company_id=company.id, rejected=False).join(ControlLot).order_by(QCResults.run_date.asc()).all()
 				
 				if len(q.res3_group):
 					q.res3_group_mean = statistics.mean([(q.qc_result) for q in qc_res3])
