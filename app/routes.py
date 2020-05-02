@@ -4,7 +4,7 @@ from flask_cors import CORS, cross_origin
 from werkzeug.urls import url_parse
 from app import app, db, photos
 from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm, ResetPasswordRequestForm, ResetPasswordForm, ProductRegistrationForm, EditProductForm, DepartmentRegistrationForm, DepartmentEditForm, TypeRegistrationForm, TypeEditForm, SupplierRegistrationForm, InventorySearchForm, CompanyRegistrationForm, CompanyProfileForm, UserRoleForm, CreateOrderIDForm, OrderListForm, EditOrderListForm, CreatePurchaseOrderForm, ItemReceiveForm, AcceptDeliveryForm, ConsumeItemForm, CommentForm, MessageForm, CreateDocumentForm, MessageFormDirect, CreateDocumentSectionForm, EditDocumentSectionForm, EditDocumentBodyForm, AccountsQueryForm, DocumentSubmitForm, RegisterMachineForm,  DeleteMachineForm, EditMachineForm, RegisterAnalyteForm, RegisterReagentLotForm, RegisterControlForm, RegisterQCLotForm, QCResultForm, QCValuesForm, EditQCValuesForm, InternalRequestForm, InternalRequestTransferForm, AssignSupervisorForm, StripeIDForm, QCCommentForm, EncodeQcResultForm, ExcludeResultForm, PublishChartForm
-from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResult, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending, QCResults
+from app.models import User, Post, Product, Item, Department, Supplier, Type, Order, Company, Affiliates, MyProducts, OrdersList, Purchase, PurchaseList, Delivery, Item, Lot, Comment, CommentReply, Message, DocumentName, DocumentationDepartment, DocumentSection, DocumentSectionBody, DocumentVersion, MySupplies, MyDepartmentSupplies, Machine, Analyte, Control, ReagentLot, ControlLot, Unit, CompanyAnalyteVariables, QCResults, QCValues, InternalRequest, InternalRequestList, CancelledPurchaseListPending
 from datetime import datetime, timedelta, time, date
 from dateutil import parser
 from app.email import send_password_reset_email
@@ -1054,34 +1054,8 @@ def qc_variables(company_name):
 			flash('Analyte ' + analyte.analyte + ' successfully registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		else:
-			flash('Analyte ' + analyte.analyte + ' already registered.')
+			flash('Analyte ' + analyte_query.analyte + ' already registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
-			'''if unit_query is None:
-				unit = Unit(unit=form2.raf_unit.data)
-				db.session.add(unit)
-				db.session.commit()
-				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte.id, machine_id=form2.raf_machine.data)
-				db.session.add(analyte_unit)
-				db.session.commit()
-			else:
-				analyte_unit = CompanyAnalyteVariables(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte.id, machine_id=form2.raf_machine.data)
-				db.session.add(analyte_unit)
-				db.session.commit()
-		else:
-			company.analyte.append(analyte_query)
-			db.session.commit()
-			if unit_query is None:
-				unit = Unit(unit=form2.raf_unit.data)
-				db.session.add(unit)
-				db.session.commit()
-				analyte_unit = CompanyAnalyteVariables(unit_id=unit.id, company_id=company.id, analyte_id=analyte_query.id, machine_id=form2.raf_machine.data)
-				db.session.add(analyte_unit)
-				db.session.commit()
-			else:
-				analyte_unit = CompanyAnalyteVariables(unit_id=unit_query.id, company_id=company.id, analyte_id=analyte_query.id, machine_id=form2.raf_machine.data)
-				db.session.add(analyte_unit)
-				db.session.commit()'''
-		#return redirect(url_for('qc_variables', company_name=company.company_name))
 		
 	#register controls
 	form3 = RegisterControlForm()
@@ -1097,7 +1071,7 @@ def qc_variables(company_name):
 		else:
 			#company.control.append(control_query)
 			#db.session.commit()
-			flash('Control ' + control.control_name + ' already registered.')
+			flash('Control ' + control_query.control_name + ' already registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		
 	#register reagent lots
@@ -1121,7 +1095,7 @@ def qc_variables(company_name):
 			#company.reagent_lot.append(rlot_query)
 			#analyte.reagent_lot.append(rlot_query)
 			#db.session.commit()
-			flash('Reagent lot ' + lot_no.lot_no + ' already registered.')
+			flash('Reagent lot ' + rlot_query.lot_no + ' already registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		
 	#register qc lot
@@ -1144,7 +1118,7 @@ def qc_variables(company_name):
 			#company.control_lot.append(clot_query)
 			#control.lot.append(clot_query)
 			#db.session.commit()
-			flash('Control lot ' + control_lot.lot_no + ' already registered.')
+			flash('Control lot ' + clot_query.lot_no + ' already registered.')
 			return redirect(url_for('qc_variables', company_name=company.company_name))
 		
 	#register qc values
@@ -1693,18 +1667,6 @@ def saved_results(company_name):
 		analyte_id=form.qcrf_analyte.data
 		reagent_lot_id=form.qcrf_reagent_lot.data
 		return redirect(url_for('qc_results', company_name=company_name, start_date=start_date, end_date=end_date, qc_lot1=qc_lot1, qc_lot2=qc_lot2, qc_lot3=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id))
-	else:
-		flash('not validated')
-	'''elif form.qcrf_edit.data and form.validate_on_submit():
-		start_date = form.start_date.data
-		end_date = form.end_date.data
-		qc_lot1 = form.control1.data
-		qc_lot2 = form.control2.data
-		qc_lot3 = form.control3.data
-		machine_id=form.qcrf_machine.data
-		analyte_id=form.qcrf_analyte.data
-		reagent_lot_id=form.qcrf_reagent_lot.data
-		return redirect(url_for('edit_qc_results', company_name=company_name, start_date=start_date, end_date=end_date, qc_lot1=qc_lot1, qc_lot2=qc_lot2, qc_lot3=qc_lot3, machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=reagent_lot_id))'''
 	return render_template('quality_control/qc_saved.html', title='QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
 	
 
