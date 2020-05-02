@@ -2200,6 +2200,9 @@ def edit_qc_results(company_name):
 		db.session.commit()
 		flash('QC result edit has been saved!')
 		return redirect(url_for('edit_qc_results', company_name=company_name))
+	else:
+		flash('QC result was not saved. Please check for errors!')
+		return redirect(url_for('edit_qc_results', company_name=company_name))
 	if form.eqcrf_delete.data and form.validate_on_submit():
 		if form.eqcrf_validate_delete.data:
 			result_id = form.eqcrf_qc_result_id.data
@@ -2208,6 +2211,9 @@ def edit_qc_results(company_name):
 			db.session.commit()
 			flash('QC result has been deleted!')
 			return redirect(url_for('edit_qc_results', company_name=company_name))
+	else:
+		flash('QC result was not deleted. Please check for errors!')
+		return redirect(url_for('edit_qc_results', company_name=company_name))
 	comp_qc_results = company.qc_results.filter_by().order_by(QCResults.run_date.desc() ).all()
 	
 	return render_template('quality_control/qc_results_edit.html', title='Edit QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, comp_qc_results=comp_qc_results, comp_machine=comp_machine, comp_analyte=comp_analyte, comp_rgt_lot=comp_rgt_lot, comp_control_lot=comp_control_lot)
@@ -2245,8 +2251,8 @@ def qc_statistics(company_name):
 		if a.result is not None:		
 			a.calc = QCResults.query.filter_by(company_id=company.id, analyte_id=a.id, rejected=False).join(ControlLot, ReagentLot).with_entities(func.avg(QCResults.qc_result).label('qc_mean'), func.stddev_samp(QCResults.qc_result).label('qc_stdev'), ((func.stddev_samp(QCResults.qc_result)/func.avg(QCResults.qc_result))*100).label('cv'), func.count(QCResults.qc_result).label('len'), QCResults.run_date, ControlLot.lot_no.label('ctrl_lot'), ControlLot.level.label('level'), ReagentLot.lot_no.label('rgt_lot')).filter(extract('year',QCResults.run_date), extract('month', QCResults.run_date )).group_by(QCResults.qc_lot, QCResults.reagent_lot_id, extract('year',QCResults.run_date), extract('month', QCResults.run_date )).order_by(QCResults.run_date.asc()).all()
 			
-			for c in a.calc:
-				print(a.analyte, c.ctrl_lot, c.rgt_lot, c.run_date.year, c.run_date.month, c.cv, c.len)
+			#for c in a.calc:
+			#	print(a.analyte, c.ctrl_lot, c.rgt_lot, c.run_date.year, c.run_date.month, c.cv, c.len)
 	#results = QCResults.query.filter_by(company_id=company.id).join(Analyte).order_by(Analyte.analyte.asc()).all()
 	return render_template('quality_control/qc_statistics.html', user=user, superuser=superuser, is_super_admin=is_super_admin, company=company, analytes=analytes, run_years=run_years)
 

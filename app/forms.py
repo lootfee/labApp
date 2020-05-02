@@ -431,7 +431,7 @@ class EncodeQcResultForm(FlaskForm):
 	eqcrf_reagent_lot = SelectField('Reagent Lot (Optional)', coerce=int, validators=[InputRequired()])
 	eqcrf_control_lot = SelectField('Control Lot', coerce=int, validators=[InputRequired()])
 	run_date = StringField('Date:', validators=[DataRequired()])
-	qc_results = DecimalField('Control Run', validators=[DataRequired()])
+	qc_results = DecimalField('Control Results', validators=[DataRequired()])
 	eqcrf_validate_delete = BooleanField('Delete this control result.')
 	eqcrf_delete = SubmitField('Delete')
 	eqcrf_submit = SubmitField('Submit')
