@@ -2188,32 +2188,35 @@ def edit_qc_results(company_name):
 	form.eqcrf_reagent_lot.choices = rgt_lot_list
 	form.eqcrf_machine.choices = machine_list
 	form.eqcrf_control_lot.choices = ctrl_lot_list
-	if form.eqcrf_submit.data and form.validate_on_submit():
-		result_id = form.eqcrf_qc_result_id.data
-		qc_result_q = company.qc_results.filter_by(id=result_id).first()
-		qc_result_q.run_date = parser.parse(form.run_date.data)
-		qc_result_q.qc_result = form.qc_results.data
-		qc_result_q.qc_lot = form.eqcrf_control_lot.data
-		qc_result_q.machine_id = form.eqcrf_machine.data
-		qc_result_q.analyte_id = form.eqcrf_analyte.data
-		qc_result_q.reagent_lot_id = form.eqcrf_reagent_lot.data
-		db.session.commit()
-		flash('QC result edit has been saved!')
-		return redirect(url_for('edit_qc_results', company_name=company_name))
-	else:
-		flash('QC result was not saved. Please check for errors!')
-		return redirect(url_for('edit_qc_results', company_name=company_name))
-	if form.eqcrf_delete.data and form.validate_on_submit():
-		if form.eqcrf_validate_delete.data:
+	if form.eqcrf_submit.data: 
+		if form.validate_on_submit():
 			result_id = form.eqcrf_qc_result_id.data
 			qc_result_q = company.qc_results.filter_by(id=result_id).first()
-			db.session.delete(qc_result_q)
+			qc_result_q.run_date = parser.parse(form.run_date.data)
+			qc_result_q.qc_result = form.qc_results.data
+			qc_result_q.qc_lot = form.eqcrf_control_lot.data
+			qc_result_q.machine_id = form.eqcrf_machine.data
+			qc_result_q.analyte_id = form.eqcrf_analyte.data
+			qc_result_q.reagent_lot_id = form.eqcrf_reagent_lot.data
 			db.session.commit()
-			flash('QC result has been deleted!')
+			flash('QC result edit has been saved!')
 			return redirect(url_for('edit_qc_results', company_name=company_name))
-	else:
-		flash('QC result was not deleted. Please check for errors!')
-		return redirect(url_for('edit_qc_results', company_name=company_name))
+		else:
+			flash('QC Result not edited. Please check form for errors!')
+			return redirect(url_for('edit_qc_results', company_name=company_name))
+	elif form.eqcrf_delete.data:
+		if form.validate_on_submit():
+			if form.eqcrf_validate_delete.data:
+				result_id = form.eqcrf_qc_result_id.data
+				qc_result_q = company.qc_results.filter_by(id=result_id).first()
+				db.session.delete(qc_result_q)
+				db.session.commit()
+				flash('QC result has been deleted!')
+				return redirect(url_for('edit_qc_results', company_name=company_name))
+		else:
+			flash('QC Result not deleted. Please check form for errors!')
+			return redirect(url_for('edit_qc_results', company_name=company_name))
+		
 	comp_qc_results = company.qc_results.filter_by().order_by(QCResults.run_date.desc() ).all()
 	
 	return render_template('quality_control/qc_results_edit.html', title='Edit QC Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, comp_qc_results=comp_qc_results, comp_machine=comp_machine, comp_analyte=comp_analyte, comp_rgt_lot=comp_rgt_lot, comp_control_lot=comp_control_lot)
