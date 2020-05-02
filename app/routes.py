@@ -2200,6 +2200,8 @@ def edit_qc_results(company_name):
 			qc_result_q.machine_id = form.eqcrf_machine.data
 			qc_result_q.analyte_id = form.eqcrf_analyte.data
 			qc_result_q.reagent_lot_id = form.eqcrf_reagent_lot.data
+			qc_result_q.comment = form.eqcrf_comment.data
+			qc_result_q.rejected = form.eqcrf_rejected.data
 			db.session.commit()
 			flash('QC result edit has been saved!')
 			return redirect(url_for('edit_qc_results', company_name=company_name))

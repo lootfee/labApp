@@ -70,7 +70,7 @@
 					<td>{{ qc.analyte.analyte }}</td>
 					<td>{{ qc.reagent_lot.lot_no }} - {{ qc.reagent_lot.expiry }}</td>
 					<td>{{ qc.control_lot.lot_no }} - {{ qc.control_lot.expiry }}</td>
-					<td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="{{ qc.id }}" data-run-date="{{ qc.run_date }}" data-qc-result="{{ qc.qc_result }}" data-machine="{{ qc.machine.id }}" data-analyte="{{ qc.analyte.id }}" data-reagent-lot="{{ qc.reagent_lot.id }}" data-control-lot="{{ qc.control_lot.id }}" data-comment="{{ qc.comment }}" data-rejected="{{ qc.rejected }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>
+					<td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="{{ qc.id }}" data-run-date="{{ qc.run_date }}" data-qc-result="{{ qc.qc_result }}" data-machine="{{ qc.machine.id }}" data-analyte="{{ qc.analyte.id }}" data-reagent-lot="{{ qc.reagent_lot.id }}" data-control-lot="{{ qc.control_lot.id }}" {% if qc.comment %} data-comment="{{ qc.comment }}" {% endif %} {% if qc.rejected %}data-rejected="{{ qc.rejected }}" {% endif %}><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>
 				</tr>
 				{% endfor %}
 			</tbody>
@@ -196,8 +196,13 @@ $(document).ready(function() {
 		var analyte_id = button.data('analyte')	
 		var rgt_lot_id = button.data('reagent-lot')
 		var ctrl_lot_id = button.data('control-lot')
-		var rejected = button.data('rejected')
-		var comment = button.data('comment')
+		if ( button.data('rejected') ){
+			var rejected = button.data('rejected')
+		}
+		if ( button.data('comment') ){
+			var comment = button.data('comment')
+		}
+		
 		
 		$('#eqcrf_qc_result_id').val(result_id);
 		$('#eqcrf_machine').val(machine_id);
@@ -206,13 +211,20 @@ $(document).ready(function() {
 		$('#eqcrf_control_lot').val(ctrl_lot_id);
 		$('#run_date').val(run_date);
 		$('#qc_results').val(qc_result);
-		$('#eqcrf_comment').val(comment);
-		if (rejected == "True" ){
-			$('#eqcrf_rejected').attr('checked', true);
+		if (rejected){
+			$('#eqcrf_rejected').prop('checked', true);
 		}
 		else{
 			$('#eqcrf_rejected').attr('checked', false);
 		}
+				
+		if (comment){
+			$('#eqcrf_comment').val(comment);
+		}
+		else{
+			$('#eqcrf_comment').val('');
+		}
+		
 	});
 	
 		
