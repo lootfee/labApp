@@ -2203,7 +2203,7 @@ def edit_qc_results(company_name):
 			return redirect(url_for('edit_qc_results', company_name=company_name))
 		else:
 			flash('QC Result not edited. Please check form for errors!')
-			return redirect(url_for('edit_qc_results', company_name=company_name))
+			#return redirect(url_for('edit_qc_results', company_name=company_name))
 	elif form.eqcrf_delete.data:
 		if form.validate_on_submit():
 			if form.eqcrf_validate_delete.data:
@@ -2215,7 +2215,7 @@ def edit_qc_results(company_name):
 				return redirect(url_for('edit_qc_results', company_name=company_name))
 		else:
 			flash('QC Result not deleted. Please check form for errors!')
-			return redirect(url_for('edit_qc_results', company_name=company_name))
+			#return redirect(url_for('edit_qc_results', company_name=company_name))
 		
 	comp_qc_results = company.qc_results.filter_by().order_by(QCResults.run_date.desc() ).all()
 	
