@@ -114,6 +114,15 @@ $(document).ready(function() {
 	$('select#analyte_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
 	$('select#rgt_lot_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
 	$('select#ctrl_lot_select').quicksearch('table#edit_qc_results_table .qc_results_data_row');
+	
+	 $('#edit_qc_results_table').DataTable({
+		//"pagingType": "full_numbers",
+		"paging": false,
+		"searching": false,
+		 "info": false,
+	 });
+	 
+	 
 
 	$('#eqcrf_submit').removeClass('btn-default').addClass('btn-primary');
 	$('#eqcrf_delete').removeClass('btn-default').addClass('btn-danger');
