@@ -69,14 +69,15 @@ $(document).ready(function() {
 			$.each(data.result, function(i, new_options){
 				$('#eqcrf_analyte').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-			$('#eqcrf_control').empty();
+			$('#eqcrf_control_lot').empty();
 			$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 				machine_id : $('#eqcrf_machine').val(), 
 				company_id : {{ company.id }}, 
-				analyte_id : $('#eqcrf_analyte').val()
+				analyte_id : '0',
+				rlot_id : '0'
 			}, function(data){
 				$.each(data.result, function(i, new_options){
-					$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+					$('#eqcrf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 				})
 				
 			});
@@ -89,13 +90,14 @@ $(document).ready(function() {
 		$('#eqcrf_reagent_lot').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
 			company_id : {{ company.id }}, 
+			machine_id : $('#eqcrf_machine').val(), 
 			analyte_id : $(this).val()
 		}, function(data){
 			$.each(data.result, function(i, new_options){
 				$('#eqcrf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
-		$('#eqcrf_control').empty();
+		$('#eqcrf_control_lot').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			machine_id : $('#eqcrf_machine').val(), 
 			company_id : {{ company.id }}, 
@@ -103,7 +105,7 @@ $(document).ready(function() {
 			rlot_id : '0'
 		}, function(data){
 			$.each(data.result, function(i, new_options){
-				$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				$('#eqcrf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 			
 		});
@@ -112,7 +114,7 @@ $(document).ready(function() {
 	});
 	
 	$('#eqcrf_reagent_lot').change(function(){
-		$('#eqcrf_control').empty();
+		$('#eqcrf_control_lot').empty();
 		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $('#eqcrf_analyte').val(),
@@ -120,7 +122,7 @@ $(document).ready(function() {
 			rlot_id : $(this).val()
 		}, function(data){
 			$.each(data.result, function(i, new_options){
-				$('#eqcrf_control').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+				$('#eqcrf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
 				
