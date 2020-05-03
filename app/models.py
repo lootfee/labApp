@@ -859,7 +859,7 @@ class Analyte(db.Model):
 		backref=db.backref('analyte', lazy='dynamic'), lazy='dynamic'
 	)'''
 	
-
+#for delete
 class Unit(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	unit = db.Column(db.String(50))

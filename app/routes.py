@@ -1597,19 +1597,19 @@ def encode_qc_results(company_name):
 	form.eqcrf_machine.choices = machine_list
 	form.eqcrf_control_lot.choices = ctrl_lot_list
 	if form.eqcrf_submit.data:
-		analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.eqcrf_analyte.data, company_id=company.id).first()
+		#analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.eqcrf_analyte.data, company_id=company.id).first()
 		date_list = request.form.getlist('cDate')
 		qc_results_list = request.form.getlist('qc_results')
 		for i in range(0, len(date_list)):
 			if date_list[i] and qc_results_list[i]:
 				try:
 					date_list[i] = parser.parse(date_list[i])
-					qc_results_query = QCResults.query.filter_by(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id).first()
+					qc_results_query = QCResults.query.filter_by(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, company_id=company.id).first()
 					if qc_results_query is None:
 						if form.eqcrf_reagent_lot.data == 0:
-							qc_results = QCResults(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+							qc_results = QCResults(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, company_id=company.id)
 						else:
-							qc_results = QCResults(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, reagent_lot_id=form.eqcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
+							qc_results = QCResults(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, reagent_lot_id=form.eqcrf_reagent_lot.data, company_id=company.id)
 						db.session.add(qc_results)
 						db.session.commit()
 				except ValueError:
