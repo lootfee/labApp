@@ -37,18 +37,26 @@
 			<label for="my_file_input">Upload QC values from Excel</label>
 			<input type="file" id="my_file_input">
 		</div>
-		<div class="col-md-5 col-sm-6 col-xs-6">
-			<br>
-			<div style="float:right;">
-				{{ form.eqcrf_submit (class_="btn btn-default")}}
-			</div>
-			
-		</div>
 	</div>
 	<br>
 	<div class="col-md-12" id="my_file_output"></div>
+	<div class="col-md-12 col-sm-12 col-xs-12">
+		<br>
+		<div style="float:right;">
+			{{ form.eqcrf_submit (class_="btn btn-default")}}
+		</div>
+	</div>
 </form>
 
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+#eqcrf_submit {
+	display: none;
+}
+</style>
 {% endblock %}
 
 {% block scripts %}
@@ -184,5 +192,8 @@ function handleFile(e) {
 	reader.readAsArrayBuffer(f);
 }
 document.getElementById('my_file_input').addEventListener('change', handleFile, false);
+$('#my_file_input').change(function() {
+	$('#eqcrf_submit').css('display', 'block');
+});
 </script>
 {% endblock %}
