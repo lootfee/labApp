@@ -1115,8 +1115,6 @@ def qc_variables(company_name):
 	#register qc values
 	comp_qc_values = company.qc_values.all()
 	form6 = QCValuesForm()
-	
-	#rgt_lot_list_ext = company.reagent_lot.order_by(ReagentLot.expiry.desc()).join(Analyte, Company.analyte).filter(Analyte.analyte==ReagentLot.analyte).all()
 	comp_control_lot = company.control_lot.order_by(ControlLot.expiry.desc())
 	ctrl_lot_list = [(0, '')] + [(c.id, c.control.control_name + " - " + str(c.lot_no) + " - " + str(c.expiry)) for c in comp_control_lot]
 	form6.qcvf_analyte.choices = analyte_list
@@ -1136,6 +1134,7 @@ def qc_variables(company_name):
 			values = QCValues(control_lot=form6.qcvf_control_lot.data, control_mean=form6.qcvf_control_mean.data, control_sd=form6.qcvf_control_sd.data,  machine_id=form6.qcvf_machine.data, analyte_id=form6.qcvf_analyte.data, company_id=company.id)
 		db.session.add(values)
 		db.session.commit()
+		flash('QC Values saved.')
 		return redirect(url_for('qc_variables', company_name=company.company_name))
 		#analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form6.qcrf_analyte.data, company_id=company.id).first()
 		'''if form6.control3.data:
