@@ -1136,47 +1136,7 @@ def qc_variables(company_name):
 		db.session.commit()
 		flash('QC Values saved.')
 		return redirect(url_for('qc_variables', company_name=company.company_name))
-		#analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form6.qcrf_analyte.data, company_id=company.id).first()
-		'''if form6.control3.data:
-			#level3_data = True
-			if form6.qcrf_reagent_lot.data:
-				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-				values3 = QCValues(control_lot=form6.control3.data, control_mean=form6.control3_mean.data, control_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-			else:
-				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, lvl3_lot=form6.control3.data, lvl3_mean=form6.control3_mean.data, lvl3_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-				values3 = QCValues(control_lot=form6.control3.data, control_mean=form6.control3_mean.data, control_sd=form6.control3_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-			db.session.add(values1)
-			db.session.add(values2)
-			db.session.add(values3)
-			db.session.commit()
-			return redirect(url_for('qc_variables', company_name=company.company_name))
-		elif form6.control2.data:
-			#level2_data = True
-			if form6.qcrf_reagent_lot.data:
-				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-			else:
-				#values = QCValues(control_lot=form6.control1.data, lvl1_mean=form6.control1_mean.data, lvl1_sd=form6.control1_sd.data, lvl2_lot=form6.control2.data, lvl2_mean=form6.control2_mean.data, lvl2_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id, unit_id=analyte_unit.unit.id)
-				values1 = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-				values2 = QCValues(control_lot=form6.control2.data, control_mean=form6.control2_mean.data, control_sd=form6.control2_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-			db.session.add(values1)
-			db.session.add(values2)
-			db.session.commit()
-			return redirect(url_for('qc_variables', company_name=company.company_name))
-		elif form6.control1.data:
-			#level1_data = True
-			if form6.qcrf_reagent_lot.data:
-				values = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data, machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, reagent_lot_id=form6.qcrf_reagent_lot.data, company_id=company.id)
-			else:
-				values = QCValues(control_lot=form6.control1.data, control_mean=form6.control1_mean.data, control_sd=form6.control1_sd.data,  machine_id=form6.qcrf_machine.data, analyte_id=form6.qcrf_analyte.data, company_id=company.id)
-			db.session.add(values)
-			db.session.commit()
-			return redirect(url_for('qc_variables', company_name=company.company_name))'''
+
 	eqcv_form = EditQCValuesForm()
 	eqcv_form.eqcvf_analyte.choices = analyte_list
 	eqcv_form.eqcvf_reagent_lot.choices = rgt_lot_list
@@ -1389,15 +1349,7 @@ def save_analyte_edit():
 		else:
 			comp_analyte.machine_id = machine_id
 			comp_analyte.unit = unit
-			db.session.commit()
-		'''if unit_query:
-			comp_analyte.unit_id = unit_query.id
-			db.session.commit()
-		else:
-			new_unit = Unit(unit=unit)
-			db.session.add(new_unit)
-			comp_analyte.unit_id = new_unit.id
-			db.session.commit()'''
+		
 	redirect_url = (url_for('qc_variables', company_name=company.company_name,  _external=True))
 	flash('Analyte successfully edited.')
 	return jsonify(result = redirect_url)
@@ -1599,6 +1551,8 @@ def encode_qc_results(company_name):
 		#analyte_unit = CompanyAnalyteVariables.query.filter_by(analyte_id=form.eqcrf_analyte.data, company_id=company.id).first()
 		date_list = request.form.getlist('cDate')
 		qc_results_list = request.form.getlist('qc_results')
+		saved_results_len = 0
+		rejected_results_len = 0
 		for i in range(0, len(date_list)):
 			if date_list[i] and qc_results_list[i]:
 				try:
@@ -1611,8 +1565,12 @@ def encode_qc_results(company_name):
 							qc_results = QCResults(run_date=date_list[i], qc_result=qc_results_list[i], qc_lot=form.eqcrf_control_lot.data, machine_id=form.eqcrf_machine.data, analyte_id=form.eqcrf_analyte.data, reagent_lot_id=form.eqcrf_reagent_lot.data, company_id=company.id)
 						db.session.add(qc_results)
 						db.session.commit()
+						saved_results_len += 1
+					else:
+						rejected_results_len += 1
 				except ValueError:
 					pass
+		flash(str(saved_results_len) + " results saved and " + str(rejected_results_len) + " were duplicates.")
 		return redirect(url_for('encode_qc_results', company_name=company_name))
 	return render_template('quality_control/encode_qc_results.html', title='Encode Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
 	
@@ -1685,12 +1643,12 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 	parsed_date = parser.parse(end_date)
 	end_date_ = datetime.combine(parsed_date.date(), time(23, 59, 59))
 	
-	'''qc_res1 = ''
+	qc_res1 = ''
 	qc_res2 = ''
 	qc_res3 = ''
 	qc_res1_lab = ''
 	qc_res2_lab = ''
-	qc_res3_lab = '''
+	qc_res3_lab = ''
 		
 	
 	if reagent_lot_id == '0':		
