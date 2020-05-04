@@ -858,26 +858,26 @@ def update_control_lot_list():
 		control_lot = company.qc_values.join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
 		#control_lots = company.control_lot.order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
 		
 		#control_lot_list = [(0, '')] + [(c.id, str(c.lot_no) + " - " + str(c.expiry)) for c in control_lots]
 	elif analyte_id == "0" and machine_id != "0" and rlot_id == "0":
 		#controls = company.qc_values.filter_by(machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
 		
 	elif analyte_id != "0" and machine_id != "0" and rlot_id == "0":
 		#controls = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
 		
 	else:
 		#controls = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id, reagent_lot_id=rlot_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
 		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " + str(c.reagent_lot.lot_no) + ")") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id, reagent_lot_id=rlot_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
 	
 	return jsonify(result = ctrl_lot_list)
 	
