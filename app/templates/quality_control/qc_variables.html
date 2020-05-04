@@ -602,19 +602,30 @@ $(document).ready(function() {
 			})
 			
 		});
-		/*$('#qcvf_control_lot').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
+		
+		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
+			company_id : {{ company.id }}, 
+			analyte_id : "0"
+		}, function(data){
+			$.each(data.result, function(i, new_options){
+				$('#qcvf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
+			})
+			
+		});
+		
+		$('#qcvf_control_lot').val(0);
+		/*$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : "0",
 			machine_id : $(this).val(), 
-			rlot_id : $('#qcvf_reagent_lot').val()
+			rlot_id : "0"
 		}, function(data){
 			$.each(data.result, function(i, new_options){
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-		});*/
+		});
 		
-		return false;
+		return false;*/
 	});
 	
 	$('#qcvf_analyte').change(function(){
@@ -630,8 +641,8 @@ $(document).ready(function() {
 				$('#qcvf_reagent_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
-		/*$('#qcvf_control_lot').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
+		$('#qcvf_control_lot').val(0);
+		/*$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $(this).val(),
 			machine_id : $('#qcvf_machine').val(), 
@@ -641,16 +652,16 @@ $(document).ready(function() {
 			$.each(data.result, function(i, new_options){
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
-		});*/
-		return false;
+		});
+		return false;*/
 	});
 	
-	/*$('#qcvf_reagent_lot').change(function() {
-		$('#qcvf_control_lot').empty();
+	$('#qcvf_reagent_lot').change(function() {
+		$('#qcvf_control_lot').val(0)
 		$('#qcvf_control_mean').val('');
 		$('#qcvf_control_sd').val('');
 		$('#qcvf_edit').css('display', 'none');
-		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
+		/*$.getJSON($SCRIPT_ROOT + '/update_control_lot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $('#qcvf_analyte').val(),
 			machine_id : $('#qcvf_machine').val(), 
@@ -662,8 +673,8 @@ $(document).ready(function() {
 				$('#qcvf_control_lot').append($('<option></option>').attr("value", new_options[0]).text(new_options[1]) );
 			})
 		});
-		return false;
-	});*/
+		return false;*/
+	});
 	
 	$('#qcvf_control_lot').change(function(){
 		$.getJSON($SCRIPT_ROOT + '/show_qc_values', {
