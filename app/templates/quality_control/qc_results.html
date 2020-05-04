@@ -80,20 +80,41 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Run mean: {{ i['ctrl1_mean'] }} </strong></p>
+		<p><strong>Run mean: <span id="group_ctrl1_mean">{{ i['ctrl1_mean'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Run SD: {{ i['ctrl1_sd'] }} </strong></p>
+		<p><strong>Run SD: <span id="group_ctrl1_sd">{{ i['ctrl1_sd'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Run CV: {{ i['ctrl1_cv'] }} </strong></p>
+		<p><strong>Run CV: <span >{{ i['ctrl1_cv'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Control runs: {{ i['ctrl_run'] }} </strong></p>
+		<p><strong>Control runs: <span id="group_ctrl1_runs">{{ i['ctrl_run'] }}</span> </strong></p>
 	</div>
 	{% endfor %}
 	{% endif %}
 </div>
+{% if qc1_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc1_total_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc1_total_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc1_total_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc1_total_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
+
 <div class="row">
 	{% if res2_group_val %}
 	<h5>Control 2</h5>
@@ -105,7 +126,7 @@
 		<p><strong>Reagent lot: {{ i['rgt_lot'] }} </strong></p>
 	</div>
 	<div class="col-md-2">
-		<p><strong>Run mean: {{ i['ctrl2_mean'] }} </strong></p>
+		<p><strong>Run mean: <span class="ctrl2_mean">{{ i['ctrl2_mean'] }}</span> </strong></p>
 	</div>
 	<div class="col-md-2">
 		<p><strong>Run SD: {{ i['ctrl2_sd'] }} </strong></p>
@@ -119,6 +140,27 @@
 	{% endfor %}
 	{% endif %}
 </div>
+{% if qc2_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc2_total_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc2_total_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc2_total_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc2_total_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
+
 
 <div class="row">
 	{% if res3_group_val %}
@@ -145,6 +187,26 @@
 	{% endfor %}
 	{% endif %}
 </div>
+{% if qc3_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc3_total_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc3_total_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc3_total_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc3_total_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
 
 
 <h5><strong>Laboratory Mean/SD</strong></h5>
@@ -173,6 +235,27 @@
 	{% endfor %}
 	{% endif %}
 </div>
+{% if qc1_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc1_total_lab_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc1_total_lab_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc1_total_lab_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc1_total_lab_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
+
 <div class="row">
 	{% if res2_lab_val %}
 	<h5>Control 2</h5>
@@ -198,6 +281,28 @@
 	{% endfor %}
 	{% endif %}
 </div>
+{% if qc2_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc2_total_lab_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc2_total_lab_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc2_total_lab_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc2_total_lab_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
+
+
 <div class="row">
 	{% if res3_lab_val %}
 	<h5>Control 3</h5>
@@ -223,7 +328,26 @@
 	{% endfor %}
 	{% endif %}
 </div>
-
+{% if qc3_total_mean != 0 %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total mean: {{ qc3_total_lab_mean }}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total SD: {{ qc3_total_lab_sd }}</span> </strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total CV: {{ qc3_total_lab_cv}}</strong></p>
+	</div>
+	<div class="col-md-2">
+		<p><strong>Total runs: {{ qc3_total_lab_len }}</strong></p>
+	</div>
+</div>
+{% endif %}
 
 <div class="row">
 	<br>
@@ -486,6 +610,7 @@
 	.qcImportData3 {
 		color: #cccc0e;
 	}
+	
 }
 
 </style>
@@ -962,7 +1087,7 @@ $(window).load(function() {
 		
 		{% for r in qc_res2 %}
 			{% if r.run_date == q.run_date and r.qc_result == q.qc_result %}
-			console.log({{r.z_score}}, {{ q.qc_result|float}})
+			//console.log({{r.z_score}}, {{ q.qc_result|float}})
 				data.addRows([
 					 ['{{q.run_date }}' , , '', {{r.z_score}}, custom_tooltips('{{q.run_date }}', '{{r.qc_result|string}}', '{{q.reagent_lot.lot_no}}', '{{q.control_lot.lot_no}}'), , '']
 				]);
@@ -1130,7 +1255,7 @@ $(document).ready(function() {
 	var cv3 = parseFloat(($("#lvl3Stndev").val() / $("#lvl3Mean").val()) * 100);
 	cv3 = N(cv3, dp3);
 	$("#lvl3CV").val(cv3);
+	
 });
 </script>
-
 {% endblock %}
