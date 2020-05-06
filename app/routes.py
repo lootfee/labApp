@@ -1573,7 +1573,41 @@ def encode_qc_results(company_name):
 		flash(str(saved_results_len) + " results saved and " + str(rejected_results_len) + " were duplicates.")
 		return redirect(url_for('encode_qc_results', company_name=company_name))
 	return render_template('quality_control/encode_qc_results.html', title='Encode Results', user=user, company=company, is_super_admin=is_super_admin, superuser=superuser, form=form, rgt_lot=rgt_lot)
+
+# not yet done
+@app.route('/show_run_dates', methods=['GET', 'POST'])
+@login_required
+def show_run_dates():
+	company_id = request.args.get('company_id')
+	analyte_id = request.args.get('analyte_id')
+	machine_id = request.args.get('machine_id')
+	rgt_lot_id = request.args.get('rgt_lot_id')
+	ctrl_lot_id = request.args.get('ctrl_lot_id')
+		
+	company = Company.query.filter_by(id=company_id).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_qc_supervisor = company.is_qc_supervisor(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	if not is_qc_supervisor:
+		return redirect(url_for('company', company_name=company.company_name))
+		
+	if rgt_lot_id == "0":
+		run_date_q = company.qc_results.filter_by(machine_id=machine_id, analyte_id=analyte_id, qc_lot=ctrl_lot_id).order_by(QCResults.run_date.asc()).all()
+	else:
+		run_date_q = company.qc_results.filter_by(machine_id=machine_id, analyte_id=analyte_id, qc_lot=ctrl_lot_id, reagent_lot_id=rgt_lot_id).order_by(QCResults.run_date.asc()).all()
+		print(run_date_q)	
+	first_run = 0
+	last_run = 0
+	for i in range(0, len(run_date_q)):
+		first_run = run_date_q[0]
+		last_run = run_date_q[-1]
 	
+	var_json = {'run_dates': str(first_run) + " - " + str(last_run) }
+	
+	return jsonify(result = var_json)
 	
 @app.route('/<company_name>/quality_control/saved_results', methods=['GET', 'POST'])
 @login_required
@@ -2182,7 +2216,47 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 	publish_form = PublishChartForm()
 	
 	return render_template('quality_control/qc_results.html', user=user, superuser=superuser, is_super_admin=is_super_admin, company=company, machine=machine, analyte=analyte,  unit=unit, reagent_lot=reagent_lot, qc_res1=qc_res1, qc_res2=qc_res2, qc_res3=qc_res3, comment_form=comment_form, qc_results=qc_results, exclude_form=exclude_form, excluded=excluded, res1_group_val=res1_group_val, res2_group_val=res2_group_val, res3_group_val=res3_group_val, res1_lab_val=res1_lab_val, res2_lab_val=res2_lab_val, res3_lab_val=res3_lab_val, publish_form=publish_form, qc1_total_mean=qc1_total_mean, qc1_total_sd=qc1_total_sd, qc1_total_cv=qc1_total_cv, qc1_total_len=qc1_total_len, qc1_total_lab_mean=qc1_total_lab_mean, qc1_total_lab_sd=qc1_total_lab_sd, qc1_total_lab_cv=qc1_total_lab_cv, qc1_total_lab_len=qc1_total_lab_len, qc2_total_mean=qc2_total_mean, qc2_total_sd=qc2_total_sd, qc2_total_cv=qc2_total_cv, qc2_total_len=qc2_total_len, qc2_total_lab_mean=qc2_total_lab_mean, qc2_total_lab_sd=qc2_total_lab_sd, qc2_total_lab_cv=qc2_total_lab_cv, qc2_total_lab_len=qc2_total_lab_len, qc3_total_mean=qc3_total_mean, qc3_total_sd=qc3_total_sd, qc3_total_cv=qc3_total_cv, qc3_total_len=qc3_total_len, qc3_total_lab_mean=qc3_total_lab_mean, qc3_total_lab_sd=qc3_total_lab_sd, qc3_total_lab_cv=qc3_total_lab_cv, qc3_total_lab_len=qc3_total_lab_len)
+
+#not used
+@app.route('/get_qc_results', methods=['GET', 'POST'])	
+@login_required
+def get_qc_results():
+	company_id = request.args.get('company_id')
+	machine_id = request.args.get('machine_id')
+	analyte_id = request.args.get('analyte_id')
+	rgt_lot_id = request.args.get('rgt_lot_id')
+	ctrl_lot_id = request.args.get('ctrl_lot_id')
 	
+	company = Company.query.filter_by(id=company_id).first_or_404()
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	superuser = User.query.filter_by(id=1).first_or_404()
+	is_qc_supervisor = company.is_qc_supervisor(user)
+	is_my_affiliate = company.is_my_affiliate(user)
+	if not is_my_affiliate:
+		return redirect(url_for('company', company_name=company.company_name))
+	if not is_qc_supervisor:
+		return redirect(url_for('company', company_name=company.company_name))
+	
+	qc_results = ''
+	
+	if company_id and machine_id and not analyte_id and not rgt_lot_id and not ctrl_lot_id:
+		qc_results = company.qc_results.filter_by(machine_id=machine_id).order_by(QCResults.run_date.desc()).all()
+		print('4')
+	elif company_id and machine_id and analyte_id and not rgt_lot_id and not ctrl_lot_id:
+		qc_results = company.qc_results.filter_by(machine_id=machine_id, analyte_id=analyte_id).order_by(QCResults.run_date.desc()).all()
+		print('3')
+	elif company_id and machine_id and analyte_id and rgt_lot_id and not ctrl_lot_id:
+		qc_results = company.qc_results.filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=rgt_lot_id).order_by(QCResults.run_date.desc()).all()
+		print('2')
+	elif company_id and machine_id and analyte_id and rgt_lot_id and ctrl_lot_id:
+		qc_results = company.qc_results.filter_by(machine_id=machine_id, analyte_id=analyte_id, reagent_lot_id=rgt_lot_id, qc_lot=ctrl_lot_id).order_by(QCResults.run_date.desc()).all()
+		print('1')
+		
+	var_json = []
+	for q in qc_results:
+		var_json.append({'id': q.id ,'run_date': str(q.run_date) , 'qc_result': str(q.qc_result) , 'machine_id': q.machine_id, 'machine_name': q.machine.machine_name, 'analyte_id': q.analyte_id, 'analyte_name': q.analyte.analyte, 'reagent_lot_id': q.reagent_lot_id, 'reagent_lot': str(q.reagent_lot.lot_no) + ' - ' + str(q.reagent_lot.expiry), 'control_lot_id': q.qc_lot, 'control_lot': str(q.control_lot.lot_no) + ' - ' + str(q.control_lot.expiry), 'rejected': q.rejected, 'comment': q.comment})
+	
+	return jsonify(result = var_json)
 	
 @app.route('/<company_name>/edit_qc_results', methods=['GET', 'POST'])	
 @login_required
