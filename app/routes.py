@@ -856,29 +856,31 @@ def update_control_lot_list():
 		
 	if machine_id == "0" and analyte_id == "0" and rlot_id == "0":
 		control_lot = company.qc_values.join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
-		#control_lots = company.control_lot.order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		try:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		except AttributeError:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ")") for c in control_lot]
 		
-		#control_lot_list = [(0, '')] + [(c.id, str(c.lot_no) + " - " + str(c.expiry)) for c in control_lots]
 	elif analyte_id == "0" and machine_id != "0" and rlot_id == "0":
-		#controls = company.qc_values.filter_by(machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		try:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		except AttributeError:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ")") for c in control_lot]
 		
 	elif analyte_id != "0" and machine_id != "0" and rlot_id == "0":
-		#controls = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ") ") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		try:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		except AttributeError:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ")") for c in control_lot]
 		
 	else:
-		#controls = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id, reagent_lot_id=rlot_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		#controls_list = [(0, '')] + [(c.control_lot, "(" + n.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " + str(c.reagent_lot.lot_no) + ")") for c in controls for n in c.qc_lot.control]
 		control_lot = company.qc_values.filter_by(analyte_id=analyte_id, machine_id=machine_id, reagent_lot_id=rlot_id).join(ControlLot).order_by(ControlLot.expiry.desc()).all()
-		ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
-	
+		try:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + " - " +  str(c.reagent_lot.lot_no) + ")") for c in control_lot]
+		except AttributeError:
+			ctrl_lot_list = [(0, '')] + [(c.control_lot, "(" + c.qc_lot.control.control_name + " - " + str(c.qc_lot.lot_no) + " - " + str(c.qc_lot.expiry) + ") - (" + str(c.analyte.analyte) + ")") for c in control_lot]
 	return jsonify(result = ctrl_lot_list)
 	
 
@@ -1349,7 +1351,7 @@ def save_analyte_edit():
 		else:
 			comp_analyte.machine_id = machine_id
 			comp_analyte.unit = unit
-		
+			db.session.commit()
 	redirect_url = (url_for('qc_variables', company_name=company.company_name,  _external=True))
 	flash('Analyte successfully edited.')
 	return jsonify(result = redirect_url)
@@ -2254,7 +2256,10 @@ def get_qc_results():
 		
 	var_json = []
 	for q in qc_results:
-		var_json.append({'id': q.id ,'run_date': str(q.run_date) , 'qc_result': str(q.qc_result) , 'machine_id': q.machine_id, 'machine_name': q.machine.machine_name, 'analyte_id': q.analyte_id, 'analyte_name': q.analyte.analyte, 'reagent_lot_id': q.reagent_lot_id, 'reagent_lot': str(q.reagent_lot.lot_no) + ' - ' + str(q.reagent_lot.expiry), 'control_lot_id': q.qc_lot, 'control_lot': str(q.control_lot.lot_no) + ' - ' + str(q.control_lot.expiry), 'rejected': q.rejected, 'comment': q.comment})
+		try:
+			var_json.append({'id': q.id ,'run_date': str(q.run_date) , 'qc_result': str(q.qc_result) , 'machine_id': q.machine_id, 'machine_name': q.machine.machine_name, 'analyte_id': q.analyte_id, 'analyte_name': q.analyte.analyte, 'reagent_lot_id': q.reagent_lot_id, 'reagent_lot': str(q.reagent_lot.lot_no) + ' - ' + str(q.reagent_lot.expiry), 'control_lot_id': q.qc_lot, 'control_lot': str(q.control_lot.lot_no) + ' - ' + str(q.control_lot.expiry), 'rejected': q.rejected, 'comment': q.comment})
+		except AttributeError:
+			var_json.append({'id': q.id ,'run_date': str(q.run_date) , 'qc_result': str(q.qc_result) , 'machine_id': q.machine_id, 'machine_name': q.machine.machine_name, 'analyte_id': q.analyte_id, 'analyte_name': q.analyte.analyte, 'reagent_lot_id': q.reagent_lot_id, 'reagent_lot': '', 'control_lot_id': q.qc_lot, 'control_lot': str(q.control_lot.lot_no) + ' - ' + str(q.control_lot.expiry), 'rejected': q.rejected, 'comment': q.comment})
 	
 	return jsonify(result = var_json)
 	
@@ -2294,7 +2299,8 @@ def edit_qc_results(company_name):
 			qc_result_q.qc_lot = form.eqcrf_control_lot.data
 			qc_result_q.machine_id = form.eqcrf_machine.data
 			qc_result_q.analyte_id = form.eqcrf_analyte.data
-			qc_result_q.reagent_lot_id = form.eqcrf_reagent_lot.data
+			if form.eqcrf_reagent_lot.data is not 0:
+				qc_result_q.reagent_lot_id = form.eqcrf_reagent_lot.data
 			qc_result_q.comment = form.eqcrf_comment.data
 			qc_result_q.rejected = form.eqcrf_rejected.data
 			db.session.commit()
