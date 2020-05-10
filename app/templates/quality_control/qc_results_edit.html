@@ -48,6 +48,9 @@
 
 <br>
 <div class="row">
+	<div class="col-md-6 col-md-offset-5" id="loading_gif_container">
+		<img id="loading_gif" src="/static/loading.gif"></img>
+	</div>
 	<div class="col-md-12">
 		<table class="table table-bordered table-hover" id="edit_qc_results_table">
 			<thead>
@@ -101,6 +104,12 @@
 <style>
 #eqcrf_delete {
 	display: none;
+}
+#loading_gif{
+	display: none;
+    z-index: 100;
+    position: fixed;
+    width: 80px;
 }
 </style>
 {% endblock %}
@@ -189,7 +198,7 @@ $(document).ready(function() {
 		$('#analyte_select').val(analyte);
 		$('#rgt_lot_select').val(rgt_lot);
 		$('#ctrl_lot_select').val(ctrl_lot);
-		
+		$('#loading_gif').css('display', 'block');
 		$.getJSON($SCRIPT_ROOT + '/get_qc_results', {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
@@ -197,6 +206,7 @@ $(document).ready(function() {
 			rgt_lot_id : $('#rgt_lot_select option:selected').data('rgt_lot_id'),
 			ctrl_lot_id : $('#ctrl_lot_select option:selected').data('ctrl_lot_id'),
 		}, function(data){
+			$('#loading_gif').css('display', 'none');
 			$.each(data.result, function(i, new_options){
 				$('#edit_qc_results_table tbody').append($('<tr class="qc_results_data_row"><td>' + data.result[i]["run_date"] + '</td><td>' + data.result[i]["qc_result"] + '</td><td>' + data.result[i]["machine_name"] + '</td><td>' + data.result[i]["analyte_name"] + '</td><td>' + data.result[i]["reagent_lot"] + '</td><td>' + data.result[i]["control_lot"] + '</td><td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="' + data.result[i]["id"] + '" data-run-date="' + data.result[i]["run_date"] + '" data-qc-result="' + data.result[i]["qc_result"] + '" data-machine="' + data.result[i]["machine_id"] + '" data-analyte="' + data.result[i]["analyte_id"] + '" data-reagent-lot="' + data.result[i]["reagent_lot_id"] + '" data-control-lot="' + data.result[i]["control_lot_id"] + '" data-comment="' + data.result[i]["comment"] + '"  data-rejected="' + data.result[i]["rejected"] + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td></tr>'));
 			})
@@ -261,6 +271,7 @@ $(document).ready(function() {
 	
 	$('#machine_select').change(function(){
 		$('#analyte_select').empty();
+		$('#loading_gif').css('display', 'block');
 		$.getJSON($SCRIPT_ROOT + '/update_analyte_list', {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
@@ -275,6 +286,7 @@ $(document).ready(function() {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
 		}, function(data){
+			$('#loading_gif').css('display', 'none');
 			$.each(data.result, function(i, new_options){
 				$('#edit_qc_results_table tbody').append($('<tr class="qc_results_data_row"><td>' + data.result[i]["run_date"] + '</td><td>' + data.result[i]["qc_result"] + '</td><td>' + data.result[i]["machine_name"] + '</td><td>' + data.result[i]["analyte_name"] + '</td><td>' + data.result[i]["reagent_lot"] + '</td><td>' + data.result[i]["control_lot"] + '</td><td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="' + data.result[i]["id"] + '" data-run-date="' + data.result[i]["run_date"] + '" data-qc-result="' + data.result[i]["qc_result"] + '" data-machine="' + data.result[i]["machine_id"] + '" data-analyte="' + data.result[i]["analyte_id"] + '" data-reagent-lot="' + data.result[i]["reagent_lot_id"] + '" data-control-lot="' + data.result[i]["control_lot_id"] + '" data-comment="' + data.result[i]["comment"] + '"  data-rejected="' + data.result[i]["rejected"] + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td></tr>'));
 			})
@@ -285,6 +297,7 @@ $(document).ready(function() {
 	
 	$('#analyte_select').change(function(){
 		$('#rgt_lot_select').empty();
+		$('#loading_gif').css('display', 'block');
 		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
 			company_id : {{ company.id }}, 
 			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
@@ -305,12 +318,13 @@ $(document).ready(function() {
 			})
 			return false;
 		});
-		//$('#edit_qc_results_table tbody').empty();
+		$('#edit_qc_results_table tbody').empty();
 		$.getJSON($SCRIPT_ROOT + '/get_qc_results', {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
 			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
 		}, function(data){
+			$('#loading_gif').css('display', 'none');
 			$.each(data.result, function(i, new_options){
 				$('#edit_qc_results_table tbody').append($('<tr class="qc_results_data_row"><td>' + data.result[i]["run_date"] + '</td><td>' + data.result[i]["qc_result"] + '</td><td>' + data.result[i]["machine_name"] + '</td><td>' + data.result[i]["analyte_name"] + '</td><td>' + data.result[i]["reagent_lot"] + '</td><td>' + data.result[i]["control_lot"] + '</td><td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="' + data.result[i]["id"] + '" data-run-date="' + data.result[i]["run_date"] + '" data-qc-result="' + data.result[i]["qc_result"] + '" data-machine="' + data.result[i]["machine_id"] + '" data-analyte="' + data.result[i]["analyte_id"] + '" data-reagent-lot="' + data.result[i]["reagent_lot_id"] + '" data-control-lot="' + data.result[i]["control_lot_id"] + '" data-comment="' + data.result[i]["comment"] + '"  data-rejected="' + data.result[i]["rejected"] + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td></tr>'));
 			})
@@ -320,6 +334,7 @@ $(document).ready(function() {
 	
 	$('#rgt_lot_select').change(function(){
 		$('#ctrl_lot_select').empty();
+		$('#loading_gif').css('display', 'block');
 		$.getJSON($SCRIPT_ROOT + '/update_control_lot_list_simple', {
 			machine_id : $('#machine_select option:selected').data('machine_id'),
 			company_id : {{ company.id }}, 
@@ -332,13 +347,14 @@ $(document).ready(function() {
 			return false;
 		});
 		
-		//$('#edit_qc_results_table tbody').empty();
+		$('#edit_qc_results_table tbody').empty();
 		$.getJSON($SCRIPT_ROOT + '/get_qc_results', {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
 			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
 			rgt_lot_id : $('#rgt_lot_select option:selected').data('rgt_lot_id'),
 		}, function(data){
+			$('#loading_gif').css('display', 'none');
 			$.each(data.result, function(i, new_options){
 				$('#edit_qc_results_table tbody').append($('<tr class="qc_results_data_row"><td>' + data.result[i]["run_date"] + '</td><td>' + data.result[i]["qc_result"] + '</td><td>' + data.result[i]["machine_name"] + '</td><td>' + data.result[i]["analyte_name"] + '</td><td>' + data.result[i]["reagent_lot"] + '</td><td>' + data.result[i]["control_lot"] + '</td><td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="' + data.result[i]["id"] + '" data-run-date="' + data.result[i]["run_date"] + '" data-qc-result="' + data.result[i]["qc_result"] + '" data-machine="' + data.result[i]["machine_id"] + '" data-analyte="' + data.result[i]["analyte_id"] + '" data-reagent-lot="' + data.result[i]["reagent_lot_id"] + '" data-control-lot="' + data.result[i]["control_lot_id"] + '" data-comment="' + data.result[i]["comment"] + '"  data-rejected="' + data.result[i]["rejected"] + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td></tr>'));
 			})
@@ -357,7 +373,8 @@ $(document).ready(function() {
 			})
 			return false;
 		});*/
-		//$('#edit_qc_results_table tbody').empty();
+		$('#loading_gif').css('display', 'block');
+		$('#edit_qc_results_table tbody').empty();
 		$.getJSON($SCRIPT_ROOT + '/get_qc_results', {
 			company_id : {{ company.id }}, 
 			machine_id : $('#machine_select option:selected').data('machine_id'),
@@ -365,6 +382,7 @@ $(document).ready(function() {
 			rgt_lot_id : $('#rgt_lot_select option:selected').data('rgt_lot_id'),
 			ctrl_lot_id : $('#ctrl_lot_select option:selected').data('ctrl_lot_id'),
 		}, function(data){
+			$('#loading_gif').css('display', 'none');
 			$.each(data.result, function(i, new_options){
 				$('#edit_qc_results_table tbody').append($('<tr class="qc_results_data_row"><td>' + data.result[i]["run_date"] + '</td><td>' + data.result[i]["qc_result"] + '</td><td>' + data.result[i]["machine_name"] + '</td><td>' + data.result[i]["analyte_name"] + '</td><td>' + data.result[i]["reagent_lot"] + '</td><td>' + data.result[i]["control_lot"] + '</td><td><button type="button" class="btn btn-primary btn-sm" title="Edit/Delete" data-toggle="modal" data-target="#edit_qc_results_modal" data-result-id="' + data.result[i]["id"] + '" data-run-date="' + data.result[i]["run_date"] + '" data-qc-result="' + data.result[i]["qc_result"] + '" data-machine="' + data.result[i]["machine_id"] + '" data-analyte="' + data.result[i]["analyte_id"] + '" data-reagent-lot="' + data.result[i]["reagent_lot_id"] + '" data-control-lot="' + data.result[i]["control_lot_id"] + '" data-comment="' + data.result[i]["comment"] + '"  data-rejected="' + data.result[i]["rejected"] + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true" style="margin-right: 2px;"></span><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td></tr>'));
 			})

@@ -2347,7 +2347,6 @@ def qc_statistics(company_name):
 	analytes = company.analyte.order_by(Analyte.analyte.asc()).all()
 	
 	for a in analytes:
-		
 		#sorted(r.run_date, key = lambda x: (int(x[0])))#(r.run_date.strftime('%Y-%m-%d-%H%M%S'), key=lambda day: datetime.strptime(day, "%d/%b/%Y"))
 		#a.avg = QCResults.query.with_entities(func.avg(QCResults.qc_result)).filter(extract('year',QCResults.run_date), extract('month', QCResults.run_date )).group_by(extract('year',QCResults.run_date), extract('month', QCResults.run_date )).filter_by(company_id=company.id, analyte_id=a.id, rejected=False).all()
 				
@@ -2356,11 +2355,11 @@ def qc_statistics(company_name):
 		if a.res_group:
 			a.dp = max([counted_dp( q.qc_result) for q in a.res_group ])
 											
-		if a.result is not None:		
+		if a.result is not None:
 			a.calc = QCResults.query.filter_by(company_id=company.id, analyte_id=a.id, rejected=False).join(ControlLot, ReagentLot).with_entities(func.avg(QCResults.qc_result).label('qc_mean'), func.stddev_samp(QCResults.qc_result).label('qc_stdev'), ((func.stddev_samp(QCResults.qc_result)/func.avg(QCResults.qc_result))*100).label('cv'), func.count(QCResults.qc_result).label('len'), QCResults.run_date, ControlLot.lot_no.label('ctrl_lot'), ControlLot.level.label('level'), ReagentLot.lot_no.label('rgt_lot')).filter(extract('year',QCResults.run_date), extract('month', QCResults.run_date )).group_by(QCResults.qc_lot, QCResults.reagent_lot_id, extract('year',QCResults.run_date), extract('month', QCResults.run_date )).order_by(QCResults.run_date.asc()).all()
-			
-			#for c in a.calc:
-			#	print(a.analyte, c.ctrl_lot, c.rgt_lot, c.run_date.year, c.run_date.month, c.cv, c.len)
+			if len(a.calc) < 1:
+				a.calc = QCResults.query.filter_by(company_id=company.id, analyte_id=a.id, rejected=False).join(ControlLot).with_entities(func.avg(QCResults.qc_result).label('qc_mean'), func.stddev_samp(QCResults.qc_result).label('qc_stdev'), ((func.stddev_samp(QCResults.qc_result)/func.avg(QCResults.qc_result))*100).label('cv'), func.count(QCResults.qc_result).label('len'), QCResults.run_date, ControlLot.lot_no.label('ctrl_lot'), ControlLot.level.label('level')).filter(extract('year',QCResults.run_date), extract('month', QCResults.run_date )).group_by(QCResults.qc_lot, QCResults.reagent_lot_id, extract('year',QCResults.run_date), extract('month', QCResults.run_date )).order_by(QCResults.run_date.asc()).all()
+		
 	#results = QCResults.query.filter_by(company_id=company.id).join(Analyte).order_by(Analyte.analyte.asc()).all()
 	return render_template('quality_control/qc_statistics.html', user=user, superuser=superuser, is_super_admin=is_super_admin, company=company, analytes=analytes, run_years=run_years)
 
