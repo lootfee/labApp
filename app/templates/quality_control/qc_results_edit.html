@@ -363,16 +363,7 @@ $(document).ready(function() {
 	});
 	
 	$('#ctrl_lot_select').change(function() {
-		/*$('#rgt_lot_select').empty();
-		$.getJSON($SCRIPT_ROOT + '/update_rlot_list', {
-			company_id : {{ company.id }}, 
-			analyte_id : $('#analyte_select option:selected').data('analyte_id'),
-		}, function(data){
-			$.each(data.result, function(i, new_options){
-				$('#rgt_lot_select').append($('<option></option>').attr({value: new_options[1], "data-rgt_lot_id":new_options[0]}).text(new_options[1]) );
-			})
-			return false;
-		});*/
+		
 		$('#loading_gif').css('display', 'block');
 		$('#edit_qc_results_table tbody').empty();
 		$.getJSON($SCRIPT_ROOT + '/get_qc_results', {
