@@ -37,6 +37,10 @@
 			<label for="my_file_input">Upload QC values from Excel</label>
 			<input type="file" id="my_file_input">
 		</div>
+		<div class="col-md-3 col-sm-6 col-xs-6" id="excel_guide_cont">
+		<br>
+			<img src="/static/excel_guide.jpg">
+		</div>
 	</div>
 	<br>
 	<div class="col-md-12" id="my_file_output"></div>
@@ -194,6 +198,7 @@ function handleFile(e) {
 document.getElementById('my_file_input').addEventListener('change', handleFile, false);
 $('#my_file_input').change(function() {
 	$('#eqcrf_submit').css('display', 'block');
+	$('#excel_guide_cont').css('display', 'none');
 });
 </script>
 {% endblock %}

@@ -1721,7 +1721,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_group_sd = statistics.stdev([(r.qc_result) for r in q.res1_group])
 					q.res1_group_cv = (q.res1_group_sd/q.res1_group_mean)*100
 					q.res1_group_len = len(q.res1_group)
-					q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					if q.reagent_lot:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					else:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
 					q.res1_group_resp = jsonify(q.res1_group_json)
 					res1_group_val.append(q.res1_group_resp.json)
 					
@@ -1729,7 +1732,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_lab_sd = statistics.stdev([(r.qc_result) for r in q.res1_lab])
 					q.res1_lab_cv = (q.res1_lab_sd/q.res1_lab_mean)*100
 					q.res1_lab_len = len(q.res1_lab)
-					q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					if q.reagent_lot:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					else:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
 					q.res1_lab_resp = jsonify(q.res1_lab_json)
 					res1_lab_val.append(q.res1_lab_resp.json)
 					
@@ -1769,7 +1775,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_group_sd= statistics.stdev([(r.qc_result) for r in q.res1_group])
 					q.res1_group_cv = (q.res1_group_sd/q.res1_group_mean)*100
 					q.res1_group_len = len(q.res1_group)
-					q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					if q.reagent_lot:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					else:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
 					q.res1_group_resp = jsonify(q.res1_group_json)
 					res1_group_val.append(q.res1_group_resp.json)
 					
@@ -1777,7 +1786,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_lab_sd = statistics.stdev([(r.qc_result) for r in q.res1_lab])
 					q.res1_lab_cv = (q.res1_lab_sd/q.res1_lab_mean)*100
 					q.res1_lab_len = len(q.res1_lab)
-					q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					if q.reagent_lot:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					else:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
 					q.res1_lab_resp = jsonify(q.res1_lab_json)
 					res1_lab_val.append(q.res1_lab_resp.json)
 					
@@ -1817,7 +1829,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_group_sd= statistics.stdev([(r.qc_result) for r in q.res2_group])
 					q.res2_group_cv = (q.res2_group_sd/q.res2_group_mean)*100
 					q.res2_group_len = len(q.res2_group)
-					q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					if q.reagent_lot:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					else:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
 					q.res2_group_resp = jsonify(q.res2_group_json)
 					res2_group_val.append(q.res2_group_resp.json)
 					
@@ -1825,7 +1840,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_lab_sd = statistics.stdev([(r.qc_result) for r in q.res2_lab])
 					q.res2_lab_cv = (q.res2_lab_sd/q.res2_lab_mean)*100
 					q.res2_lab_len = len(q.res2_lab)
-					q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					if q.reagent_lot:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					else:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
 					q.res2_lab_resp = jsonify(q.res2_lab_json)
 					res2_lab_val.append(q.res2_lab_resp.json)
 					
@@ -1867,7 +1885,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_group_sd= statistics.stdev([(r.qc_result) for r in q.res2_group])
 					q.res2_group_cv = (q.res2_group_sd/q.res2_group_mean)*100
 					q.res2_group_len = len(q.res2_group)
-					q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					if q.reagent_lot:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					else:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
 					q.res2_group_resp = jsonify(q.res2_group_json)
 					res2_group_val.append(q.res2_group_resp.json)
 					
@@ -1875,7 +1896,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_lab_sd = statistics.stdev([(r.qc_result) for r in q.res2_lab])
 					q.res2_lab_cv = (q.res2_lab_sd/q.res2_lab_mean)*100
 					q.res2_lab_len = len(q.res2_lab)
-					q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					if q.reagent_lot:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					else:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
 					q.res2_lab_resp = jsonify(q.res2_lab_json)
 					res2_lab_val.append(q.res2_lab_resp.json)
 					
@@ -1916,7 +1940,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res3_group_sd= statistics.stdev([(r.qc_result) for r in q.res3_group])
 					q.res3_group_cv = (q.res3_group_sd/q.res3_group_mean)*100
 					q.res3_group_len = len(q.res3_group)
-					q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					if q.reagent_lot:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					else:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
 					q.res3_group_resp = jsonify(q.res3_group_json)
 					res3_group_val.append(q.res3_group_resp.json)
 					
@@ -1924,7 +1951,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res3_lab_sd = statistics.stdev([(r.qc_result) for r in q.res3_lab])
 					q.res3_lab_cv = (q.res3_lab_sd/q.res3_lab_mean)*100
 					q.res3_lab_len = len(q.res3_lab)
-					q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
+					if q.reagent_lot:
+						q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
+					else:
+						q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
 					q.res3_lab_resp = jsonify(q.res3_lab_json)
 					res3_lab_val.append(q.res3_lab_resp.json)
 					
@@ -1964,7 +1994,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res3_group_sd= statistics.stdev([(r.qc_result) for r in q.res3_group])
 					q.res3_group_cv = (q.res3_group_sd/q.res3_group_mean)*100
 					q.res3_group_len = len(q.res3_group)
-					q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					if q.reagent_lot:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					else:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
 					q.res3_group_resp = jsonify(q.res3_group_json)
 					res3_group_val.append(q.res3_group_resp.json)
 					
@@ -2021,7 +2054,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_group_sd = statistics.stdev([(q.qc_result) for q in qc_res1])
 					q.res1_group_cv = (q.res1_group_sd/q.res1_group_mean)*100
 					q.res1_group_len = len(q.res1_group)
-					q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					if q.reagent_lot:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
+					else:
+						q.res1_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl1_mean': round(float(q.res1_group_mean), dp), 'ctrl1_sd': round(float(q.res1_group_sd), dp), 'ctrl1_cv': round(float(q.res1_group_cv), dp), 'ctrl_run': q.res1_group_len}
 					q.res1_group_resp = jsonify(q.res1_group_json)
 					res1_group_val.append(q.res1_group_resp.json)
 					
@@ -2029,7 +2065,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res1_lab_sd = statistics.stdev([(r.qc_result) for r in qc_res1_lab])
 					q.res1_lab_cv = (q.res1_lab_sd/q.res1_lab_mean)*100
 					q.res1_lab_len = len(q.res1_lab)
-					q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					if q.reagent_lot:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
+					else:
+						q.res1_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl1_lab_mean': round(float(q.res1_lab_mean), dp), 'ctrl1_lab_sd': round(float(q.res1_lab_sd), dp), 'ctrl1_lab_cv': round(float(q.res1_lab_cv), dp), 'ctrl1_lab_run': q.res1_lab_len}
 					q.res1_lab_resp = jsonify(q.res1_lab_json)
 					res1_lab_val.append(q.res1_lab_resp.json)
 					
@@ -2065,7 +2104,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_group_sd = statistics.stdev([(q.qc_result) for q in qc_res2])
 					q.res2_group_cv = (q.res2_group_sd/q.res2_group_mean)*100
 					q.res2_group_len = len(q.res2_group)
-					q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					if q.reagent_lot:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
+					else:
+						q.res2_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_mean': round(float(q.res2_group_mean), dp), 'ctrl2_sd': round(float(q.res2_group_sd), dp), 'ctrl2_cv': round(float(q.res2_group_cv), dp), 'ctrl_run': q.res2_group_len}
 					q.res2_group_resp = jsonify(q.res2_group_json)
 					res2_group_val.append(q.res2_group_resp.json)
 					
@@ -2073,7 +2115,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res2_lab_sd = statistics.stdev([(r.qc_result) for r in qc_res2_lab])
 					q.res2_lab_cv = (q.res2_lab_sd/q.res2_lab_mean)*100
 					q.res2_lab_len = len(q.res2_lab)
-					q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					if q.reagent_lot:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
+					else:
+						q.res2_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl2_lab_mean': round(float(q.res2_lab_mean), dp), 'ctrl2_lab_sd': round(float(q.res2_lab_sd), dp), 'ctrl2_lab_cv': round(float(q.res2_lab_cv), dp), 'ctrl2_lab_run': q.res2_lab_len}
 					q.res2_lab_resp = jsonify(q.res2_lab_json)
 					res2_lab_val.append(q.res2_lab_resp.json)
 					
@@ -2109,7 +2154,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res3_group_sd = statistics.stdev([(q.qc_result) for q in qc_res3])
 					q.res3_group_cv = (q.res3_group_sd/q.res3_group_mean)*100
 					q.res3_group_len = len(q.res3_group)
-					q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					if q.reagent_lot:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
+					else:
+						q.res3_group_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl3_mean': round(float(q.res3_group_mean), dp), 'ctrl3_sd': round(float(q.res3_group_sd), dp), 'ctrl3_cv': round(float(q.res3_group_cv), dp), 'ctrl_run': q.res3_group_len}
 					q.res3_group_resp = jsonify(q.res3_group_json)
 					res3_group_val.append(q.res3_group_resp.json)
 					
@@ -2117,7 +2165,10 @@ def qc_results(company_name, start_date, end_date, qc_lot1, qc_lot2, qc_lot3, ma
 					q.res3_lab_sd = statistics.stdev([(r.qc_result) for r in qc_res3_lab])
 					q.res3_lab_cv = (q.res3_lab_sd/q.res3_lab_mean)*100
 					q.res3_lab_len = len(q.res3_lab)
-					q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
+					if q.reagent_lot:
+						q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'rgt_lot': q.reagent_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
+					else:
+						q.res3_lab_json = {'ctrl_lot': q.control_lot.lot_no, 'ctrl3_lab_mean': round(float(q.res3_lab_mean), dp), 'ctrl3_lab_sd': round(float(q.res3_lab_sd), dp), 'ctrl3_lab_cv': round(float(q.res3_lab_cv), dp), 'ctrl3_lab_run': q.res3_lab_len}
 					q.res3_lab_resp = jsonify(q.res3_lab_json)
 					res3_lab_val.append(q.res3_lab_resp.json)
 					

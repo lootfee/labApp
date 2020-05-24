@@ -204,6 +204,45 @@
     {% endfor %}
   </div>
 </div>
+<br>
+<div class="col-md-6">
+	<div class="row"><strong>Note:</strong></div>
+	<div class="row">
+		<div class="col-md-12">
+			<div><strong>*Monthly CV Formula:</strong></div>
+			<div>&nbsp&nbsp Monthly CV's are weighted CV for each control lot and reagent lot(if given).</strong></div>
+			<div>&nbsp&nbsp n = number of control runs in that month per control lot and reagent lot(if given)</div>
+			<div class="col-md-8">
+				<div>&nbsp&nbsp (CV1 x n1) + (CV2 x n2) + (CV... x n...)</div>
+				<div><hr style="margin-top: 0; margin-bottom: 0; width:100%; border-color:black;float:left;"></div>
+				<div style="100%">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp n1 + n2 + n...</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-12">
+			<div><strong>*Cummulative CV formula:</strong></div>
+			<div class="col-md-8">
+				<div>&nbsp&nbsp <span>SQRT</span>(CV1<sup>2</sup> + CV2<sup>2</sup> + CV...<sup>2</sup>)</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-12">
+			<div><strong>*Pooled CV formula:</strong></div>
+			<div>n = number of control runs in that month regardless of control lot and reagent lot(if given)</div>
+			<div class="col-md-1" style="margin:0; padding:0;text-align:end;">SQRT</div>
+			<div class="col-md-8" style="padding-left:0;">
+				<div>&nbsp&nbsp (CV1<sup>2</sup> x n1 - 1) + (CV2<sup>2</sup> x n2 - 1) + (CV...<sup>2</sup> x n... - 1)</div>
+				<div><hr style="margin-top: 0; margin-bottom: 0; border-color:black;float:left;width:95%;"></div>
+				<div>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (n1 - 1) + (n2 - 1) + (n... - 1)</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
 
 {% endblock %}
 
