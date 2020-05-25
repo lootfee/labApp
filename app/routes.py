@@ -987,8 +987,9 @@ def qc_variables(company_name):
 		return redirect(url_for('company', company_name=company.company_name))
 	
 	controls = Control.query.with_entities(Control.control_name).distinct()
-	control_lots = ControlLot.query.with_entities(ControlLot.lot_no).distinct()
-	reagent_lots = ReagentLot.query.with_entities(ReagentLot.lot_no).distinct()
+	control_lots = ControlLot.query.with_entities(ControlLot.lot_no, ControlLot.expiry).distinct()
+	reagent_lots = ReagentLot.query.with_entities(ReagentLot.lot_no, ReagentLot.expiry).distinct().all()
+	print(reagent_lots)
 	machines = Machine.query.with_entities(Machine.machine_name).distinct()
 	analytes = Analyte.query.with_entities(Analyte.analyte).distinct()
 	units = Analyte.query.with_entities(Analyte.unit).distinct()#Unit.query.all()
@@ -1075,7 +1076,7 @@ def qc_variables(company_name):
 		raw_lotno = form4.rrlf_reagent_lot_no.data
 		alnum_lotno = ''.join(e for e in raw_lotno if e.isalnum())
 		rlot_query = ReagentLot.query.filter_by(lot_no=alnum_lotno, company_id=company.id).first()
-		analyte = Analyte.query.filter_by(id=form4.rrlf_analyte.data).first()
+		#analyte = Analyte.query.filter_by(id=form4.rrlf_analyte.data).first()
 		if rlot_query is None:
 			lot_no = ReagentLot(lot_no=alnum_lotno, expiry=form4.rrlf_reagent_expiry.data, company_id=company.id, analyte_id=form4.rrlf_analyte.data)
 			db.session.add(lot_no)
@@ -1097,7 +1098,7 @@ def qc_variables(company_name):
 	if form5.validate_on_submit():
 		raw_control_lot = form5.rqclf_control_lot_no.data
 		alnum_control_lot = ''.join(e for e in raw_control_lot if e.isalnum())
-		clot_query = ControlLot.query.filter_by(lot_no=alnum_control_lot).first()
+		clot_query = ControlLot.query.filter_by(lot_no=alnum_control_lot, company_id=company.id).first()
 		#control = Control.query.filter_by(id=form5.rqclf_control.data).first()
 		if clot_query is None:
 			control_lot = ControlLot(lot_no=alnum_control_lot, expiry=form5.rqclf_control_expiry.data, level=form5.rqclf_analyte.data, company_id=company.id, control_id=form5.rqclf_control.data)
@@ -1117,7 +1118,7 @@ def qc_variables(company_name):
 	#register qc values
 	comp_qc_values = company.qc_values.all()
 	form6 = QCValuesForm()
-	comp_control_lot = company.control_lot.order_by(ControlLot.expiry.desc())
+	comp_control_lot = company.control_lot.order_by(ControlLot.expiry.desc()).all()
 	ctrl_lot_list = [(0, '')] + [(c.id, c.control.control_name + " - " + str(c.lot_no) + " - " + str(c.expiry)) for c in comp_control_lot]
 	form6.qcvf_analyte.choices = analyte_list
 	form6.qcvf_reagent_lot.choices = rgt_lot_list
@@ -1482,7 +1483,11 @@ def get_ctrl_lot_var():
 	
 	
 	comp_ctrl_lot = company.control_lot.filter_by(id=ctrl_lot_id).first()
-	var_json = {'expiry': comp_ctrl_lot.expiry, 'level': comp_ctrl_lot.level, 'control': comp_ctrl_lot.control_id }
+	
+	if ctrl_lot_id != '0':
+		var_json = {'expiry': comp_ctrl_lot.expiry, 'level': comp_ctrl_lot.level, 'control': comp_ctrl_lot.control_id }
+	else:
+		var_json = {'expiry': '', 'level': '', 'control': '' }
 	
 	return jsonify(result = var_json)
 	
