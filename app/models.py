@@ -158,13 +158,19 @@ class Company(db.Model):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date==None).count() > 0
 		
 	def is_my_affiliate(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date.isnot(None)).count() > 0  or user.id == 1
+		if self.id is not 1:
+			return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.start_date.isnot(None)).count() > 0  or user.id == 1
+		else:
+			return user.id != 0
 		
 	def is_super_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.super_admin==True).first() or user.id == 1
 		
 	def is_qc_supervisor(self, user):
-		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_supervisor==True).first() or user.id == 1
+		if self.id is not 1:
+			return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_supervisor==True).first() or user.id == 1
+		else:
+			return user.id != 0
 		
 	def is_qc_admin(self, user):
 		return self.affiliate.filter(Affiliates.user_id == user.id, Affiliates.qc_admin==True).first() or user.id == 1

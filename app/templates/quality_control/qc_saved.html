@@ -111,7 +111,7 @@ $(document).ready(function() {
 	//    for updating select options   
 	
 	 $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; //same like url_for ut for jquery
-	
+	console.log($.getJSON($SCRIPT_ROOT));
 		
 	$('#qcrf_machine').change(function(){
 		$('#qcrf_analyte').empty();
