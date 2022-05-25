@@ -34,7 +34,7 @@ markdown2==2.3.8
 MarkupSafe==1.1.0
 openapi-spec-validator==0.2.8
 psycopg2==2.8.5
-PyJWT==1.7.1
+PyJWT==2.4.0
 PyMySQL==0.9.3
 pyrsistent==0.16.0
 python-dateutil==2.8.0
